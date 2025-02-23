@@ -1,25 +1,26 @@
 {
-  "name": "server",
+  "name": "mern-student-management",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "server": "nodemon index.js",
-    "client": "npm start --prefix client",
+    "server": "nodemon backend/server.js",
+    "client": "npm start --prefix frontend",
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "prepare": "husky install",
+    "lint-frontend": "eslint --config frontend/eslint.config.js frontend/src",
+    "lint-backend": "echo 'No linting for backend'",
+    "lint": "npm run lint-frontend && npm run lint-backend"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "mongoose": "^5.13.4",
-    "nodemon": "^2.0.12"
+    "concurrently": "^6.5.1"
   },
   "devDependencies": {
-    "concurrently": "^6.2.1"
+    "@eslint/js": "^9.21.0",
+    "husky": "^8.0.0",
+    "vite": "^6.1.1"
   }
 }

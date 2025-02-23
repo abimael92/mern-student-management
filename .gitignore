@@ -1,2 +1,13 @@
-node_modules
-package-lock.json
+# Node modules
+/node_modules/
+/frontend/node_modules/
+/backend/node_modules/
+
+# Logs
+/logs/
+
+# .env files
+.env
+
+# OS-specific files
+.DS_Store
