@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import studentRoutes from './routes/student.js';
+import studentRoutes from './backend/routes/student.js';
 import dotenv from 'dotenv';
 
 // Load environment variables
