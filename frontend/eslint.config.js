@@ -33,6 +33,7 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      'no-unused-vars': ['warn', { varsIgnorePattern: '^React$' }], // Add this rule to ignore unused React imports
     },
   },
 ]

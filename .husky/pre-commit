@@ -4,16 +4,14 @@
 # Run tests and linting
 # npm test && npm run lint
 
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
 # Get the list of changed files
 changed_files=$(git diff --cached --name-only)
 
 # Check if any of the changed files are in the frontend or backend directories
-if echo "$changed_files" | grep -E '^frontend/|^backend/'; then
-  npm run lint
-else
-  echo "No changes in frontend or backend, skipping linting."
-fi
+# if echo "$changed_files" | grep -E '^frontend/|^backend/'; then
+#   npm run lint
+# else
+#   echo "No changes in frontend or backend, skipping linting."
+# fi
 

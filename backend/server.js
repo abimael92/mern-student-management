@@ -16,7 +16,8 @@ const app = express();
 // Middleware
 app.use(bodyParser.json({ limit: '20mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
-app.use(cors());
+app.use(cors({ origin: '*' }));
+
 
 // Routes
 app.use('/students', studentRoutes);
@@ -39,7 +40,20 @@ mongoose.connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: tr
     })
     .catch((error) => {
         console.error("Error connecting to MongoDB:", error);
+        process.exit(1); // Exit process on failure
     });
+
+// Handle 404
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Internal Server Error' });
+});
+
 
 // Basic route
 app.get('/', (req, res) => {
