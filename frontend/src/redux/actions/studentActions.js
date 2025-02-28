@@ -6,7 +6,9 @@ import {
     UPDATE_STUDENT,
     UPDATE_STUDENT_FAILURE,
     DELETE_STUDENT,
-    DELETE_STUDENT_FAILURE
+    DELETE_STUDENT_FAILURE,
+    UPDATE_STUDENT_STATUS,
+    UPDATE_STUDENT_STATUS_FAILURE
 } from '../actionTypes';
 
 const API_URL = 'http://localhost:5000';
@@ -68,7 +70,7 @@ export const updateStudent = (id, updatedData) => async (dispatch) => {
     }
 };
 
-export const getLastStudentNumber = (year) => async (dispatch) => {
+export const getLastStudentNumber = () => async (dispatch) => {
     try {
         const response = await fetch(`${API_URL}/students/lastStudentNumber`);
 

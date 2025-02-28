@@ -114,10 +114,10 @@ const LandingPage = () => {
                 mb: 3,
               }}
             >
-              Whether you're an administrator optimizing school operations or a
-              teacher enhancing students' learning, our School Management System
-              equips you with the tools to succeed. Stay organized, save time,
-              and improve outcomes.
+              Whether you&#39;re an administrator optimizing school operations
+              or a teacher enhancing students&#39; learning, our School
+              Management System equips you with the tools to succeed. Stay
+              organized, save time, and improve outcomes.
             </Typography>
             <Typography
               variant="body1"
@@ -127,8 +127,9 @@ const LandingPage = () => {
               }}
             >
               Built with modern technologies, our platform ensures that your
-              school’s needs are met today and in the future. It's not just a
-              tool—it's your partner in providing the best education possible.
+              school&#39;s needs are met today and in the future. It&#39;s not
+              just a tool—it&#39; your partner in providing the best education
+              possible.
             </Typography>
           </motion.div>
         </Box>
@@ -190,7 +191,10 @@ const LandingPage = () => {
             size="large"
             sx={{
               backgroundColor: 'primary.main',
-              '&:hover': { backgroundColor: 'primary.dark' },
+              '&:hover': {
+                backgroundColor: 'primary.dark',
+                transform: 'scale(1.05)',
+              },
               color: 'white',
               fontWeight: 'bold',
               py: 2,
@@ -198,7 +202,6 @@ const LandingPage = () => {
               borderRadius: '8px',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
               transition: 'all 0.3s',
-              '&:hover': { transform: 'scale(1.05)' },
             }}
           >
             Get Started
