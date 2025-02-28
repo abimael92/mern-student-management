@@ -4,7 +4,9 @@ import {
     ADD_STUDENT,
     ADD_STUDENT_FAILURE,
     UPDATE_STUDENT,
-    UPDATE_STUDENT_FAILURE
+    UPDATE_STUDENT_FAILURE,
+    DELETE_STUDENT,
+    DELETE_STUDENT_FAILURE
 } from '../actionTypes';
 
 const API_URL = 'http://localhost:5000';
@@ -84,5 +86,41 @@ export const getLastStudentNumber = (year) => async (dispatch) => {
             payload: error.message,
         });
         throw error;
+    }
+};
+
+export const deleteStudent = (id) => async (dispatch) => {
+    try {
+        const response = await fetch(`${API_URL}/students/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete student');
+        }
+
+        dispatch({ type: DELETE_STUDENT, payload: id });
+    } catch (error) {
+        dispatch({ type: DELETE_STUDENT_FAILURE, error: error.message });
+    }
+};
+
+
+export const updateStudentStatus = (id, status) => async (dispatch) => {
+    try {
+        const response = await fetch(`${API_URL}/students/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update student status');
+        }
+
+        const data = await response.json();
+        dispatch({ type: UPDATE_STUDENT_STATUS, payload: { id, status: data.status } });
+    } catch (error) {
+        dispatch({ type: UPDATE_STUDENT_STATUS_FAILURE, error: error.message });
     }
 };
