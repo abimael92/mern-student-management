@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check if commit message is empty
+if [ -z "$1" ]; then
+    echo "❌ Commit message cannot be empty. Please provide a meaningful message."
+    exit 1
+fi
+
+# Run commitlint
+npx commitlint --edit "$1" && {
+    commit_message=$(cat "$1")
+    echo "✅ Successful Commit!"
+    echo "$commit_message"
+    exit 0
+} || {
+    echo ""
+    echo "$commit_message"
+    echo ""
+    echo "❌ Commit message does not follow the convention!"
+    echo "✅ Correct format example: 'feat(frontend): Add user authentication (fix #12)'"
+    echo ""
+    echo "Commit message structure:"
+    echo ""
+    echo "| Type     | Scope      | Description                        |"
+    echo "|----------|------------|------------------------------------|"
+    echo "| feat     | frontend   | Add a new feature                  |"
+    echo "| fix      | backend    | Fix an issue (mention issue #)     |"
+    echo "| docs     | root       | Update documentation               |"
+    echo "| style    | frontend   | Code style changes (no logic)      |"
+    echo "| refactor | backend    | Refactoring existing code          |"
+    echo "| perf     | backend    | Improve performance                |"
+    echo "| test     | frontend   | Add or update tests                |"
+    echo "| build    | root       | Build system or CI changes         |"
+    echo "| chore    | root       | Other changes                      |"
+    echo ""
+    echo "Example commits:"
+    echo ""
+    echo "- feat(frontend): Implement new login form"
+    echo "- fix(backend): Resolve user authentication bug (fix #15)"
+    echo "- docs(root): Update API documentation"
+    echo "- refactor(frontend): Simplify state management"
+    echo ""
+    exit 1
+}
