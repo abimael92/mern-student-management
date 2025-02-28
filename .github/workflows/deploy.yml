@@ -1,0 +1,43 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies for backend
+        run: npm install --prefix backend
+
+      - name: Install dependencies for frontend
+        run: npm install --prefix frontend
+
+      - name: Build frontend
+        run: npm run build --prefix frontend
+        # You can use `npm run build` if your frontend requires building
+
+      # If you're deploying backend, you can add a deploy step here (for example, deploying to Heroku or AWS)
+      - name: Deploy backend
+        run: |
+          # Add your deployment commands for the backend here
+          # For example, if deploying to Heroku:
+          # heroku login -i
+          # git push heroku main
+
+      # If you're deploying frontend, you can add a deploy step here (for example, deploying to Netlify or AWS)
+      - name: Deploy frontend
+        run: |
+          # Add your deployment commands for the frontend here
+          # For example, if deploying to Netlify:
+          # netlify deploy --dir=frontend/build --prod

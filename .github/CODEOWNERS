@@ -1,0 +1,22 @@
+# Assigning code owners to specific paths
+
+# You can adjust these rules based on the file paths in your project.
+
+# Assign yourself as the reviewer for all feature branches
+
+feature/\* @abimael92
+
+# Assign a reviewer to the frontend and backend paths (if you have separate frontend/backend folders)
+
+frontend/_ @abimael92
+backend/_ @abimael92
+
+# You can also set the rules for specific files or directories:
+
+# Assign code owner to all files in the /src/ui directory
+
+/src/ui/ @abimael92
+
+# Assign code owner to all files in the /src/api directory
+
+/src/api/ @abimael92
