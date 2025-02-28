@@ -1,0 +1,27 @@
+name: Auto Merge PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  merge-pr:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      #   - name: Run tests
+      #     run: npm test
+
+      - name: Merge PR if checks pass
+        uses: peter-evans/merge-pull-request@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pull_request_number: ${{ github.event.pull_request.number }}
+          merge_method: squash
+
+      - name: Delete branch after merge
+        run: git push origin --delete ${{ github.head_ref }}

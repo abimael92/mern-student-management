@@ -11,8 +11,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Determine scope based on issue labels
+        id: determine_scope
+        run: |
+          # Default to root scope
+          SCOPE="r"
+
+          # Check if the issue has labels and assign the scope accordingly
+          if [[ "${{ github.event.issue.labels }}" == *"frontend"* ]]; then
+            SCOPE="f"
+          elif [[ "${{ github.event.issue.labels }}" == *"backend"* ]]; then
+            SCOPE="b"
+          fi
+
+          echo "Scope determined: $SCOPE"
+          echo "scope=$SCOPE" >> $GITHUB_ENV
+
       - name: Create branch from issue
         run: |
-          BRANCH_NAME="feature/issue-${{ github.event.issue.number }}-$(echo ${{ github.event.issue.title }} | tr ' ' '-' | tr '[:upper:]' '[:lower:]')"
+          # Generate the branch name with the determined scope
+          BRANCH_NAME="fix/${{ github.event.issue.title }}-issue${{ github.event.issue.number }}-${{ env.scope }}"
+          BRANCH_NAME=$(echo $BRANCH_NAME | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+
+          # Create and push the branch
           git checkout -b $BRANCH_NAME
           git push origin $BRANCH_NAME
