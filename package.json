@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "commit": "git-cz",
     "server": "nodemon backend/server.js",
     "client": "npm start --prefix frontend",
     "start": "concurrently \"npm run server\" \"npm run client\"",
@@ -21,11 +22,15 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.8",
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
     "@eslint/js": "^9.21.0",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
-    "husky": "^8.0.0",
+    "husky": "^8.0.3",
     "vite": "^6.1.1"
   }
 }

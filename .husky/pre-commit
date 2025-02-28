@@ -1,13 +1,19 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# Run ESLint with max-warnings=999
-npx eslint --max-warnings=999
+# Run ESLint and capture output
+eslint_output=$(npx eslint --max-warnings=999 2>&1)
 
-if [ $? -eq 0 ]; then
-  echo "No critical issues found."
+# Extract summary line
+summary=$(echo "$eslint_output" | grep -E "✖ [0-9]+ problems? \([0-9]+ errors?, [0-9]+ warnings?\)")
+
+if [ -z "$summary" ]; then
+    echo ""
+    echo "✅ No critical issues found."
 else
-  echo "Some warnings were found in your code. Please review them and fix the following:"
-  # Customize this part to print the warning logs
-  npx eslint --max-warnings=999 --format=unix
+    echo ""
+    echo "Warning! ESLint found issues in your code:"
+    echo ""
+    echo "$summary"
+    echo ""
 fi
