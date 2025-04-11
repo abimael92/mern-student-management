@@ -54,6 +54,9 @@ const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
           >
             Delete
           </Button>
+        </Box>
+
+        <Box display="flex" justifyContent="space-around" mt={2}>
           <Button
             variant="contained"
             color={student.isEnrolled ? 'warning' : 'success'}
