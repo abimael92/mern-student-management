@@ -7,6 +7,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
+import defaultProfile from '../assets/profile-default.png';
 
 const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
   return (
@@ -14,17 +15,18 @@ const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
       sx={{
         maxWidth: 300,
         m: 2,
-        // bgcolor: student.isEnrolled ? '#e8f5e9' : '#ffebee',
+        bgcolor: student.isEnrolled ? '#e8f5e9' : '#ffebee',
         boxShadow: 3,
         borderRadius: 2,
         transition: '0.3s',
+        padding: '25px',
         '&:hover': { boxShadow: 6 },
       }}
     >
       <CardMedia
         component="img"
-        height="140"
-        image={student.picture || '/default-avatar.png'}
+        // height="140"
+        image={student.picture || defaultProfile}
         alt="Student Picture"
         sx={{ objectFit: 'cover' }}
       />
@@ -59,7 +61,7 @@ const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
         <Box display="flex" justifyContent="space-around" mt={2}>
           <Button
             variant="contained"
-            color={student.isEnrolled ? 'warning' : 'success'}
+            color={student.isEnrolled ? 'light-grey' : 'info'}
             onClick={() => onToggleStatus(student.studentNumber)}
           >
             {student.isEnrolled ? 'Deactivate' : 'Activate'}

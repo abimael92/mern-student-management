@@ -4,7 +4,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // Allow Vite to be accessible from the network
     proxy: {
-      '/students': 'http://localhost:5000',
+      '/api': 'http://localhost:5000',
     }
   }
 });
