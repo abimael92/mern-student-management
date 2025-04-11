@@ -72,7 +72,7 @@ const StudentList = () => {
       ) : (
         <Grid container spacing={3} justifyContent="center">
           {filteredStudents.map((student) => (
-            <Grid item key={student.studentNumber}>
+            <Grid item xs={12} sm={6} md={4} key={student.studentNumber}>
               <StudentCard
                 student={student}
                 onEdit={handleEdit}
