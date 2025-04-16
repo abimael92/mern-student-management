@@ -11,42 +11,67 @@ import {
   Checkbox,
   Tabs,
   Tab,
-  Grid,
 } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { addStudent, updateStudent } from '../redux/actions/studentActions';
 
-const StudentDialog = ({ open, onClose, onSave, student = {} }) => {
+const StudentDialog = ({ open, onClose, student = {} }) => {
+  const dispatch = useDispatch();
   const [tab, setTab] = useState(0);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    studentName: '',
+    lastName: '',
+    age: '',
+    grade: '',
+    tutor: '',
+    dob: '',
+    nationality: '',
+    isEnrolled: false,
+    emergencyContact: {
+      name: '',
+      relation: '',
+      phone: '',
+    },
+    contactInfo: {
+      phoneNumber: '',
+      email: '',
+    },
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+    },
+  });
 
   useEffect(() => {
-    if (!student || Object.keys(student).length === 0) return;
-
-    setFormData((prev) => ({
-      ...prev,
-      studentName: student?.studentName ?? '',
-      lastName: student?.lastName ?? '',
-      age: student?.age ?? '',
-      grade: student?.grade ?? '',
-      tutor: student?.tutor ?? '',
-      dob: student?.dob ?? '',
-      nationality: student?.nationality ?? '',
-      isEnrolled: student?.isEnrolled ?? false,
-      emergencyContact: {
-        name: student?.emergencyContact?.name ?? '',
-        relation: student?.emergencyContact?.relation ?? '',
-        phone: student?.emergencyContact?.phone ?? '',
-      },
-      contactInfo: {
-        phoneNumber: student?.contactInfo?.phoneNumber ?? '',
-        email: student?.contactInfo?.email ?? '',
-      },
-      address: {
-        street: student?.address?.street ?? '',
-        city: student?.address?.city ?? '',
-        state: student?.address?.state ?? '',
-        zipCode: student?.address?.zipCode ?? '',
-      },
-    }));
+    if (student && Object.keys(student).length) {
+      setFormData({
+        studentName: student.studentName ?? '',
+        lastName: student.lastName ?? '',
+        age: student.age ?? '',
+        grade: student.grade ?? '',
+        tutor: student.tutor ?? '',
+        dob: student.dob ?? '',
+        nationality: student.nationality ?? '',
+        isEnrolled: student.isEnrolled ?? false,
+        emergencyContact: {
+          name: student.emergencyContact?.name ?? '',
+          relation: student.emergencyContact?.relation ?? '',
+          phone: student.emergencyContact?.phone ?? '',
+        },
+        contactInfo: {
+          phoneNumber: student.contactInfo?.phoneNumber ?? '',
+          email: student.contactInfo?.email ?? '',
+        },
+        address: {
+          street: student.address?.street ?? '',
+          city: student.address?.city ?? '',
+          state: student.address?.state ?? '',
+          zipCode: student.address?.zipCode ?? '',
+        },
+      });
+    }
   }, [student]);
 
   const handleChange = (section, key, value) => {
@@ -67,7 +92,11 @@ const StudentDialog = ({ open, onClose, onSave, student = {} }) => {
   };
 
   const handleSave = () => {
-    onSave(formData);
+    if (student?._id) {
+      dispatch(updateStudent(student._id, formData));
+    } else {
+      dispatch(addStudent(formData));
+    }
     onClose();
   };
 
@@ -266,12 +295,12 @@ const StudentDialog = ({ open, onClose, onSave, student = {} }) => {
 
       <DialogContent dividers>{renderTabPanel()}</DialogContent>
 
-      <DialogActions sx={{ justifyContent: 'space-between', p: 2 }}>
-        <Button onClick={onClose} color="error" variant="contained">
+      <DialogActions sx={{ justifyContent: 'space-between', px: 3 }}>
+        <Button onClick={onClose} color="secondary">
           Cancel
         </Button>
-        <Button onClick={handleSave} color="primary" variant="contained">
-          Save
+        <Button onClick={handleSave} variant="contained" color="primary">
+          {student?._id ? 'Update' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
