@@ -51,7 +51,6 @@ export const createStudent = async (req, res) => {
 };
 
 
-
 // DELETE /students/:id - Delete a student by ID
 export const deleteStudent = async (req, res) => {
     const id = req.params.id;
@@ -88,6 +87,31 @@ export const getLastStudentNumber = async (req, res) => {
     } catch (error) {
         console.error("Error fetching the last student number:", error);
         res.status(500).json({ error: "Failed to fetch the last student number" });
+    }
+};
+
+// PUT /students/:id - Update a student's information
+export const updateStudent = async (req, res) => {
+    const id = req.params.id;
+    const updates = req.body;
+
+    // Validate that the ID exists in the request body
+    if (!id) {
+        return res.status(400).json({ message: "Student ID is required." });
+    }
+
+    try {
+        // Find the student by ID and update
+        const updatedStudent = await Student.findByIdAndUpdate(id, updates, { new: true });
+
+        if (!updatedStudent) {
+            return res.status(404).json({ message: `Student with ID ${id} not found` });
+        }
+
+        res.status(200).json({ message: "Student updated successfully", student: updatedStudent });
+    } catch (error) {
+        console.error("Error updating student:", error);
+        res.status(500).json({ error: "Failed to update student" });
     }
 };
 
