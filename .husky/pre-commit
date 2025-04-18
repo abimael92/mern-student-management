@@ -1,19 +1,17 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# Run ESLint and capture output
-eslint_output=$(npx eslint --max-warnings=999 2>&1)
+echo "🔍 Running ESLint..."
 
-# Extract summary line
-summary=$(echo "$eslint_output" | grep -E "✖ [0-9]+ problems? \([0-9]+ errors?, [0-9]+ warnings?\)")
+npx eslint . --max-warnings=999
 
-if [ -z "$summary" ]; then
-    echo ""
-    echo "✅ No critical issues found."
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo ""
+  echo "❌ ESLint found issues. Commit blocked."
+  exit 1
 else
-    echo ""
-    echo "Warning! ESLint found issues in your code:"
-    echo ""
-    echo "$summary"
-    echo ""
+  echo ""
+  echo "✅ ESLint passed. Proceeding with commit..."
 fi
