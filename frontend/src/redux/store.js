@@ -1,13 +1,12 @@
-import { createStore, applyMiddleware } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { thunk } from 'redux-thunk';
+import studentReducer from '../features/students/slices/studentSlice';
 
-import { combineReducers } from 'redux';
-import { studentReducer } from './reducers/studentReducer';
-
-const rootReducer = combineReducers({
-    students: studentReducer,
+const store = configureStore({
+    reducer: {
+        students: studentReducer,
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
 });
-
-const store = createStore(rootReducer, applyMiddleware(thunk));  // `thunk` should be passed here
 
 export default store;
