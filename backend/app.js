@@ -13,29 +13,27 @@ import authRoutes from './routes/auth.routes.js';
 import globalErrorHandler from './middlewares/error.middleware.js';
 import requestLogger from './middlewares/requestLogger.middleware.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+// Initialize the Express app
 const app = express();
 
 // Security Middlewares
 app.use(helmet());
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+    origin: '*',  // Hardcoded to allow all origins
     credentials: true,
 }));
 app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 200,
+    windowMs: 15 * 60 * 1000,  // Hardcoded to 15 minutes
+    max: 200,  // Hardcoded to 200 requests
     message: 'Too many requests from this IP, please try again later',
 });
 app.use('/api', limiter);
 
 // Body parsers
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '10kb' }));  // Hardcoded to 10kb
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Data sanitization
@@ -51,8 +49,8 @@ app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/auth', authRoutes);
 
 // Static files in production
+const frontendPath = path.join(__dirname, '../frontend/dist');  // Hardcoded static frontend path
 if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '../frontend/dist');
     app.use(express.static(frontendPath));
     app.get('*', (req, res) => {
         res.sendFile(path.join(frontendPath, 'index.html'));

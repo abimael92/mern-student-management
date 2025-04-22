@@ -1,38 +1,38 @@
 import winston from 'winston';
 import 'winston-mongodb';
 
-const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
-    format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.errors({ stack: true }),
-        winston.format.json()
-    ),
-    transports: [
-        new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format.colorize(),
-                winston.format.simple()
-            )
-        }),
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'logs/combined.log' }),
-    ],
-    exceptionHandlers: [
-        new winston.transports.File({ filename: 'logs/exceptions.log' })
-    ],
-    rejectionHandlers: [
-        new winston.transports.File({ filename: 'logs/rejections.log' })
-    ]
+const mongoURI = 'mongodb://localhost:27017/student-management';
+
+const { combine, timestamp, printf, colorize, align } = winston.format;
+
+const logFormat = printf(({ level, message, timestamp, stack }) => {
+    return `${timestamp} [${level}]: ${stack || message}`;
 });
 
-if (process.env.NODE_ENV === 'production') {
-    logger.add(new winston.transports.MongoDB({
-        db: process.env.MONGO_URI,
-        options: { useUnifiedTopology: true },
-        collection: 'logs',
-        level: 'error'
-    }));
-}
+const logger = winston.createLogger({
+    level: 'info',
+    format: combine(
+        colorize(),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        align(),
+        logFormat
+    ),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'logs/combined.log' }),
+        new winston.transports.MongoDB({
+            db: mongoURI,
+            collection: 'logs',
+            level: 'error',
+        }),
+    ],
+    exceptionHandlers: [
+        new winston.transports.File({ filename: 'logs/exceptions.log' }),
+    ],
+    rejectionHandlers: [
+        new winston.transports.File({ filename: 'logs/rejections.log' }),
+    ],
+});
 
 export default logger;
