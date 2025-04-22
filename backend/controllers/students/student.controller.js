@@ -1,9 +1,9 @@
-import Student from '../../models/student.schema';
-import ApiFeatures from '../../utils/apiFeatures';
-import AppError from '../../utils/appError';
-import responseHandler from '../../utils/responseHandler';
-import { generateStudentNumber } from '../../services/studentNumber.service';
-import logger from '../../config/logger';
+import Student from '../../models/student.schema.js';
+import ApiFeatures from '../../utils/apiFeatures.js';
+import AppError from '../../utils/appError.js';
+import { sendResponse as responseHandler } from '../../utils/responseHandler.js';
+import { generateStudentNumber } from '../../services/studentNumber.service.js';
+import logger from '../../config/logger.js';
 
 export const createStudent = async (req, res, next) => {
     try {

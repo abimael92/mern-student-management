@@ -1,10 +1,13 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
-  server: {
-    host: '0.0.0.0', // Allow Vite to be accessible from the network
-    proxy: {
-      '/api': 'http://localhost:5000',
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@api': path.resolve(__dirname, './api'),
+      '@features': path.resolve(__dirname, './src/features'),
     }
   }
 });
