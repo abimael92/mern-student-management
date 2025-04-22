@@ -1,5 +1,5 @@
 import { body, param } from 'express-validator';
-import Student from '../../models/student.schema';
+import Student from '../../models/student.schema.js';
 
 // ==================== VALIDATION HELPERS ====================
 const validateIdExists = async (value) => {

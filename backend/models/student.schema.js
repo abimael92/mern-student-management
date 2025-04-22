@@ -6,7 +6,7 @@ const studentSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
-            index: true,
+            // Remove index: true here since it's already indexed later
         },
         firstName: {
             type: String,
@@ -119,7 +119,8 @@ studentSchema.virtual('fullName').get(function () {
 
 // Indexes for better query performance
 studentSchema.index({ firstName: 'text', lastName: 'text' });
-studentSchema.index({ studentNumber: 1 });
+// Remove the duplicate index definition for studentNumber
+
 
 const Student = mongoose.model('Student', studentSchema);
 

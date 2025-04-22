@@ -6,17 +6,17 @@ import {
     updateStudent,
     deleteStudent,
     toggleEnrollmentStatus,
-} from '../controllers/students/student.controller';
+} from '../controllers/students/student.controller.js';
 import {
     createStudentValidations,
     updateStudentValidations,
-} from '../controllers/students/student.validations';
-import validationMiddleware from '../middlewares/validation.middleware';
-import authMiddleware from '../middlewares/auth.middleware'; // New auth middleware
-import roleMiddleware from '../middlewares/role.middleware'; // New role middleware
-import requestLogger from '../middlewares/requestLogger.middleware'; // New logging middleware
+} from '../controllers/students/student.validations.js';
+import validationMiddleware from '../middlewares/validation.middleware.js';
+import authMiddleware from '../middlewares/auth.middleware.js'; // New auth middleware
+import roleMiddleware from '../middlewares/role.middleware.js'; // New role middleware
+import requestLogger from '../middlewares/requestLogger.middleware.js'; // New logging middleware
 import rateLimit from 'express-rate-limit'; // For rate limiting
-import sanitizeMiddleware from '../middlewares/sanitize.middleware'; // New sanitization
+import sanitizeMiddleware from '../middlewares/sanitize.middleware.js'; // New sanitization
 
 // Rate limiting configuration
 const createStudentLimiter = rateLimit({

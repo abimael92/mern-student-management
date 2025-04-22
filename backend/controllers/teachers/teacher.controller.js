@@ -1,8 +1,8 @@
-import Teacher from '../models/Teacher';
-import ApiFeatures from '../utils/apiFeatures';
-import AppError from '../utils/appError';
-import responseHandler from '../utils/responseHandler';
-import logger from '../config/logger';
+import Teacher from '../../models/teacher.schema.js';
+import ApiFeatures from '../../utils/apiFeatures.js';
+import AppError from '../../utils/appError.js';
+import { sendResponse as responseHandler } from '../../utils/responseHandler.js';
+import logger from '../../config/logger.js';
 
 export const createTeacher = async (req, res, next) => {
     try {

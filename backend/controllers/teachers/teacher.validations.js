@@ -1,5 +1,5 @@
 import { body, param } from 'express-validator';
-import Teacher from '../models/Teacher';
+import Teacher from '../../models/teacher.schema.js';
 
 // Common validation rules
 const nameRule = (field) =>

@@ -171,7 +171,6 @@ teacherSchema.virtual('yearsAtSchool').get(function () {
 });
 
 // Indexes
-teacherSchema.index({ email: 1 }, { unique: true });
 teacherSchema.index({ lastName: 1, firstName: 1 });
 teacherSchema.index({ 'classesAssigned.class': 1 });
 
