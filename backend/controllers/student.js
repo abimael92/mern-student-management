@@ -5,11 +5,13 @@ import logger from '../utils/logger.js';
 // GET /students - Fetch all students
 export const getStudents = async (req, res) => {
     try {
-        const students = await Student.find(); // Ensure Student is correctly imported
+        console.log('Fetching students from DB...'); // Add this line
+        const students = await Student.find({}).lean(); // Add .lean() for better performance
+        console.log(`Found ${students.length} students`); // Add this line
         res.status(200).json(students);
     } catch (error) {
-        console.error("Error fetching students:", error);
-        res.status(500).json({ error: "Failed to fetch students" });
+        console.error("DB Error:", error); // Enhanced logging
+        res.status(500).json({ error: error.message }); // Send actual error
     }
 };
 
