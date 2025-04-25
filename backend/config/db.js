@@ -1,4 +1,9 @@
 import mongoose from 'mongoose';
+import logger from './logger.js';
+
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 5000;
+let connectionAttempts = 0;
 
 const connectDB = async () => {
 
