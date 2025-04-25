@@ -1,68 +1,32 @@
-const API_URL = 'http://localhost:5000';  // Your backend API URL
+const BASE = import.meta.env.VITE_API_URL;
 
 export const api = {
     fetchStudents: async () => {
-        try {
-            const response = await fetch(`${API_URL}/students`);
-            if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-            return await response.json();
-        } catch (error) {
-            console.error("Failed to fetch students:", error);
-            throw error;  // Re-throw the error for handling in components
-        }
+        const res = await fetch(`${BASE}/api/students`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
     },
-
-    addStudent: async (studentData) => {
-        try {
-            const response = await fetch(`${API_URL}/students`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(studentData),
-            });
-
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`Error: ${errorDetails}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error("Error adding student:", error.message || error);
-            throw error;
-        }
+    addStudent: async (data) => {
+        const res = await fetch(`${BASE}/api/students`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
     },
-
-    updateStudent: async (id, studentData) => {
-        try {
-            const response = await fetch(`${API_URL}/students/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(studentData),
-            });
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`Error: ${errorDetails}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error updating student:", error);
-            throw error;
-        }
+    updateStudent: async (id, data) => {
+        const res = await fetch(`${BASE}/api/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
     },
-
     deleteStudent: async (id) => {
-        try {
-            const response = await fetch(`${API_URL}/students/${id}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`Error: ${errorDetails}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error deleting student:", error);
-            throw error;
-        }
+        const res = await fetch(`${BASE}/api/students/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
     },
 };

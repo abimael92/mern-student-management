@@ -1,33 +1,44 @@
-import app from './app.js';
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import studentRoutes from './routes/student.js';
 import connectDB from './config/db.js';
-import logger from './config/logger.js';
 
-const PORT = process.env.PORT || 5000;
+dotenv.config();
 
-const startServer = async () => {
-    try {
-        await connectDB();
-        const server = app.listen(PORT, () => {
-            logger.info(`Server running on port ${PORT}`);
-            logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-        });
+// dotenv.config({ path: './backend/.env' });
 
-        process.on('unhandledRejection', (err) => {
-            logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
-            logger.error(err.name, err.message);
-            server.close(() => process.exit(1));
-        });
 
-        process.on('SIGTERM', () => {
-            logger.info('👋 SIGTERM RECEIVED. Shutting down gracefully');
-            server.close(() => {
-                logger.info('💥 Process terminated!');
-            });
-        });
-    } catch (err) {
-        logger.error('Failed to start server:', err);
-        process.exit(1);
-    }
-};
+console.log(process.env.MONGO_URI);
+const app = express();
 
-startServer();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
+
+app.use('/api', studentRoutes);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendPath = path.join(__dirname, '../frontend/dist');
+
+app.use(express.static(frontendPath));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Internal Server Error' });
+});
+
+connectDB().then(() => {
+    app.listen(process.env.PORT || 5000, () => {
+        console.log(`Server running on port ${process.env.PORT || 5000}`);
+    });
+});

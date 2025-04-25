@@ -2,9 +2,16 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   server: {
-    host: '0.0.0.0', // Allow Vite to be accessible from the network
     proxy: {
-      '/api': 'http://localhost:5000',
-    }
-  }
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        configure: (proxy, options) => {
+          console.log('Proxying request:', options);
+        },
+      },
+    },
+  },
+
 });

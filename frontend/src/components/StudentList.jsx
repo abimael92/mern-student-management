@@ -4,6 +4,7 @@ import {
   fetchStudents,
   updateStudentStatus,
   deleteStudent,
+  addStudent, // Add this import
 } from '../redux/actions/studentActions';
 import {
   Grid,
@@ -26,8 +27,11 @@ const StudentList = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchStudents());
-  }, [dispatch]);
+    console.log('Fetched Students:', students);
+    if (!students.length) {
+      dispatch(fetchStudents());
+    }
+  }, [dispatch, students.length]);
 
   useEffect(() => {
     setFilteredStudents(students);
