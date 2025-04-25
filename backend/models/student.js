@@ -1,7 +1,17 @@
 import mongoose from 'mongoose';
 
 const studentSchema = new mongoose.Schema({
-    studentNumber: { type: String, required: true, unique: true },
+    studentNumber: {
+        type: String,
+        required: true,
+        unique: true,
+        validate: {
+            validator: function (value) {
+                return /^ST\d{4}-\d{3}$/.test(value); // Example: ST2022-001
+            },
+            message: props => `${props.value} is not a valid student number!`
+        }
+    },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     age: { type: Number, default: null },
@@ -29,6 +39,5 @@ const studentSchema = new mongoose.Schema({
 });
 
 const Student = mongoose.model('Student', studentSchema); // Capitalize 'Student' for consistency
-console.log("Student model created:", Student);  // Debug log
 
 export default Student;
