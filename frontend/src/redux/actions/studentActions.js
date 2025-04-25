@@ -126,3 +126,4 @@ export const updateStudentStatus = (id, status) => async (dispatch) => {
         dispatch({ type: UPDATE_STUDENT_STATUS_FAILURE, error: error.message });
     }
 };
+

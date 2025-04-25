@@ -1,8 +1,7 @@
-// Remove the hardcoded API_URL since we're using Vite proxy
 export const api = {
     fetchStudents: async () => {
         try {
-            const response = await fetch('/students');  // Removed API_URL prefix
+            const response = await fetch('/api/students');  // Use '/api' prefix as per Vite proxy config
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
                 throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
@@ -16,7 +15,7 @@ export const api = {
 
     addStudent: async (studentData) => {
         try {
-            const response = await fetch('/students', {  // Removed API_URL prefix
+            const response = await fetch('/api/students', {  // Use '/api' prefix as per Vite proxy config
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -38,7 +37,7 @@ export const api = {
 
     updateStudent: async (id, studentData) => {
         try {
-            const response = await fetch(`/students/${id}`, {  // Removed API_URL prefix
+            const response = await fetch(`/api/students/${id}`, {  // Use '/api' prefix as per Vite proxy config
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -60,7 +59,7 @@ export const api = {
 
     deleteStudent: async (id) => {
         try {
-            const response = await fetch(`/students/${id}`, {  // Removed API_URL prefix
+            const response = await fetch(`/api/students/${id}`, {  // Use '/api' prefix as per Vite proxy config
                 method: 'DELETE',
                 headers: { 'Accept': 'application/json' }
             });

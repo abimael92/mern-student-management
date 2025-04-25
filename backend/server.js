@@ -1,13 +1,12 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import studentRoutes from './routes/student.js';
+import connectDB from './config/db.js';
 
 dotenv.config();
-mongoose.set('strictQuery', false);
 
 const app = express();
 
@@ -33,21 +32,15 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// Error handler (must be after routes)
+// Error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Internal Server Error' });
 });
 
-// Start server
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log('MongoDB connected');
-        app.listen(process.env.PORT || 5000, () => {
-            console.log(`Server running on port ${process.env.PORT || 5000}`);
-        });
-    })
-    .catch((error) => {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
+// Connect DB and start server
+connectDB().then(() => {
+    app.listen(process.env.PORT || 5000, () => {
+        console.log(`Server running on port ${process.env.PORT || 5000}`);
     });
+});

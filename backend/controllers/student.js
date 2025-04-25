@@ -5,15 +5,16 @@ import logger from '../utils/logger.js';
 // GET /students - Fetch all students
 export const getStudents = async (req, res) => {
     try {
-        console.log('Fetching students from DB...'); // Add this line
-        const students = await Student.find({}).lean(); // Add .lean() for better performance
-        console.log(`Found ${students.length} students`); // Add this line
+        console.log('Fetching students from DB...');
+        const students = await Student.find({}).lean();
+        console.log(`Found ${students.length} students`);
         res.status(200).json(students);
     } catch (error) {
-        console.error("DB Error:", error); // Enhanced logging
-        res.status(500).json({ error: error.message }); // Send actual error
+        console.error("DB Error:", error);
+        res.status(500).json({ error: error.message });
     }
 };
+
 
 // POST /students - Create a new student
 export const createStudent = async (req, res) => {
