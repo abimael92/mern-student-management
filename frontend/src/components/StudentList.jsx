@@ -27,6 +27,7 @@ const StudentList = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
+    console.log('Fetched Students:', students);
     if (!students.length) {
       dispatch(fetchStudents());
     }

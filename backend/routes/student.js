@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.get('/students', getStudents); // ✅ Use the controller directly
+router.get('/students', getStudents);
 
 
 router.post('/students', createStudent);

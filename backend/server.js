@@ -7,6 +7,11 @@ import studentRoutes from './routes/student.js';
 import connectDB from './config/db.js';
 
 dotenv.config();
+
+// dotenv.config({ path: './backend/.env' });
+
+
+console.log(process.env.MONGO_URI);
 const app = express();
 
 app.use(express.json());

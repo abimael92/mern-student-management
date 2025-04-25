@@ -1,5 +1,5 @@
 import {
-    FETCH_STUDENTS,
+    FETCH_STUDENTS_SUCCESS,
     ADD_STUDENT,
     UPDATE_STUDENT,
     FETCH_STUDENTS_FAILURE,
@@ -16,7 +16,7 @@ const initialState = {
 
 export const studentReducer = (state = initialState, action) => {
     switch (action.type) {
-        case FETCH_STUDENTS:
+        case FETCH_STUDENTS_SUCCESS:
             return { ...state, students: action.payload, error: null };
         case ADD_STUDENT:
             return { ...state, students: [...state.students, action.payload], error: null };
