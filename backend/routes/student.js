@@ -1,17 +1,20 @@
 import express from "express";
-import { check } from 'express-validator';
-import { getStudents, createStudent, deleteStudent, getLastStudentNumber, updateStudent } from '../controllers/student.js';
+import {
+    getStudents,
+    createStudent,
+    deleteStudent,
+    getLastStudentNumber,
+    updateStudent,
+} from "../controllers/student.js";
 
 const router = express.Router();
 
-router.get('/api/students', getStudents);
+router.get('/students', getStudents); // ✅ Use the controller directly
 
-router.post('/api/students', createStudent);
 
-router.delete('/api/students/:id', deleteStudent);
-
-router.get('/api/students/lastStudentNumber', getLastStudentNumber);
-
-router.put('/api/students/:id', updateStudent);
+router.post('/students', createStudent);
+router.delete('/students/:id', deleteStudent);
+router.get('/students/lastStudentNumber', getLastStudentNumber);
+router.put('/students/:id', updateStudent);
 
 export default router;

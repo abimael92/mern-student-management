@@ -1,129 +1,41 @@
+import { api } from '../../utils/api';  // adjust path if needed
 import {
-    FETCH_STUDENTS,
+    FETCH_STUDENTS_REQUEST,
+    FETCH_STUDENTS_SUCCESS,
     FETCH_STUDENTS_FAILURE,
     ADD_STUDENT,
-    ADD_STUDENT_FAILURE,
     UPDATE_STUDENT,
-    UPDATE_STUDENT_FAILURE,
     DELETE_STUDENT,
-    DELETE_STUDENT_FAILURE,
     UPDATE_STUDENT_STATUS,
-    UPDATE_STUDENT_STATUS_FAILURE
 } from '../actionTypes';
 
-const API_URL = 'http://localhost:5000';
 
 export const fetchStudents = () => async (dispatch) => {
+    dispatch({ type: FETCH_STUDENTS_REQUEST });
     try {
-        const response = await fetch(`${API_URL}/students`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch students');
-        }
-        const data = await response.json();
-        dispatch({ type: FETCH_STUDENTS, payload: data });
+        const data = await api.fetchStudents();
+        dispatch({ type: FETCH_STUDENTS_SUCCESS, payload: data });
     } catch (error) {
-        dispatch({ type: FETCH_STUDENTS_FAILURE, error: error.message });
+        dispatch({ type: FETCH_STUDENTS_FAILURE, payload: error.message });
     }
 };
 
-export const addStudent = (studentData) => async (dispatch) => {
-
-    try {
-        const response = await fetch(`${API_URL}/students`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(studentData),
-        });
-
-        if (!response.ok) {
-            const errorDetails = await response.text();  // If not ok, get the error details
-            throw new Error(`Error: ${errorDetails}`);
-        }
-
-        const data = await response.json();
-        console.log('Added Student Data:', data);
-        dispatch({ type: ADD_STUDENT, payload: data.student });
-
-        return data;
-
-    } catch (error) {
-        dispatch({ type: ADD_STUDENT_FAILURE, error: error.message });
-        throw error;
-    }
-
+export const addStudent = (student) => async (dispatch) => {
+    const data = await api.addStudent(student);
+    dispatch({ type: ADD_STUDENT, payload: data });
 };
 
-export const updateStudent = (id, updatedData) => async (dispatch) => {
-    try {
-        const response = await fetch(`${API_URL}/students/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedData),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to update student');
-        }
-        const data = await response.json();
-        dispatch({ type: UPDATE_STUDENT, payload: data });
-    } catch (error) {
-        dispatch({ type: UPDATE_STUDENT_FAILURE, error: error.message });
-    }
-};
-
-export const getLastStudentNumber = () => async (dispatch) => {
-    try {
-        const response = await fetch(`${API_URL}/students/lastStudentNumber`);
-
-        const data = await response.json();
-
-        dispatch({
-            type: 'GET_LAST_STUDENT_NUMBER_SUCCESS',
-            payload: data,
-        });
-
-        return data;
-    } catch (error) {
-        dispatch({
-            type: 'GET_LAST_STUDENT_NUMBER_FAILURE',
-            payload: error.message,
-        });
-        throw error;
-    }
+export const updateStudent = (id, student) => async (dispatch) => {
+    const data = await api.updateStudent(id, student);
+    dispatch({ type: UPDATE_STUDENT, payload: data });
 };
 
 export const deleteStudent = (id) => async (dispatch) => {
-    try {
-        const response = await fetch(`${API_URL}/students/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete student');
-        }
-
-        dispatch({ type: DELETE_STUDENT, payload: id });
-    } catch (error) {
-        dispatch({ type: DELETE_STUDENT_FAILURE, error: error.message });
-    }
+    await api.deleteStudent(id);
+    dispatch({ type: DELETE_STUDENT, payload: id });
 };
 
-
-export const updateStudentStatus = (id, status) => async (dispatch) => {
-    try {
-        const response = await fetch(`${API_URL}/students/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update student status');
-        }
-
-        const data = await response.json();
-        dispatch({ type: UPDATE_STUDENT_STATUS, payload: { id, status: data.status } });
-    } catch (error) {
-        dispatch({ type: UPDATE_STUDENT_STATUS_FAILURE, error: error.message });
-    }
+export const updateStudentStatus = (id, isEnrolled) => async (dispatch) => {
+    const data = await api.updateStudent(id, { isEnrolled });
+    dispatch({ type: UPDATE_STUDENT_STATUS, payload: data });
 };
-

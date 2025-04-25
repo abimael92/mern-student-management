@@ -5,9 +5,7 @@ import logger from '../utils/logger.js';
 // GET /students - Fetch all students
 export const getStudents = async (req, res) => {
     try {
-        console.log('Fetching students from DB...');
         const students = await Student.find({}).lean();
-        console.log(`Found ${students.length} students`);
         res.status(200).json(students);
     } catch (error) {
         console.error("DB Error:", error);

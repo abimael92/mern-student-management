@@ -1,10 +1,11 @@
 export const api = {
     fetchStudents: async () => {
         try {
-            const response = await fetch('/api/students');  // Use '/api' prefix as per Vite proxy config
+            const response = await fetch('/api/students');
+            console.log('this is hte response: ', response);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+                const errorData = await response.text(); // Log full response
+                throw new Error(`HTTP error! status: ${response.status}, Response: ${errorData}`);
             }
             return await response.json();
         } catch (error) {
@@ -12,6 +13,7 @@ export const api = {
             throw error;
         }
     },
+
 
     addStudent: async (studentData) => {
         try {
