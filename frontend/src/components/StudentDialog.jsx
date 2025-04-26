@@ -19,7 +19,7 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
   const dispatch = useDispatch();
   const [tab, setTab] = useState(0);
   const [formData, setFormData] = useState({
-    studentName: '',
+    firstName: '',
     lastName: '',
     age: '',
     grade: '',
@@ -47,7 +47,7 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
   useEffect(() => {
     if (student && Object.keys(student).length) {
       setFormData({
-        studentName: student.studentName ?? '',
+        firstName: student.firstName ?? '',
         lastName: student.lastName ?? '',
         age: student.age ?? '',
         grade: student.grade ?? '',
@@ -109,10 +109,8 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
               label="First Name"
               fullWidth
               margin="normal"
-              value={formData.studentName}
-              onChange={(e) =>
-                handleChange(null, 'studentName', e.target.value)
-              }
+              value={formData.firstName}
+              onChange={(e) => handleChange(null, 'firstName', e.target.value)}
             />
             <TextField
               label="Last Name"
