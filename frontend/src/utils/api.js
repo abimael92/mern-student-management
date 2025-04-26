@@ -7,6 +7,8 @@ export const api = {
         return res.json();
     },
     addStudent: async (data) => {
+        console.log(data);
+
         const res = await fetch(`${BASE}/api/students`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
