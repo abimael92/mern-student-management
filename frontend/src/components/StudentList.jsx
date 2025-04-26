@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchStudents,
   updateStudentStatus,
   deleteStudent,
-  addStudent, // Add this import
+  addStudent,
+  updateStudent,
 } from '../redux/actions/studentActions';
 import {
   Grid,
@@ -22,29 +23,28 @@ const StudentList = () => {
   const dispatch = useDispatch();
   const { students, isLoading, error } = useSelector((state) => state.students);
 
-  const [filteredStudents, setFilteredStudents] = useState(students);
+  const [filterQuery, setFilterQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
-    console.log('Fetched Students:', students);
-    if (!students.length) {
+    if (!students || !students.length) {
       dispatch(fetchStudents());
     }
-  }, [dispatch, students.length]);
+  }, [dispatch]);
 
-  useEffect(() => {
-    setFilteredStudents(students);
-  }, [students]);
+  const filtered = useMemo(() => {
+    if (!Array.isArray(students)) return [];
+    if (!filterQuery.trim()) return students;
+    return students.filter((student) =>
+      `${student.firstName} ${student.lastName}`
+        .toLowerCase()
+        .includes(filterQuery.toLowerCase())
+    );
+  }, [students, filterQuery]);
 
   const handleFilter = (query) => {
-    setFilteredStudents(
-      students.filter((student) =>
-        `${student.firstName} ${student.lastName}`
-          .toLowerCase()
-          .includes(query.toLowerCase())
-      )
-    );
+    setFilterQuery(query);
   };
 
   const handleEdit = (student) => {
@@ -57,9 +57,14 @@ const StudentList = () => {
   };
 
   const handleToggleStatus = (studentNumber) => {
-    const student = students.find((s) => s.studentNumber === studentNumber);
-    dispatch(updateStudentStatus(studentNumber, !student.isEnrolled));
+    const student = students?.find((s) => s.studentNumber === studentNumber);
+    if (student) {
+      dispatch(updateStudentStatus(student._id, !student.isEnrolled));
+    }
   };
+
+  if (isLoading) return <CircularProgress />;
+  if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
     <Box sx={{ py: 4 }}>
@@ -69,28 +74,28 @@ const StudentList = () => {
 
       <StudentFilter onFilter={handleFilter} />
 
-      {isLoading ? (
-        <CircularProgress />
-      ) : error ? (
-        <Alert severity="error">{error}</Alert>
-      ) : (
-        <Grid container spacing={3} justifyContent="center">
-          {filteredStudents.map((student) => (
-            <Grid item xs={12} sm={6} md={4} key={student.studentNumber}>
-              <StudentCard
-                student={student}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleStatus={handleToggleStatus}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      )}
+      <Grid container spacing={3} justifyContent="center">
+        {filtered.map(
+          (student, index) =>
+            student?._id && (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <StudentCard
+                  student={student}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onToggleStatus={handleToggleStatus}
+                />
+              </Grid>
+            )
+        )}
+      </Grid>
 
       <Button
         variant="contained"
-        onClick={() => setDialogOpen(true)}
+        onClick={() => {
+          setSelectedStudent(null);
+          setDialogOpen(true);
+        }}
         sx={{ mt: 4 }}
       >
         Add New Student
@@ -98,10 +103,13 @@ const StudentList = () => {
 
       <StudentDialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => {
+          setDialogOpen(false);
+          setSelectedStudent(null);
+        }}
         onSave={(studentData) => {
           if (selectedStudent) {
-            dispatch(updateStudent(selectedStudent.studentNumber, studentData));
+            dispatch(updateStudent(selectedStudent._id, studentData));
           } else {
             dispatch(addStudent(studentData));
           }
