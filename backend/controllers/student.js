@@ -1,6 +1,8 @@
 import Student from '../models/student.js'; // Make sure the import matches the model export
 import { validationResult } from 'express-validator';
 import logger from '../utils/logger.js';
+import { generateStudentNumber } from '../services/studentNumber.service.js';
+
 
 // GET /students - Fetch all students
 export const getStudents = async (req, res) => {
@@ -22,11 +24,13 @@ export const createStudent = async (req, res) => {
     }
 
     const {
-        studentNumber, firstName, lastName, age, grade, tutor, emergencyContact,
+        firstName, lastName, age, grade, tutor, emergencyContact,
         dateOfBirth, nationality, contactInfo, address, isEnrolled
     } = req.body;
 
     try {
+        const studentNumber = await generateStudentNumber();
+
         const newStudent = new Student({
             studentNumber,
             firstName,
@@ -70,26 +74,29 @@ export const deleteStudent = async (req, res) => {
 
 // GET /students/lastStudentNumber - Fetch the last student number
 export const getLastStudentNumber = async (req, res) => {
+    const currentYear = new Date().getFullYear();
+    const yearPrefix = `ST${currentYear}`;
+
     try {
-        const currentYear = new Date().getFullYear();
-        const yearPrefix = `ST${currentYear}`;
+        const lastStudent = await Student.find({
+            studentNumber: { $regex: `^${yearPrefix}` },
+        }).sort({ studentNumber: -1 }).limit(1);
 
-        const lastStudent = await Student.find({ studentNumber: { $regex: `^${yearPrefix}` } })
-            .sort({ studentNumber: -1 })
-            .limit(1)
-            .exec();
+        let nextNumber = 1;
 
-        if (!lastStudent.length) {
-            return res.status(404).json({ message: 'No students found with the given pattern.' });
+        if (lastStudent.length > 0) {
+            const lastNum = parseInt(lastStudent[0].studentNumber.split('-')[1], 10);
+            nextNumber = lastNum + 1;
         }
 
-        // Return only the last student number
-        res.status(200).json({ lastStudentNumber: lastStudent[0].studentNumber });
+        const nextStudentNumber = `${yearPrefix}-${nextNumber.toString().padStart(3, '0')}`;
+        res.status(200).json({ studentNumber: nextStudentNumber });
     } catch (error) {
-        console.error("Error fetching the last student number:", error);
-        res.status(500).json({ error: "Failed to fetch the last student number" });
+        console.error("Error generating student number:", error);
+        res.status(500).json({ error: "Failed to generate student number" });
     }
 };
+
 
 // PUT /students/:id - Update a student's information
 export const updateStudent = async (req, res) => {
