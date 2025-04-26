@@ -13,8 +13,8 @@ router.get('/students', getStudents);
 
 
 router.post('/students', createStudent);
-router.delete('/students/:id', deleteStudent);
 router.get('/students/lastStudentNumber', getLastStudentNumber);
+
 router.put('/students/:id', updateStudent);
 
 export default router;
