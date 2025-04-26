@@ -5,7 +5,7 @@ import {
     FETCH_STUDENTS_FAILURE,
     ADD_STUDENT_FAILURE,
     UPDATE_STUDENT_FAILURE,
-    UPDATE_STUDENT_STATUS
+    UPDATE_STUDENT_STATUS,
 } from '../actionTypes';
 
 const initialState = {
