@@ -14,7 +14,7 @@ const StudentForm = () => {
   const [loading, setLoading] = useState(false);
 
   const validationSchema = Yup.object({
-    studentName: Yup.string().required('Student name is required'),
+    firstName: Yup.string().required('Student name is required'),
     age: Yup.number()
       .required('Age is required')
       .min(1, 'Age must be greater than 0'),
@@ -32,6 +32,7 @@ const StudentForm = () => {
   }, [id]);
 
   const handleSubmit = (values) => {
+    console.log('val', values);
     if (id) {
       dispatch(updateStudent(id, values)); // Update student
     } else {
@@ -56,7 +57,7 @@ const StudentForm = () => {
       <Formik
         enableReinitialize
         initialValues={{
-          studentName: student?.studentName || '',
+          firstName: student?.firstName || '',
           age: student?.age || '',
         }}
         validationSchema={validationSchema}
@@ -67,14 +68,14 @@ const StudentForm = () => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  name="studentName"
+                  name="firstName"
                   label="Student Name"
                   variant="outlined"
                   fullWidth
-                  value={values.studentName}
+                  value={values.firstName}
                   onChange={handleChange}
-                  error={touched.studentName && Boolean(errors.studentName)}
-                  helperText={touched.studentName && errors.studentName}
+                  error={touched.firstName && Boolean(errors.firstName)}
+                  helperText={touched.firstName && errors.firstName}
                 />
               </Grid>
 
