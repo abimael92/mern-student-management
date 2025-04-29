@@ -20,10 +20,11 @@ export const fetchStudents = () => async (dispatch) => {
     }
 };
 
-export const addStudent = (student) => async (dispatch) => {
-    const data = await api.addStudent(student);
-    dispatch({ type: ADD_STUDENT, payload: data });
+export const addStudent = async (student) => {
+    const response = await axios.post('/api/students', student);
+    return response.data;
 };
+
 
 export const updateStudent = (id, student) => async (dispatch) => {
     const data = await api.updateStudent(id, student);

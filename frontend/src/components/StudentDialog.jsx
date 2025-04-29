@@ -12,6 +12,9 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { api } from '../utils/api';
+import { getPublicUrl } from '../utils/helpers';
 import { useDispatch } from 'react-redux';
 import { addStudent, updateStudent } from '../redux/actions/studentActions';
 
@@ -21,27 +24,16 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    profilePicture: '',
     age: '',
     grade: '',
     tutor: '',
-    dob: '',
+    dob: null,
     nationality: '',
     isEnrolled: false,
-    emergencyContact: {
-      name: '',
-      relation: '',
-      phone: '',
-    },
-    contactInfo: {
-      phoneNumber: '',
-      email: '',
-    },
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-    },
+    emergencyContact: { name: '', relation: '', phone: '' },
+    contactInfo: { phone: '', email: '' },
+    address: { street: '', city: '', state: '', zipCode: '' },
   });
 
   useEffect(() => {
@@ -49,10 +41,11 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
       setFormData({
         firstName: student.firstName ?? '',
         lastName: student.lastName ?? '',
+        profilePicture: student.profilePicture ?? '',
         age: student.age ?? '',
         grade: student.grade ?? '',
         tutor: student.tutor ?? '',
-        dob: student.dob ?? '',
+        dob: student.dob ? new Date(student.dob) : null,
         nationality: student.nationality ?? '',
         isEnrolled: student.isEnrolled ?? false,
         emergencyContact: {
@@ -64,6 +57,7 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
           phoneNumber: student.contactInfo?.phoneNumber ?? '',
           email: student.contactInfo?.email ?? '',
         },
+
         address: {
           street: student.address?.street ?? '',
           city: student.address?.city ?? '',
@@ -78,24 +72,40 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
     if (section) {
       setFormData((prev) => ({
         ...prev,
-        [section]: {
-          ...prev[section],
-          [key]: value,
-        },
+        [section]: { ...prev[section], [key]: value },
       }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handleImageUpload = async (file) => {
+    console.log('i got image: ', file);
+    try {
+      const uploadedUrl = await api.uploadImage(file);
+      console.log('Image uploaded: ', uploadedUrl);
+      if (uploadedUrl) {
+        console.log('Image uploaded successfully: ', uploadedUrl);
+        handleChange(null, 'profilePicture', uploadedUrl); // Update picture field
+      } else {
+        console.error('Uploaded URL is undefined or invalid.');
+      }
+    } catch (error) {
+      console.error('Image upload failed:', error);
     }
   };
 
   const handleSave = () => {
+    console.log('profilePicture: ', formData.profilePicture);
+    const studentData = { ...formData }; // no need to manually assign picture
+    // if (!studentData.picture) {
+    //   delete studentData.picture; // if no picture, remove it
+    // }
+
     if (student?._id) {
-      dispatch(updateStudent(student._id, formData));
+      dispatch(updateStudent(student._id, studentData));
     } else {
-      dispatch(addStudent(formData));
+      dispatch(addStudent(studentData));
     }
     onClose();
   };
@@ -119,6 +129,32 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
               value={formData.lastName}
               onChange={(e) => handleChange(null, 'lastName', e.target.value)}
             />
+            <Box mt={2}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    await handleImageUpload(file);
+                  }
+                }}
+                style={{ display: 'none' }}
+                id="upload-image"
+              />
+              <label htmlFor="upload-image">
+                <Button variant="contained" component="span">
+                  Upload Headshot
+                </Button>
+              </label>
+              {formData.profilePicture && (
+                <img
+                  src={formData.profilePicture}
+                  alt={formData.firstName}
+                  style={{ width: '100px', height: '100px', marginTop: '10px' }}
+                />
+              )}
+            </Box>
             <TextField
               label="Age"
               fullWidth
@@ -155,12 +191,13 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
       case 1:
         return (
           <Box>
-            <TextField
-              label="DOB"
-              fullWidth
-              margin="normal"
+            <DatePicker
+              label="Date of Birth"
               value={formData.dob}
-              onChange={(e) => handleChange(null, 'dob', e.target.value)}
+              onChange={(date) => handleChange(null, 'dob', date)}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth margin="normal" />
+              )}
             />
             <TextField
               label="Nationality"
@@ -226,11 +263,6 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
                 handleChange('contactInfo', 'email', e.target.value)
               }
             />
-          </Box>
-        );
-      case 4:
-        return (
-          <Box>
             <TextField
               label="Street"
               fullWidth
@@ -272,33 +304,20 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle
-        sx={{ bgcolor: '#1976d2', color: 'white', textAlign: 'center' }}
-      >
-        {student?._id ? 'Edit Student' : 'Add Student'}
-      </DialogTitle>
-
-      <Tabs
-        value={tab}
-        onChange={(e, newTab) => setTab(newTab)}
-        variant="scrollable"
-        scrollButtons="auto"
-      >
-        <Tab label="Basic Info" />
-        <Tab label="DOB & Nationality" />
-        <Tab label="Emergency Contact" />
-        <Tab label="Contact Info" />
-        <Tab label="Address" />
-      </Tabs>
-
-      <DialogContent dividers>{renderTabPanel()}</DialogContent>
-
-      <DialogActions sx={{ justifyContent: 'space-between', px: 3 }}>
-        <Button onClick={onClose} color="secondary">
-          Cancel
-        </Button>
-        <Button onClick={handleSave} variant="contained" color="primary">
-          {student?._id ? 'Update' : 'Save'}
+      <DialogTitle>{student?._id ? 'Edit Student' : 'Add Student'}</DialogTitle>
+      <DialogContent>
+        <Tabs value={tab} onChange={(e, newTab) => setTab(newTab)}>
+          <Tab label="Basic Info" />
+          <Tab label="Birth Info" />
+          <Tab label="Emergency Contact" />
+          <Tab label="Contact & Address" />
+        </Tabs>
+        {renderTabPanel()}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="contained" onClick={handleSave}>
+          Save
         </Button>
       </DialogActions>
     </Dialog>

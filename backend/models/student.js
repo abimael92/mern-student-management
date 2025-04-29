@@ -13,6 +13,11 @@ const studentSchema = new mongoose.Schema({
     },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    profilePicture: {
+        type: String,
+        default: '',
+    },
+
     age: { type: Number, default: null },
     grade: { type: String, default: "N/A" },
     tutor: { type: String, default: "N/A" },

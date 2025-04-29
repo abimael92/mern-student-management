@@ -8,8 +8,11 @@ import {
   Box,
 } from '@mui/material';
 import defaultProfile from '../assets/profile-default.png';
+import { getPublicUrl } from '../utils/helpers';
 
 const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
+  console.log(student);
+  console.log(student?.profilePicture);
   if (!student) {
     return null; // Don't render anything if student data is missing
   }
@@ -29,10 +32,18 @@ const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
     >
       <CardMedia
         component="img"
-        image={student.picture || defaultProfile}
+        image={
+          student?.profilePicture
+            ? getPublicUrl(student.profilePicture)
+            : defaultProfile
+        } // Using the imageUrl from the student object
         alt="Student Picture"
-        sx={{ objectFit: 'cover' }}
+        sx={{ objectFit: 'cover', height: 200 }}
+        onError={(e) => {
+          e.target.src = defaultProfile; // Fallback to default if the image fails to load
+        }}
       />
+
       <CardContent>
         <Typography variant="h6" align="center" sx={{ fontWeight: 'bold' }}>
           {`${student?.firstName} ${student?.lastName}`}
