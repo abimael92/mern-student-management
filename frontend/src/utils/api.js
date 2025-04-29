@@ -31,4 +31,26 @@ export const api = {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
+    uploadImage: async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch(`${BASE}/api/upload`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+            });
+            const result = await res.json();
+            // console.log('Upload Response: ', result); // Check the result here
+            return result?.url; // Ensure you're returning the correct URL
+        } catch (error) {
+            console.error('Upload failed:', error);
+        }
+
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        return data.secure_url;  // Assuming the response has the 'secure_url' field for the uploaded image URL
+    },
+
 };
