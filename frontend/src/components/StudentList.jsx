@@ -31,7 +31,7 @@ const StudentList = () => {
     if (!students || !students.length) {
       dispatch(fetchStudents());
     }
-  }, [dispatch]);
+  }, [dispatch, students]);
 
   const filtered = useMemo(() => {
     if (!Array.isArray(students)) return [];
@@ -43,9 +43,7 @@ const StudentList = () => {
     );
   }, [students, filterQuery]);
 
-  const handleFilter = (query) => {
-    setFilterQuery(query);
-  };
+  const handleFilter = (query) => setFilterQuery(query);
 
   const handleEdit = (student) => {
     setSelectedStudent(student);
@@ -75,19 +73,16 @@ const StudentList = () => {
       <StudentFilter onFilter={handleFilter} />
 
       <Grid container spacing={3} justifyContent="center">
-        {filtered.map(
-          (student, index) =>
-            student?._id && (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <StudentCard
-                  student={student}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onToggleStatus={handleToggleStatus}
-                />
-              </Grid>
-            )
-        )}
+        {filtered.map((student) => (
+          <Grid item xs={12} sm={6} md={4} key={student._id}>
+            <StudentCard
+              student={student}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
+            />
+          </Grid>
+        ))}
       </Grid>
 
       <Button
@@ -106,13 +101,6 @@ const StudentList = () => {
         onClose={() => {
           setDialogOpen(false);
           setSelectedStudent(null);
-        }}
-        onSave={(studentData) => {
-          if (selectedStudent) {
-            dispatch(updateStudent(selectedStudent._id, studentData));
-          } else {
-            dispatch(addStudent(studentData));
-          }
         }}
         student={selectedStudent}
       />
