@@ -5,6 +5,9 @@ const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 5000;
 let connectionAttempts = 0;
 
+mongoose.set('strictQuery', true);
+
+
 const connectDB = async () => {
 
     if (!process.env.MONGO_URI) {
