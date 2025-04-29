@@ -48,8 +48,8 @@ const studentSchema = new mongoose.Schema(
             },
         },
         dateOfBirth: {
-            type: String,
-            default: 'N/A',
+            type: Date,
+            default: null,
         },
         nationality: {
             type: String,
