@@ -24,7 +24,7 @@ export const createStudent = async (req, res) => {
     }
 
     const {
-        firstName, lastName, age, grade, tutor, emergencyContact,
+        firstName, lastName, profilePicture, age, grade, tutor, emergencyContact,
         dateOfBirth, nationality, contactInfo, address, isEnrolled
     } = req.body;
 
@@ -35,11 +35,12 @@ export const createStudent = async (req, res) => {
             studentNumber,
             firstName,
             lastName,
+            profilePicture,
             age,
             grade,
             tutor,
             emergencyContact,
-            dateOfBirth,
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
             nationality,
             contactInfo,
             address,
