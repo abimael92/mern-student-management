@@ -5,13 +5,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import studentRoutes from './routes/student.js';
 import connectDB from './config/db.js';
+import uploadRoutes from './routes/upload.js';  // Use import for consistency
 
 dotenv.config();
 
-// dotenv.config({ path: './backend/.env' });
-
-
-console.log(process.env.MONGO_URI);
+console.log(process.env.MONGO_URI); // Check if MONGO_URI is loaded correctly
 const app = express();
 
 app.use(express.json());
@@ -22,6 +20,9 @@ app.use(cors({
 }));
 
 app.use('/api', studentRoutes);
+app.use('/api/upload', uploadRoutes);
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,7 @@ app.use(express.static(frontendPath));
 app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
+
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
