@@ -17,4 +17,7 @@ router.get('/students/lastStudentNumber', getLastStudentNumber);
 
 router.put('/students/:id', updateStudent);
 
+router.delete('/students/:id', deleteStudent);
+
+
 export default router;
