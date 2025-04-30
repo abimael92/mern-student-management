@@ -11,6 +11,12 @@ import {
   Checkbox,
   Tabs,
   Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel, //
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { api } from '../utils/api';
@@ -46,6 +52,13 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
       flag: 'none',
     },
   });
+
+  const [showNoteFields, setShowNoteFields] = useState(false);
+  const [hasAllergies, setHasAllergies] = useState(false);
+
+  // const { role } = useSelector((state) => state.auth.user); // Assuming you have user info in your redux store
+  // const hasNursePermissions = role === 'nurse';
+  const hasNursePermissions = false;
 
   useEffect(() => {
     if (student && Object.keys(student).length) {
@@ -324,50 +337,88 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
       case 4:
         return (
           <Box>
-            <TextField
-              label="Behavior Alert"
-              fullWidth
-              margin="normal"
-              value={formData.alerts.behavior}
-              onChange={(e) =>
-                handleChange('alerts', 'behavior', e.target.value)
+            <Button variant="outlined" onClick={() => setShowNoteFields(true)}>
+              Add Note
+            </Button>
+
+            {showNoteFields && (
+              <>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Alert Flag</InputLabel>
+                  <Select
+                    value={formData.alerts.flag}
+                    onChange={(e) =>
+                      handleChange('alerts', 'flag', e.target.value)
+                    }
+                    label="Alert Flag"
+                  >
+                    <MenuItem value="none">None</MenuItem>
+                    <MenuItem value="warning">Warning</MenuItem>
+                    <MenuItem value="success">Success</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {(formData.alerts.flag === 'warning' ||
+                  formData.alerts.flag === 'success') && (
+                  <>
+                    <TextField
+                      label="Behavior Alert"
+                      fullWidth
+                      margin="normal"
+                      value={formData.alerts.behavior}
+                      onChange={(e) =>
+                        handleChange('alerts', 'behavior', e.target.value)
+                      }
+                    />
+                    <TextField
+                      label="Academic Alert"
+                      fullWidth
+                      margin="normal"
+                      value={formData.alerts.academic}
+                      onChange={(e) =>
+                        handleChange('alerts', 'academic', e.target.value)
+                      }
+                    />
+                  </>
+                )}
+              </>
+            )}
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={hasAllergies}
+                  onChange={(e) => setHasAllergies(e.target.checked)}
+                />
               }
+              label="Has Allergies?"
             />
-            <TextField
-              label="Academic Alert"
-              fullWidth
-              margin="normal"
-              value={formData.alerts.academic}
-              onChange={(e) =>
-                handleChange('alerts', 'academic', e.target.value)
-              }
-            />
-            <TextField
-              label="Alert Flag"
-              fullWidth
-              margin="normal"
-              value={formData.alerts.flag}
-              onChange={(e) => handleChange('alerts', 'flag', e.target.value)}
-              placeholder="warning / success / none"
-            />
-            <TextField
-              label="Allergies (comma-separated)"
-              fullWidth
-              margin="normal"
-              value={formData.medicalInfo.allergies}
-              onChange={(e) =>
-                handleChange('medicalInfo', 'allergies', e.target.value)
-              }
-            />
-            <TextField
-              label="Nurse Comments"
-              fullWidth
-              margin="normal"
-              value={formData.medicalInfo.nurseComments}
-              onChange={(e) =>
-                handleChange('medicalInfo', 'nurseComments', e.target.value)
-              }
-            />
+
+            {hasAllergies ? (
+              <TextField
+                label="Allergies (comma-separated)"
+                fullWidth
+                margin="normal"
+                value={formData.medicalInfo.allergies}
+                onChange={(e) =>
+                  handleChange('medicalInfo', 'allergies', e.target.value)
+                }
+              />
+            ) : null}
+
+            {hasNursePermissions && (
+              <TextField
+                label="Nurse Comments"
+                fullWidth
+                multiline
+                rows={4}
+                margin="normal"
+                value={formData.medicalInfo.nurseComments}
+                onChange={(e) =>
+                  handleChange('medicalInfo', 'nurseComments', e.target.value)
+                }
+              />
+            )}
           </Box>
         );
       default:
