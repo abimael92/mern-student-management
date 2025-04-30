@@ -26,12 +26,11 @@ const StudentList = () => {
   const [filterQuery, setFilterQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    if (!students || !students.length) {
-      dispatch(fetchStudents());
-    }
-  }, [dispatch, students]);
+    dispatch(fetchStudents());
+  }, [dispatch]);
 
   const filtered = useMemo(() => {
     if (!Array.isArray(students)) return [];
@@ -50,14 +49,43 @@ const StudentList = () => {
     setDialogOpen(true);
   };
 
-  const handleDelete = (studentNumber) => {
-    dispatch(deleteStudent(studentNumber));
+  const handleDelete = async (studentNumber) => {
+    try {
+      await dispatch(deleteStudent(studentNumber));
+      setRefreshTrigger((prev) => prev + 1); // Force refresh after deletion
+    } catch (error) {
+      console.error('Failed to delete student:', error);
+    }
   };
 
-  const handleToggleStatus = (studentNumber) => {
-    const student = students?.find((s) => s.studentNumber === studentNumber);
-    if (student) {
-      dispatch(updateStudentStatus(student._id, !student.isEnrolled));
+  const handleToggleStatus = async (student) => {
+    console.log(student);
+    try {
+      if (!student || !student._id) {
+        console.error('Student or student ID not found');
+        return;
+      }
+
+      await dispatch(updateStudentStatus(student._id, !student.isEnrolled));
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
+  };
+
+  const handleUpdateStudent = async (updatedStudent) => {
+    if (!updatedStudent.studentNumber) {
+      console.error('Student number is missing');
+      return;
+    }
+
+    console.log('Updating student with ID:', updatedStudent.studentNumber); // Log for debugging
+
+    try {
+      await dispatch(updateStudent(updatedStudent)); // Make sure updatedStudent has the correct ID
+      setDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to update student:', error);
     }
   };
 
@@ -74,12 +102,12 @@ const StudentList = () => {
 
       <Grid container spacing={3} justifyContent="center">
         {filtered.map((student) => (
-          <Grid item xs={12} sm={6} md={4} key={student._id}>
+          <Grid item xs={12} sm={6} md={4} key={student.studentNumber}>
             <StudentCard
-              student={student}
+              student={student || {}} // Safeguard against undefined student
               onEdit={handleEdit}
-              onDelete={handleDelete}
-              onToggleStatus={handleToggleStatus}
+              onDelete={() => handleDelete(student.studentNumber)}
+              onToggleStatus={() => handleToggleStatus(student)}
             />
           </Grid>
         ))}
@@ -103,6 +131,7 @@ const StudentList = () => {
           setSelectedStudent(null);
         }}
         student={selectedStudent}
+        onUpdate={handleUpdateStudent}
       />
     </Box>
   );
