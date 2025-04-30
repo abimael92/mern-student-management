@@ -98,12 +98,18 @@ const Header = () => {
     },
   ];
 
+  const userMenuItems = [
+    { name: 'Profile', path: '/profile', icon: <AccountCircleIcon /> },
+    { name: 'Logout', path: '/logout', icon: <AccountCircleIcon /> },
+  ];
+
   const categories = [
     { name: 'Insights & Reports', items: insightsReportsItems },
     { name: 'People Management', items: peopleManagementItems },
     { name: 'Academics & Attendance', items: academicsAttendanceItems },
     { name: 'Financial & Logistics', items: financialLogisticsItems },
     { name: 'Resources & Facilities', items: resourcesFacilitiesItems },
+    { name: 'User', items: userMenuItems },
   ];
 
   return (
@@ -156,7 +162,7 @@ const Header = () => {
           {/* User Profile */}
           <IconButton
             color="inherit"
-            onClick={handleMenuClick}
+            onClick={(e) => handleMenuClick(e, 'User')}
             sx={{
               '&:hover': {
                 transform: 'scale(1.1)',

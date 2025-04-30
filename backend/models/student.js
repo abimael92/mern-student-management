@@ -20,7 +20,9 @@ const studentSchema = new mongoose.Schema({
 
     age: { type: Number, default: null },
     grade: { type: String, default: "N/A" },
+    classroomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Classroom', default: null },
     tutor: { type: String, default: "N/A" },
+    tutorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tutor', default: null },
     emergencyContact: {
         name: { type: String, default: "N/A" },
         relation: { type: String, default: "N/A" },
@@ -37,6 +39,20 @@ const studentSchema = new mongoose.Schema({
         city: { type: String, default: "N/A" },
         state: { type: String, default: "N/A" },
         zipCode: { type: String, default: "N/A" },
+    },
+    medicalInfo: {
+        allergies: { type: [String], default: [] },
+        nurseComments: { type: String, default: '' }
+    },
+
+    alerts: {
+        behavior: { type: String, default: '' },
+        academic: { type: String, default: '' },
+        flag: {
+            type: String,
+            enum: ['warning', 'success', 'none'],
+            default: 'none'
+        }
     },
     isEnrolled: { type: Boolean, required: true },
     enrollmentDate: { type: Date, default: Date.now }, // Enrollment Date
