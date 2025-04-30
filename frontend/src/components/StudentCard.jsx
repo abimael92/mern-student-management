@@ -23,14 +23,17 @@ import defaultProfile from '../assets/profile-default.png';
 import { getPublicUrl } from '../utils/helpers';
 
 const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
-  if (!student) return null; // Don't render if student data is missing
+  if (!student) return null;
+
+  const cardBg = student?.isEnrolled ? '#e8f5e9' : '#ffebee';
+  const detailsBg = student?.isEnrolled ? '#c8e6c9' : '#ffcdd2';
 
   return (
     <Card
       sx={{
         maxWidth: 360,
         m: 2,
-        bgcolor: student?.isEnrolled ? '#e8f5e9' : '#ffebee',
+        bgcolor: cardBg,
         boxShadow: 3,
         borderRadius: 2,
       }}
@@ -57,44 +60,45 @@ const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
           {student.isEnrolled ? 'Enrolled' : 'Not Enrolled'}
         </Typography>
 
-        <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+        <Box mt={2} display="flex" justifyContent="space-between" px={1}>
           <Typography variant="body2">
             <strong>Grade:</strong> {student.grade}
           </Typography>
           <Typography variant="body2">
             <strong>Age:</strong> {student.age ?? 'N/A'}
           </Typography>
-          <Accordion sx={{ mt: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="subtitle2">More Details</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography variant="body2">
-                <strong>DOB:</strong> {student.dateOfBirth}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Tutor:</strong> {student.tutor}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Emergency:</strong> {student.emergencyContact?.name} (
-                {student.emergencyContact?.relation})
-              </Typography>
-              <Typography variant="body2">
-                <strong>Phone:</strong> {student.emergencyContact?.phone}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Email:</strong> {student.contactInfo?.email}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Address:</strong> {student.address?.street},{' '}
-                {student.address?.city}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Nationality:</strong> {student.nationality}
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
+          <Typography variant="body2">
+            <strong>Tutor:</strong> {student.tutor}
+          </Typography>
         </Box>
+
+        <Accordion sx={{ mt: 2, bgcolor: detailsBg }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle2">More Details</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography variant="body2">
+              <strong>DOB:</strong> {student.dateOfBirth}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Emergency:</strong> {student.emergencyContact?.name} (
+              {student.emergencyContact?.relation})
+            </Typography>
+            <Typography variant="body2">
+              <strong>Phone:</strong> {student.emergencyContact?.phone}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Email:</strong> {student.contactInfo?.email}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Address:</strong> {student.address?.street},{' '}
+              {student.address?.city}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Nationality:</strong> {student.nationality}
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
 
         <Box display="flex" justifyContent="space-around" mt={2}>
           <Tooltip title="Edit Student">
