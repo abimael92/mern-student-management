@@ -32,13 +32,18 @@ const StudentForm = () => {
   }, [id]);
 
   const handleSubmit = (values) => {
-    console.log('val', values);
     if (id) {
-      dispatch(updateStudent(id, values)); // Update student
+      dispatch(updateStudent(id, values)).then(() => {
+        // Refresh the student list after update
+        dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
+      });
     } else {
-      dispatch(addStudent(values, setLoading, handleClose)); // Add new student
+      dispatch(addStudent(values)).then(() => {
+        // Refresh the student list after adding
+        dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
+      });
     }
-    navigate('/students'); // Updated navigation
+    navigate('/students');
   };
 
   if (id && !student) {
