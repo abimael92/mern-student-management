@@ -28,12 +28,23 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
     age: '',
     grade: '',
     tutor: '',
+    tutorId: '',
     dob: null,
     nationality: '',
     isEnrolled: false,
     emergencyContact: { name: '', relation: '', phone: '' },
     contactInfo: { phone: '', email: '' },
     address: { street: '', city: '', state: '', zipCode: '' },
+    classroomId: '',
+    medicalInfo: {
+      allergies: '',
+      nurseComments: '',
+    },
+    alerts: {
+      behavior: '',
+      academic: '',
+      flag: 'none',
+    },
   });
 
   useEffect(() => {
@@ -45,6 +56,8 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
         age: student.age ?? '',
         grade: student.grade ?? '',
         tutor: student.tutor ?? '',
+        tutorId: student.tutorId ?? '',
+
         dob: student.dob ? new Date(student.dob) : null,
         nationality: student.nationality ?? '',
         isEnrolled: student.isEnrolled ?? false,
@@ -63,6 +76,17 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
           city: student.address?.city ?? '',
           state: student.address?.state ?? '',
           zipCode: student.address?.zipCode ?? '',
+        },
+
+        classroomId: student.classroomId ?? '',
+        medicalInfo: {
+          allergies: student.medicalInfo?.allergies?.join(', ') ?? '',
+          nurseComments: student.medicalInfo?.nurseComments ?? '',
+        },
+        alerts: {
+          behavior: student.alerts?.behavior ?? '',
+          academic: student.alerts?.academic ?? '',
+          flag: student.alerts?.flag ?? 'none',
         },
       });
     }
@@ -297,6 +321,55 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
             />
           </Box>
         );
+      case 4:
+        return (
+          <Box>
+            <TextField
+              label="Behavior Alert"
+              fullWidth
+              margin="normal"
+              value={formData.alerts.behavior}
+              onChange={(e) =>
+                handleChange('alerts', 'behavior', e.target.value)
+              }
+            />
+            <TextField
+              label="Academic Alert"
+              fullWidth
+              margin="normal"
+              value={formData.alerts.academic}
+              onChange={(e) =>
+                handleChange('alerts', 'academic', e.target.value)
+              }
+            />
+            <TextField
+              label="Alert Flag"
+              fullWidth
+              margin="normal"
+              value={formData.alerts.flag}
+              onChange={(e) => handleChange('alerts', 'flag', e.target.value)}
+              placeholder="warning / success / none"
+            />
+            <TextField
+              label="Allergies (comma-separated)"
+              fullWidth
+              margin="normal"
+              value={formData.medicalInfo.allergies}
+              onChange={(e) =>
+                handleChange('medicalInfo', 'allergies', e.target.value)
+              }
+            />
+            <TextField
+              label="Nurse Comments"
+              fullWidth
+              margin="normal"
+              value={formData.medicalInfo.nurseComments}
+              onChange={(e) =>
+                handleChange('medicalInfo', 'nurseComments', e.target.value)
+              }
+            />
+          </Box>
+        );
       default:
         return null;
     }
@@ -311,8 +384,9 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
           <Tab label="Birth Info" />
           <Tab label="Emergency Contact" />
           <Tab label="Contact & Address" />
+          <Tab label="Medical & Alerts" />
         </Tabs>
-        {renderTabPanel()}
+        <Box mt={2}>{renderTabPanel()}</Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
