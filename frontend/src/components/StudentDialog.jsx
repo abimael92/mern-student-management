@@ -370,6 +370,62 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
                 }
               />
             )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setShowNoteFields(true)}
+                disabled={showNoteFields}
+              >
+                Add Note
+              </Button>
+            </Box>
+
+            {showNoteFields && (
+              <>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Alert Flag</InputLabel>
+                  <Select
+                    value={formData.alerts.flag}
+                    onChange={(e) =>
+                      handleChange('alerts', 'flag', e.target.value)
+                    }
+                    label="Alert Flag"
+                  >
+                    <MenuItem value="warning">Warning</MenuItem>
+                    <MenuItem value="success">Success</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {formData.alerts.flag === 'warning' && (
+                  <TextField
+                    label="Behavior Alert"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    value={formData.alerts.behavior}
+                    onChange={(e) =>
+                      handleChange('alerts', 'behavior', e.target.value)
+                    }
+                  />
+                )}
+
+                {formData.alerts.flag === 'success' && (
+                  <TextField
+                    label="Academic Alert"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    value={formData.alerts.academic}
+                    onChange={(e) =>
+                      handleChange('alerts', 'academic', e.target.value)
+                    }
+                  />
+                )}
+              </>
+            )}
           </Box>
         );
       default:
