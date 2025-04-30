@@ -7,23 +7,26 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/', upload.single('file'), async (req, res) => {
-    const file = req.file;
-    // console.log('Recibí un archivo:', file);
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const { originalname, buffer, mimetype } = req.file;
 
     const params = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `students/${Date.now()}_${file.originalname}`,
-        Body: file.buffer,
-        ContentType: file.mimetype
+        Key: `students/${Date.now()}_${originalname}`,
+        Body: buffer,
+        ContentType: mimetype,
     };
 
     try {
         const data = await s3.upload(params).promise();
-        res.json({ url: data.Location });
+        res.status(200).json({ url: data.Location });
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error uploading file');
+        console.error('S3 Upload Error:', error);
+        res.status(500).json({ message: 'Error uploading file', error: error.message });
     }
 });
 
-export default router; // This is key!
+export default router;
