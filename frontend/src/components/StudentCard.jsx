@@ -3,28 +3,27 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Button,
   Typography,
   Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import {
+  ExpandMore as ExpandMoreIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Cancel as CancelIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 
 import defaultProfile from '../assets/profile-default.png';
 import { getPublicUrl } from '../utils/helpers';
 
 const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
-  console.log(student);
-  console.log(student?.profilePicture);
-  if (!student) {
-    return null; // Don't render anything if student data is missing
-  }
+  if (!student) return null; // Don't render if student data is missing
 
   return (
     <Card
@@ -58,45 +57,44 @@ const StudentCard = ({ student, onEdit, onDelete, onToggleStatus }) => {
           {student.isEnrolled ? 'Enrolled' : 'Not Enrolled'}
         </Typography>
 
-        <Box mt={2}>
+        <Box mt={2} display="flex" flexDirection="column" alignItems="center">
           <Typography variant="body2">
             <strong>Grade:</strong> {student.grade}
           </Typography>
           <Typography variant="body2">
             <strong>Age:</strong> {student.age ?? 'N/A'}
           </Typography>
-          <Typography variant="body2">
-            <strong>DOB:</strong> {student.dateOfBirth}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Tutor:</strong> {student.tutor}
-          </Typography>
+          <Accordion sx={{ mt: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle2">More Details</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2">
+                <strong>DOB:</strong> {student.dateOfBirth}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Tutor:</strong> {student.tutor}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Emergency:</strong> {student.emergencyContact?.name} (
+                {student.emergencyContact?.relation})
+              </Typography>
+              <Typography variant="body2">
+                <strong>Phone:</strong> {student.emergencyContact?.phone}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Email:</strong> {student.contactInfo?.email}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Address:</strong> {student.address?.street},{' '}
+                {student.address?.city}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Nationality:</strong> {student.nationality}
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
         </Box>
-
-        <Accordion sx={{ mt: 2 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle2">More Details</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography variant="body2">
-              <strong>Emergency:</strong> {student.emergencyContact?.name} (
-              {student.emergencyContact?.relation})
-            </Typography>
-            <Typography variant="body2">
-              <strong>Phone:</strong> {student.emergencyContact?.phone}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Email:</strong> {student.contactInfo?.email}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Address:</strong> {student.address?.street},{' '}
-              {student.address?.city}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Nationality:</strong> {student.nationality}
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
 
         <Box display="flex" justifyContent="space-around" mt={2}>
           <Tooltip title="Edit Student">
