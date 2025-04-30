@@ -1,4 +1,4 @@
-import { api } from '../../utils/api';  // adjust path if needed
+import { api } from '../../utils/api';
 import {
     FETCH_STUDENTS_REQUEST,
     FETCH_STUDENTS_SUCCESS,
@@ -7,8 +7,13 @@ import {
     UPDATE_STUDENT,
     DELETE_STUDENT,
     UPDATE_STUDENT_STATUS,
+    UPDATE_STUDENT_START,
+    UPDATE_STUDENT_SUCCESS,
+    UPDATE_STUDENT_FAILURE,
+    UPDATE_STUDENT_STATUS_START,
+    UPDATE_STUDENT_STATUS_SUCCESS,
+    UPDATE_STUDENT_STATUS_FAILURE,
 } from '../actionTypes';
-
 
 export const fetchStudents = () => async (dispatch) => {
     dispatch({ type: FETCH_STUDENTS_REQUEST });
@@ -20,23 +25,52 @@ export const fetchStudents = () => async (dispatch) => {
     }
 };
 
-export const addStudent = async (student) => {
-    const response = await axios.post('/api/students', student);
-    return response.data;
-};
+export const addStudent = (studentData) => async (dispatch) => {
+    try {
+        const response = await api.addStudent(studentData);
+        dispatch({ type: ADD_STUDENT, payload: response.data });
+        dispatch(fetchStudents()); // Refresh with full updated list
+    } catch (error) {
+        dispatch({ type: ADD_STUDENT_FAILURE, payload: error.message });
+        console.error('Error adding student:', error);
+    }
 
-
-export const updateStudent = (id, student) => async (dispatch) => {
-    const data = await api.updateStudent(id, student);
-    dispatch({ type: UPDATE_STUDENT, payload: data });
 };
 
 export const deleteStudent = (id) => async (dispatch) => {
-    await api.deleteStudent(id);
-    dispatch({ type: DELETE_STUDENT, payload: id });
+    try {
+        await api.deleteStudent(id);
+        dispatch({ type: DELETE_STUDENT, payload: id });
+        dispatch(fetchStudents()); // Optional: keep list in sync
+    } catch (error) {
+        console.error('Error deleting student:', error);
+    }
 };
 
-export const updateStudentStatus = (id, isEnrolled) => async (dispatch) => {
-    const data = await api.updateStudent(id, { isEnrolled });
-    dispatch({ type: UPDATE_STUDENT_STATUS, payload: data });
+export const updateStudentStatus = (studentId, status) => async (dispatch) => {
+    try {
+        dispatch({ type: UPDATE_STUDENT_STATUS_START });
+        const updatedStudent = await api.updateStudentStatus(studentId, status);
+        dispatch({ type: UPDATE_STUDENT_STATUS_SUCCESS, payload: updatedStudent });
+
+    } catch (error) {
+        dispatch({
+            type: UPDATE_STUDENT_STATUS_FAILURE,
+            payload: error.response?.data?.message || error.message
+        });
+    }
+};
+
+export const updateStudent = (studentData) => async (dispatch) => {
+    try {
+        dispatch({ type: UPDATE_STUDENT_START });
+        const response = await api.updateStudent(studentData);
+        dispatch({ type: UPDATE_STUDENT_SUCCESS, payload: response });
+    } catch (error) {
+        console.error('Error updating student:', error);
+        dispatch({
+            type: UPDATE_STUDENT_FAILURE,
+            payload: error.response?.data?.message || error.message
+        });
+    }
 };
