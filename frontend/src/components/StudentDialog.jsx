@@ -337,53 +337,6 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
       case 4:
         return (
           <Box>
-            <Button variant="outlined" onClick={() => setShowNoteFields(true)}>
-              Add Note
-            </Button>
-
-            {showNoteFields && (
-              <>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Alert Flag</InputLabel>
-                  <Select
-                    value={formData.alerts.flag}
-                    onChange={(e) =>
-                      handleChange('alerts', 'flag', e.target.value)
-                    }
-                    label="Alert Flag"
-                  >
-                    <MenuItem value="none">None</MenuItem>
-                    <MenuItem value="warning">Warning</MenuItem>
-                    <MenuItem value="success">Success</MenuItem>
-                  </Select>
-                </FormControl>
-
-                {(formData.alerts.flag === 'warning' ||
-                  formData.alerts.flag === 'success') && (
-                  <>
-                    <TextField
-                      label="Behavior Alert"
-                      fullWidth
-                      margin="normal"
-                      value={formData.alerts.behavior}
-                      onChange={(e) =>
-                        handleChange('alerts', 'behavior', e.target.value)
-                      }
-                    />
-                    <TextField
-                      label="Academic Alert"
-                      fullWidth
-                      margin="normal"
-                      value={formData.alerts.academic}
-                      onChange={(e) =>
-                        handleChange('alerts', 'academic', e.target.value)
-                      }
-                    />
-                  </>
-                )}
-              </>
-            )}
-
             <FormControlLabel
               control={
                 <Switch
@@ -394,17 +347,19 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
               label="Has Allergies?"
             />
 
-            {hasAllergies ? (
+            {hasAllergies && (
               <TextField
                 label="Allergies (comma-separated)"
                 fullWidth
+                multiline
+                rows={4}
                 margin="normal"
                 value={formData.medicalInfo.allergies}
                 onChange={(e) =>
                   handleChange('medicalInfo', 'allergies', e.target.value)
                 }
               />
-            ) : null}
+            )}
 
             {hasNursePermissions && (
               <TextField
@@ -419,8 +374,65 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
                 }
               />
             )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setShowNoteFields(true)}
+                disabled={showNoteFields}
+              >
+                Add Note
+              </Button>
+            </Box>
+
+            {showNoteFields && (
+              <>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Alert Flag</InputLabel>
+                  <Select
+                    value={formData.alerts.flag}
+                    onChange={(e) =>
+                      handleChange('alerts', 'flag', e.target.value)
+                    }
+                    label="Alert Flag"
+                  >
+                    <MenuItem value="warning">Warning</MenuItem>
+                    <MenuItem value="success">Success</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {formData.alerts.flag === 'warning' && (
+                  <TextField
+                    label="Behavior Alert"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    value={formData.alerts.behavior}
+                    onChange={(e) =>
+                      handleChange('alerts', 'behavior', e.target.value)
+                    }
+                  />
+                )}
+
+                {formData.alerts.flag === 'success' && (
+                  <TextField
+                    label="Academic Alert"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    value={formData.alerts.academic}
+                    onChange={(e) =>
+                      handleChange('alerts', 'academic', e.target.value)
+                    }
+                  />
+                )}
+              </>
+            )}
           </Box>
         );
+
       default:
         return null;
     }
