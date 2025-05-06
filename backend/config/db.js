@@ -1,9 +1,4 @@
 import mongoose from 'mongoose';
-import logger from './logger.js';
-
-const MAX_RETRY_ATTEMPTS = 3;
-const RETRY_DELAY_MS = 5000;
-let connectionAttempts = 0;
 
 mongoose.set('strictQuery', true);
 
@@ -25,7 +20,7 @@ const connectDB = async () => {
         console.log('MongoDB Connected:', conn.connection.host);
     } catch (error) {
         console.error('DB Error:', error);
-        process.exit(1);  // Exit process with failure
+        process.exit(1);
     }
 };
 
