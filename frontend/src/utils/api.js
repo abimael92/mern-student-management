@@ -30,9 +30,6 @@ export const api = {
         return res.json();
     },
 
-
-
-
     updateStudentStatus: async (studentId, status) => {
         try {
             const response = await fetch(`${BASE}/api/students/${studentId}/status`, {
@@ -52,10 +49,47 @@ export const api = {
         }
     },
 
-
-
     deleteStudent: async (id) => {
         const res = await fetch(`${BASE}/api/students/${id}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // === TEACHER CRUD ===
+    fetchTeachers: async () => {
+        console.log('fetrching teachers');
+        console.log('BASE URL:', BASE, '/api/teachers');
+
+        const res = await fetch(`${BASE}/api/teachers`);
+        console.log(res);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    addTeacher: async (data) => {
+        const res = await fetch(`${BASE}/api/teachers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    updateTeacher: async (teacher) => {
+        const res = await fetch(`${BASE}/api/teachers/${teacher.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(teacher),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    deleteTeacher: async (id) => {
+        const res = await fetch(`${BASE}/api/teachers/${id}`, {
             method: 'DELETE',
         });
         if (!res.ok) throw new Error(await res.text());
