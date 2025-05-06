@@ -60,7 +60,6 @@ const Header = () => {
       name: 'Teachers',
       path: '/teachers',
       icon: <PeopleIcon />,
-      comingSoon: true,
     },
   ];
 
