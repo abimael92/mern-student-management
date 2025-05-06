@@ -1,4 +1,4 @@
-import logger from '../utils/logger.js';
+import logger from '../utils/loggerts.js';
 
 const globalErrorHandler = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;

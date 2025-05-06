@@ -1,13 +1,14 @@
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { thunk } from 'redux-thunk';
 
-import { combineReducers } from 'redux';
 import { studentReducer } from './reducers/studentReducer';
+import { teacherReducer } from './reducers/teacherReducer';
 
 const rootReducer = combineReducers({
     students: studentReducer,
+    teachers: teacherReducer,
 });
 
-const store = createStore(rootReducer, applyMiddleware(thunk));  // `thunk` should be passed here
+const store = createStore(rootReducer, applyMiddleware(thunk));
 
 export default store;

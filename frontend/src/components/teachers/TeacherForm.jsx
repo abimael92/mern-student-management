@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { TextField, Button, CircularProgress, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addStudent, updateStudent } from '../../redux/actions/studentActions';
+import { addTeacher, updateTeacher } from '../../redux/actions/teacherActions';
 import * as Yup from 'yup';
 import { Formik, Form } from 'formik';
 
-const StudentForm = () => {
+const TeacherForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id } = useParams(); // For editing an existing student
-  const [student, setStudent] = useState(null);
+  const { id } = useParams(); // For editing an existing teacher
+  const [teacher, setStudent] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const validationSchema = Yup.object({
@@ -22,27 +22,31 @@ const StudentForm = () => {
 
   useEffect(() => {
     if (id) {
-      fetch(`/students/${id}`)
+      // Fetch teacher data if editing
+      // Replace with actual API request to fetch teacher
+      fetch(`/teachers/${id}`)
         .then((res) => res.json())
         .then((data) => setStudent(data))
-        .catch((err) => console.error('Error fetching student data:', err));
+        .catch((err) => console.error('Error fetching teacher data:', err));
     }
   }, [id]);
 
   const handleSubmit = (values) => {
     if (id) {
-      dispatch(updateStudent(id, values)).then(() => {
-        dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
+      dispatch(updateTeacher(id, values)).then(() => {
+        // Refresh the teacher list after update
+        dispatch(fetchTeacherList()); // Assuming you have a fetchStudentList action
       });
     } else {
-      dispatch(addStudent(values)).then(() => {
-        dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
+      dispatch(addTeacher(values)).then(() => {
+        // Refresh the teacher list after adding
+        dispatch(fetchTeacherList()); // Assuming you have a fetchStudentList action
       });
     }
-    navigate('/students');
+    navigate('/teachers');
   };
 
-  if (id && !student) {
+  if (id && !teacher) {
     return (
       <div className="text-center">
         <CircularProgress />
@@ -58,8 +62,8 @@ const StudentForm = () => {
       <Formik
         enableReinitialize
         initialValues={{
-          firstName: student?.firstName || '',
-          age: student?.age || '',
+          firstName: teacher?.firstName || '',
+          age: teacher?.age || '',
         }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
@@ -107,4 +111,4 @@ const StudentForm = () => {
   );
 };
 
-export default StudentForm;
+export default TeacherForm;

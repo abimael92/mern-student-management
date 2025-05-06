@@ -1,158 +1,156 @@
-import Student from '../../models/student.schema';
-import ApiFeatures from '../../utils/apiFeatures';
-import AppError from '../../utils/appError';
-import responseHandler from '../../utils/responseHandler';
-import { generateStudentNumber } from '../../services/studentNumber.service';
-import logger from '../../config/logger';
+import mongoose from 'mongoose';
+import { validationResult } from 'express-validator';
+import Student from '../../models/student.schema.js';
+import { generateStudentNumber } from '../../services/studentNumber.service.js';
 
-export const createStudent = async (req, res, next) => {
+// ----- READ -----
+
+// GET /students
+export const getStudents = async (req, res) => {
     try {
-        // Ensure required fields are present
-        if (!req.body.firstName || !req.body.lastName) {
-            throw new AppError('First name and last name are required', 400);
-        }
-
-        const studentData = {
-            ...req.body,
-            studentNumber: await generateStudentNumber(),
-            // Ensure defaults are maintained for optional fields
-            contactInfo: {
-                phone: req.body.contactInfo?.phone || 'N/A',
-                email: req.body.contactInfo?.email || 'N/A',
-            },
-            emergencyContact: {
-                name: req.body.emergencyContact?.name || 'N/A',
-                relation: req.body.emergencyContact?.relation || 'N/A',
-                phone: req.body.emergencyContact?.phone || 'N/A'
-            }
-        };
-
-        const student = await Student.create(studentData);
-
-        logger.info(`Student created: ${student.studentNumber}`);
-        responseHandler(res, 201, {
-            ...student.toObject(),
-            fullName: student.fullName // Include virtual field
-        });
+        const students = await Student.find().select('-__v').lean();
+        res.status(200).json(students);
     } catch (error) {
-        logger.error(`Student creation failed: ${error.message}`);
-        next(error);
+        console.error("DB Error:", error);
+        res.status(500).json({ error: error.message });
     }
 };
 
-export const getAllStudents = async (req, res, next) => {
+// GET /students/lastStudentNumber
+export const getLastStudentNumber = async (req, res) => {
     try {
-        const features = new ApiFeatures(Student.find(), req.query)
-            .filter()
-            .sort()
-            .limitFields()
-            .paginate();
+        const currentYear = new Date().getFullYear();
+        const prefix = `ST${currentYear}`;
+        const lastStudent = await Student.find({
+            studentNumber: { $regex: `^${prefix}` }
+        }).sort({ studentNumber: -1 }).limit(1);
 
-        const students = await features.query;
+        let nextNumber = 1;
+        if (lastStudent.length > 0) {
+            const lastNum = parseInt(lastStudent[0].studentNumber.split('-')[1], 10);
+            nextNumber = lastNum + 1;
+        }
 
-        // Map students to include virtual fields
-        const studentsWithVirtuals = students.map(student => ({
-            ...student.toObject(),
-            fullName: student.fullName
-        }));
-
-        responseHandler(res, 200, {
-            results: students.length,
-            students: studentsWithVirtuals
-        });
+        const nextStudentNumber = `${prefix}-${nextNumber.toString().padStart(3, '0')}`;
+        res.status(200).json({ studentNumber: nextStudentNumber });
     } catch (error) {
-        logger.error(`Get all students failed: ${error.message}`);
-        next(error);
+        console.error("Error generating student number:", error);
+        res.status(500).json({ error: "Failed to generate student number" });
     }
 };
 
-export const getStudent = async (req, res, next) => {
+// ----- CREATE -----
+// POST /students
+export const createStudent = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {
+        firstName, lastName, profilePicture, age, grade, tutor, emergencyContact,
+        dateOfBirth, nationality, contactInfo, address, isEnrolled
+    } = req.body;
+
     try {
-        const student = await Student.findById(req.params.id);
+        const studentNumber = await generateStudentNumber();
 
-        if (!student) {
-            logger.warn(`Student not found: ${req.params.id}`);
-            return next(new AppError('No student found with that ID', 404));
-        }
-
-        responseHandler(res, 200, {
-            ...student.toObject(),
-            fullName: student.fullName
+        const newStudent = new Student({
+            studentNumber,
+            firstName,
+            lastName,
+            profilePicture,
+            age,
+            grade,
+            tutor,
+            emergencyContact,
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+            nationality,
+            contactInfo,
+            address,
+            isEnrolled,
+            enrollmentDate: new Date(),
         });
+
+        await newStudent.save();
+        res.status(201).json({ message: 'Student created successfully', student: newStudent });
     } catch (error) {
-        logger.error(`Get student failed: ${error.message}`);
-        next(error);
+        console.error("Error creating student:", error);
+        res.status(500).json({ error: 'There was an error creating the student.' });
     }
 };
 
-export const updateStudent = async (req, res, next) => {
-    try {
-        // Prevent updating studentNumber
-        if (req.body.studentNumber) {
-            delete req.body.studentNumber;
-        }
+// ----- UPDATE -----
+export const updateStudent = async (req, res) => {
+    const { id: studentId } = req.params;
 
-        const student = await Student.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true,
-            }
+
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+        return res.status(400).json({ message: 'Invalid student ID' });
+    }
+
+    try {
+        const updatedStudent = await Student.findByIdAndUpdate(studentId, req.body, { new: true });
+        if (!updatedStudent) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        res.json(updatedStudent);
+    } catch (err) {
+        console.error('Error updating student:', err);
+        res.status(500).json({ message: 'Error updating student' });
+    }
+};
+
+
+// PATCH /students/:id/status
+export const updateStudentStatus = async (req, res) => {
+    const { id } = req.params;
+    const { isEnrolled } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid student ID format' });
+    }
+
+    try {
+        const updatedStudent = await Student.findByIdAndUpdate(
+            id,
+            { isEnrolled },
+            { new: true }
         );
 
-        if (!student) {
-            logger.warn(`Student update failed - not found: ${req.params.id}`);
-            return next(new AppError('No student found with that ID', 404));
+        if (!updatedStudent) {
+            return res.status(404).json({ message: 'Student not found' });
         }
 
-        logger.info(`Student updated: ${student.studentNumber}`);
-        responseHandler(res, 200, {
-            ...student.toObject(),
-            fullName: student.fullName
-        });
+        res.status(200).json(updatedStudent);
     } catch (error) {
-        logger.error(`Student update failed: ${error.message}`);
-        next(error);
+        console.error('Error updating student status:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
-export const deleteStudent = async (req, res, next) => {
-    try {
-        const student = await Student.findByIdAndDelete(req.params.id);
+// ----- DELETE -----
+export const deleteStudent = async (req, res) => {
+    const { id } = req.params;
 
-        if (!student) {
-            logger.warn(`Student delete failed - not found: ${req.params.id}`);
-            return next(new AppError('No student found with that ID', 404));
-        }
-
-        logger.info(`Student deleted: ${student.studentNumber}`);
-        responseHandler(res, 204, null);
-    } catch (error) {
-        logger.error(`Student delete failed: ${error.message}`);
-        next(error);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid student ID format' });
     }
-};
 
-export const toggleEnrollmentStatus = async (req, res, next) => {
     try {
-        const student = await Student.findById(req.params.id);
+        const deletedStudent = await Student.findByIdAndDelete(id);
 
-        if (!student) {
-            logger.warn(`Enrollment toggle failed - student not found: ${req.params.id}`);
-            return next(new AppError('No student found with that ID', 404));
+        if (!deletedStudent) {
+            return res.status(404).json({ message: `Student with ID ${id} not found` });
         }
 
-        student.isEnrolled = !student.isEnrolled;
-        await student.save();
-
-        logger.info(`Enrollment status toggled for: ${student.studentNumber} to ${student.isEnrolled}`);
-        responseHandler(res, 200, {
-            status: 'success',
-            isEnrolled: student.isEnrolled
-        });
+        res.status(200).json({ message: `Successfully deleted student with ID ${id}` });
     } catch (error) {
-        logger.error(`Enrollment toggle failed: ${error.message}`);
-        next(error);
+        logger.error(`Error deleting student with ID ${id}: ${error.message}`, {
+            method: req.method,
+            route: req.originalUrl,
+            params: req.params
+        });
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
