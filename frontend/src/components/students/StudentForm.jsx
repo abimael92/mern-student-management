@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { TextField, Button, CircularProgress, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addStudent, updateStudent } from '../redux/actions/studentActions';
+import { addStudent, updateStudent } from '../../redux/actions/studentActions';
 import * as Yup from 'yup';
 import { Formik, Form } from 'formik';
 
@@ -32,13 +32,18 @@ const StudentForm = () => {
   }, [id]);
 
   const handleSubmit = (values) => {
-    console.log('val', values);
     if (id) {
-      dispatch(updateStudent(id, values)); // Update student
+      dispatch(updateStudent(id, values)).then(() => {
+        // Refresh the student list after update
+        dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
+      });
     } else {
-      dispatch(addStudent(values, setLoading, handleClose)); // Add new student
+      dispatch(addStudent(values)).then(() => {
+        // Refresh the student list after adding
+        dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
+      });
     }
-    navigate('/students'); // Updated navigation
+    navigate('/students');
   };
 
   if (id && !student) {

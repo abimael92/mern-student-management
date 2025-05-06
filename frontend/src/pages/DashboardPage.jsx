@@ -1,13 +1,13 @@
 import React from 'react';
 import { Grid, Box, Typography } from '@mui/material';
-import StatsCard from '../components/dashboardSections/StatsCard';
-import UpcomingEvents from '../components/dashboardSections/UpcomingEvents';
-import QuickActions from '../components/dashboardSections/QuickActions';
-import NotificationsList from '../components/dashboardSections/NotificationsList';
-import DashboardCalendar from '../components/dashboardSections/DashboardCalendar';
-import PerfectAttendance from '../components/dashboardSections/PerfectAttendance';
-import HonorsLeaderboard from '../components/dashboardSections/HonorsLeaderboard';
-import TeacherPerformance from '../components/dashboardSections/TeacherPerformance';
+import StatsCard from '../components/dashboard/StatsCard';
+import UpcomingEvents from '../components/dashboard/UpcomingEvents';
+import QuickActions from '../components/dashboard/QuickActions';
+import NotificationsList from '../components/dashboard/NotificationsList';
+import DashboardCalendar from '../components/dashboard/DashboardCalendar';
+import PerfectAttendance from '../components/dashboard/PerfectAttendance';
+import HonorsLeaderboard from '../components/dashboard/HonorsLeaderboard';
+import TeacherPerformance from '../components/dashboard/TeacherPerformance';
 
 const Dashboard = () => {
   const studentsData = {

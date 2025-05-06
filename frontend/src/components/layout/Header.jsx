@@ -10,28 +10,28 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Tooltip,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import SchoolIcon from '@mui/icons-material/School'; // School icon
-import HomeIcon from '@mui/icons-material/Home'; // Home icon
-import PeopleIcon from '@mui/icons-material/People'; // Students icon
-import DashboardIcon from '@mui/icons-material/Dashboard'; // Dashboard icon
-import MenuIcon from '@mui/icons-material/Menu'; // Menu icon for mobile
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // User Profile icon
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'; // Library icon
-import LocalShippingIcon from '@mui/icons-material/LocalShipping'; // Transport icon
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined'; // Academics icon
-import ReceiptIcon from '@mui/icons-material/Receipt'; // Fees icon
-import AssessmentIcon from '@mui/icons-material/Assessment'; // Reports icon
-import Tooltip from '@mui/material/Tooltip';
+import SchoolIcon from '@mui/icons-material/School';
+import HomeIcon from '@mui/icons-material/Home';
+import PeopleIcon from '@mui/icons-material/People';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const Header = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Check for mobile view
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [anchorEl, setAnchorEl] = useState(null); // State for the menu
-  const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category
+  const [anchorEl, setAnchorEl] = useState(null); // Track Selected Category
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const openMenu = Boolean(anchorEl);
 
   const handleMenuClick = (event, category) => {
@@ -109,17 +109,15 @@ const Header = () => {
     { name: 'Academics & Attendance', items: academicsAttendanceItems },
     { name: 'Financial & Logistics', items: financialLogisticsItems },
     { name: 'Resources & Facilities', items: resourcesFacilitiesItems },
-    { name: 'User', items: userMenuItems },
   ];
 
   return (
     <>
-      {/* Header Section */}
       <AppBar
         position="sticky"
         sx={{
           backgroundColor: theme.palette.primary.main,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', // Subtle shadow
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         }}
       >
         <Toolbar
@@ -140,7 +138,7 @@ const Header = () => {
               to="/"
               sx={{
                 '&:hover': {
-                  transform: 'scale(1.1)', // Add hover animation
+                  transform: 'scale(1.1)',
                   transition: 'transform 0.3s ease',
                 },
               }}
@@ -162,7 +160,7 @@ const Header = () => {
           {/* User Profile */}
           <IconButton
             color="inherit"
-            onClick={(e) => handleMenuClick(e, 'User')}
+            onClick={(event) => handleMenuClick(event, 'User')}
             sx={{
               '&:hover': {
                 transform: 'scale(1.1)',
@@ -175,7 +173,6 @@ const Header = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Navbar Section Below Header */}
       <AppBar
         position="sticky"
         sx={{
@@ -192,12 +189,7 @@ const Header = () => {
           }}
         >
           {!isMobile && (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: '16px',
-              }}
-            >
+            <Box sx={{ display: 'flex', gap: '16px' }}>
               <Button
                 color="inherit"
                 component={Link}
@@ -213,7 +205,6 @@ const Header = () => {
               >
                 Home
               </Button>
-
               {/* Loop through categories and render buttons */}
               {categories.map((category) => (
                 <Button
@@ -261,32 +252,48 @@ const Header = () => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        {selectedCategory &&
-          categories
-            .filter((category) => category.name === selectedCategory)
-            .map((category) => (
-              <Box key={category.name}>
-                <Typography sx={{ padding: '8px 16px', fontWeight: 'bold' }}>
-                  {category.name}
-                </Typography>
-                {category.items.map((item) =>
-                  item.comingSoon ? (
-                    <Tooltip key={item.name} title="Coming Soon">
-                      <span>
-                        <MenuItem disabled sx={{ opacity: 0.5 }}>
-                          {item.icon} {item.name}
-                        </MenuItem>
-                      </span>
-                    </Tooltip>
-                  ) : (
-                    <MenuItem key={item.name} component={Link} to={item.path}>
-                      {item.icon} {item.name}
-                    </MenuItem>
-                  )
-                )}
-                <Divider />
-              </Box>
-            ))}
+        {selectedCategory === 'User'
+          ? userMenuItems.map((item) => (
+              <MenuItem
+                key={item.name}
+                component={Link}
+                to={item.path}
+                onClick={handleMenuClose}
+              >
+                {item.icon} {item.name}
+              </MenuItem>
+            ))
+          : selectedCategory &&
+            categories
+              .filter((category) => category.name === selectedCategory)
+              .map((category) => (
+                <Box key={category.name}>
+                  <Typography sx={{ padding: '8px 16px', fontWeight: 'bold' }}>
+                    {category.name}
+                  </Typography>
+                  {category.items.map((item) =>
+                    item.comingSoon ? (
+                      <Tooltip key={item.name} title="Coming Soon">
+                        <span>
+                          <MenuItem disabled sx={{ opacity: 0.5 }}>
+                            {item.icon} {item.name}
+                          </MenuItem>
+                        </span>
+                      </Tooltip>
+                    ) : (
+                      <MenuItem
+                        key={item.name}
+                        component={Link}
+                        to={item.path}
+                        onClick={handleMenuClose}
+                      >
+                        {item.icon} {item.name}
+                      </MenuItem>
+                    )
+                  )}
+                  <Divider />
+                </Box>
+              ))}
       </Menu>
     </>
   );

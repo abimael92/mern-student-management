@@ -1,23 +1,27 @@
 import express from "express";
 import {
-    getStudents,
-    createStudent,
-    deleteStudent,
-    getLastStudentNumber,
-    updateStudent,
+    getStudents,             // READ: Get all students
+    getLastStudentNumber,    // READ: Get last student number
+    createStudent,           // CREATE: Add new student
+    updateStudent,           // UPDATE: Update student info
+    updateStudentStatus,     // UPDATE: Toggle enrollment status
+    deleteStudent,           // DELETE: Remove student
 } from "../controllers/student.js";
 
 const router = express.Router();
 
-router.get('/students', getStudents);
+// ----- READ -----
+router.get("/students", getStudents);
+router.get("/students/lastStudentNumber", getLastStudentNumber);
 
+// ----- CREATE -----
+router.post("/students", createStudent);
 
-router.post('/students', createStudent);
-router.get('/students/lastStudentNumber', getLastStudentNumber);
+// ----- UPDATE -----
+router.put("/students/:id", updateStudent);
+router.patch("/students/:id/status", updateStudentStatus);
 
-router.put('/students/:id', updateStudent);
-
-router.delete('/students/:id', deleteStudent);
-
+// ----- DELETE -----
+router.delete("/students/:id", deleteStudent);
 
 export default router;

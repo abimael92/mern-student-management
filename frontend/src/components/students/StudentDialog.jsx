@@ -16,135 +16,131 @@ import {
   Select,
   MenuItem,
   Switch,
-  FormControlLabel, //
+  FormControlLabel,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { api } from '../utils/api';
-import { getPublicUrl } from '../utils/helpers';
+import { api } from '../../utils/api';
 import { useDispatch } from 'react-redux';
-import { addStudent, updateStudent } from '../redux/actions/studentActions';
+import { addStudent, updateStudent } from '../../redux/actions/studentActions';
+
+const initialFormData = {
+  firstName: '',
+  lastName: '',
+  profilePicture: '',
+  age: '',
+  grade: '',
+  tutor: '',
+  tutorId: '',
+  dob: null,
+  nationality: '',
+  isEnrolled: false,
+  emergencyContact: { name: '', relation: '', phone: '' },
+  contactInfo: { phone: '', email: '' },
+  address: { street: '', city: '', state: '', zipCode: '' },
+  classroomId: '',
+  medicalInfo: {
+    allergies: '',
+    nurseComments: '',
+  },
+  alerts: {
+    behavior: '',
+    academic: '',
+    flag: 'none',
+  },
+};
 
 const StudentDialog = ({ open, onClose, student = {} }) => {
   const dispatch = useDispatch();
   const [tab, setTab] = useState(0);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    profilePicture: '',
-    age: '',
-    grade: '',
-    tutor: '',
-    tutorId: '',
-    dob: null,
-    nationality: '',
-    isEnrolled: false,
-    emergencyContact: { name: '', relation: '', phone: '' },
-    contactInfo: { phone: '', email: '' },
-    address: { street: '', city: '', state: '', zipCode: '' },
-    classroomId: '',
-    medicalInfo: {
-      allergies: '',
-      nurseComments: '',
-    },
-    alerts: {
-      behavior: '',
-      academic: '',
-      flag: 'none',
-    },
-  });
-
+  const [formData, setFormData] = useState(initialFormData);
   const [showNoteFields, setShowNoteFields] = useState(false);
   const [hasAllergies, setHasAllergies] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  // const { role } = useSelector((state) => state.auth.user); // Assuming you have user info in your redux store
-  // const hasNursePermissions = role === 'nurse';
   const hasNursePermissions = false;
 
   useEffect(() => {
-    if (student && Object.keys(student).length) {
+    if (student && open) {
       setFormData({
-        firstName: student.firstName ?? '',
-        lastName: student.lastName ?? '',
-        profilePicture: student.profilePicture ?? '',
-        age: student.age ?? '',
-        grade: student.grade ?? '',
-        tutor: student.tutor ?? '',
-        tutorId: student.tutorId ?? '',
-
+        ...initialFormData,
+        ...student,
         dob: student.dob ? new Date(student.dob) : null,
-        nationality: student.nationality ?? '',
-        isEnrolled: student.isEnrolled ?? false,
-        emergencyContact: {
-          name: student.emergencyContact?.name ?? '',
-          relation: student.emergencyContact?.relation ?? '',
-          phone: student.emergencyContact?.phone ?? '',
-        },
-        contactInfo: {
-          phoneNumber: student.contactInfo?.phoneNumber ?? '',
-          email: student.contactInfo?.email ?? '',
-        },
-
-        address: {
-          street: student.address?.street ?? '',
-          city: student.address?.city ?? '',
-          state: student.address?.state ?? '',
-          zipCode: student.address?.zipCode ?? '',
-        },
-
-        classroomId: student.classroomId ?? '',
         medicalInfo: {
           allergies: student.medicalInfo?.allergies?.join(', ') ?? '',
           nurseComments: student.medicalInfo?.nurseComments ?? '',
         },
-        alerts: {
-          behavior: student.alerts?.behavior ?? '',
-          academic: student.alerts?.academic ?? '',
-          flag: student.alerts?.flag ?? 'none',
-        },
       });
+      setHasAllergies(!!student.medicalInfo?.allergies?.length);
+    } else if (!open) {
+      setFormData(initialFormData);
+      setShowNoteFields(false);
+      setHasAllergies(false);
+      setError(null);
     }
-  }, [student]);
+  }, [student, open]);
 
   const handleChange = (section, key, value) => {
-    if (section) {
+    if (!section) {
+      setFormData((prev) => ({ ...prev, [key]: value }));
+    } else {
       setFormData((prev) => ({
         ...prev,
-        [section]: { ...prev[section], [key]: value },
+        [section]: {
+          ...prev[section],
+          [key]: value,
+        },
       }));
-    } else {
-      setFormData((prev) => ({ ...prev, [key]: value }));
     }
   };
 
   const handleImageUpload = async (file) => {
-    console.log('i got image: ', file);
     try {
       const uploadedUrl = await api.uploadImage(file);
-      console.log('Image uploaded: ', uploadedUrl);
       if (uploadedUrl) {
-        console.log('Image uploaded successfully: ', uploadedUrl);
-        handleChange(null, 'profilePicture', uploadedUrl); // Update picture field
-      } else {
-        console.error('Uploaded URL is undefined or invalid.');
+        handleChange(null, 'profilePicture', uploadedUrl);
       }
     } catch (error) {
       console.error('Image upload failed:', error);
+      setError('Image upload failed. Please try again.');
     }
   };
 
-  const handleSave = () => {
-    console.log('profilePicture: ', formData.profilePicture);
-    const studentData = { ...formData }; // no need to manually assign picture
-    // if (!studentData.picture) {
-    //   delete studentData.picture; // if no picture, remove it
-    // }
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    setError(null);
 
-    if (student?._id) {
-      dispatch(updateStudent(student._id, studentData));
-    } else {
-      dispatch(addStudent(studentData));
+    try {
+      console.log('Student ID:', student._id);
+
+      const studentData = {
+        ...formData,
+        medicalInfo: {
+          ...formData.medicalInfo,
+          allergies: hasAllergies
+            ? formData.medicalInfo.allergies.split(',').map((a) => a.trim())
+            : [],
+        },
+      };
+
+      if (student?._id) {
+        await dispatch(
+          updateStudent({
+            id: student._id,
+            studentData,
+          })
+        );
+      } else {
+        await dispatch(addStudent(studentData));
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error saving student:', error);
+      setError(error.message || 'Failed to save student');
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   const renderTabPanel = () => {
@@ -286,9 +282,9 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
               label="Phone Number"
               fullWidth
               margin="normal"
-              value={formData.contactInfo.phoneNumber}
+              value={formData.contactInfo.phone}
               onChange={(e) =>
-                handleChange('contactInfo', 'phoneNumber', e.target.value)
+                handleChange('contactInfo', 'phone', e.target.value)
               }
             />
             <TextField
@@ -432,28 +428,35 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
             )}
           </Box>
         );
-
       default:
         return null;
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={onClose} fullWidth>
       <DialogTitle>{student?._id ? 'Edit Student' : 'Add Student'}</DialogTitle>
       <DialogContent>
-        <Tabs value={tab} onChange={(e, newTab) => setTab(newTab)}>
+        <Tabs value={tab} onChange={(_, newTab) => setTab(newTab)}>
           <Tab label="Basic Info" />
-          <Tab label="Birth Info" />
+          <Tab label="Personal Info" />
           <Tab label="Emergency Contact" />
-          <Tab label="Contact & Address" />
-          <Tab label="Medical & Alerts" />
+          <Tab label="Address" />
+          <Tab label="Medical Info" />
         </Tabs>
-        <Box mt={2}>{renderTabPanel()}</Box>
+        {renderTabPanel()}
+        {error && <Typography color="error">{error}</Typography>}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSave}>
+        <Button onClick={onClose} color="secondary" disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+          disabled={isSubmitting}
+        >
           Save
         </Button>
       </DialogActions>

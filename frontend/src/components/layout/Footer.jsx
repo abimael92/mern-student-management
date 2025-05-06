@@ -2,9 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Typography, Grid } from '@mui/material';
 import { motion } from 'framer-motion';
-import githubIcon from '../assets/socialmedia/github-icon.svg';
-import linkedinIcon from '../assets/socialmedia/linkedin-icon.svg';
-import twitterIcon from '../assets/socialmedia/twitter-icon.svg';
+import githubIcon from '../../assets/socialmedia/github-icon.svg';
+import linkedinIcon from '../../assets/socialmedia/linkedin-icon.svg';
+import twitterIcon from '../../assets/socialmedia/twitter-icon.svg';
 import { useTheme } from '@mui/material/styles';
 
 const Footer = () => {
