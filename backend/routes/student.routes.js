@@ -6,7 +6,7 @@ import {
     updateStudent,           // UPDATE: Update student info
     updateStudentStatus,     // UPDATE: Toggle enrollment status
     deleteStudent,           // DELETE: Remove student
-} from "../controllers/student.js";
+} from "../controllers/students/student.controller.js";
 
 const router = express.Router();
 
