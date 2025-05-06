@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import studentRoutes from './routes/student.js';
+import studentRoutes from './routes/student.routes.js';
+import teacherRoutes from './routes/teacher.routes.js';
 import connectDB from './config/db.js';
 import uploadRoutes from './routes/upload.js';  // Use import for consistency
 
@@ -19,7 +20,8 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use('/api', studentRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/teachers', teacherRoutes);
 app.use('/api/upload', uploadRoutes);
 
 
