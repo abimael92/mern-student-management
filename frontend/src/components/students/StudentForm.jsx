@@ -22,8 +22,6 @@ const StudentForm = () => {
 
   useEffect(() => {
     if (id) {
-      // Fetch student data if editing
-      // Replace with actual API request to fetch student
       fetch(`/students/${id}`)
         .then((res) => res.json())
         .then((data) => setStudent(data))
@@ -34,12 +32,10 @@ const StudentForm = () => {
   const handleSubmit = (values) => {
     if (id) {
       dispatch(updateStudent(id, values)).then(() => {
-        // Refresh the student list after update
         dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
       });
     } else {
       dispatch(addStudent(values)).then(() => {
-        // Refresh the student list after adding
         dispatch(fetchStudentList()); // Assuming you have a fetchStudentList action
       });
     }
