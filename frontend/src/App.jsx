@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import StudentForm from './components/StudentForm';
-import StudentList from './components/StudentList';
+import StudentPage from './pages/Students/StudentPage';
+import StudentForm from './components/students/StudentForm';
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -34,7 +34,7 @@ const App = () => {
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/students" element={<StudentList />} />
+                  <Route path="/students" element={<StudentPage />} />
                   <Route path="/add-student" element={<StudentForm />} />
                   <Route path="/edit-student/:id" element={<StudentForm />} />
                 </Routes>
