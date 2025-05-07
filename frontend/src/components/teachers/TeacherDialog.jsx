@@ -1,126 +1,107 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography,
   Button,
+  Switch,
+  FormControlLabel,
   Box,
-  Checkbox,
+  Autocomplete,
+  Chip,
+  Typography,
   Tabs,
   Tab,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Switch,
-  FormControlLabel,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { api } from '../../utils/api';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addTeacher, updateTeacher } from '../../redux/actions/teacherActions';
+import { fetchStudents } from '../../redux/actions/studentActions';
+import { api } from '../../utils/api';
 
 const initialFormData = {
   firstName: '',
   lastName: '',
+  email: '',
   profilePicture: '',
-  age: '',
-  grade: '',
-  tutor: '',
-  tutorId: '',
-  dob: null,
-  nationality: '',
-  isEnrolled: false,
-  emergencyContact: { name: '', relation: '', phone: '' },
-  contactInfo: { phone: '', email: '' },
-  address: { street: '', city: '', state: '', zipCode: '' },
-  classroomId: '',
-  medicalInfo: {
-    allergies: '',
-    nurseComments: '',
-  },
-  alerts: {
-    behavior: '',
-    academic: '',
-    flag: 'none',
-  },
+  subjects: [],
+  isActive: true,
+  tutoredStudents: [],
+  qualifications: [],
+  yearsOfExperience: 0,
 };
 
-const TeacherDialog = ({ open, onClose, teacher = {} }) => {
+const TeacherDialog = ({ open, onClose, teacher = null }) => {
   const dispatch = useDispatch();
+  const students = useSelector((state) => state.students.list);
   const [tab, setTab] = useState(0);
   const [formData, setFormData] = useState(initialFormData);
-  const [showNoteFields, setShowNoteFields] = useState(false);
-  const [hasAllergies, setHasAllergies] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  const hasNursePermissions = false;
-
   useEffect(() => {
-    if (teacher && open) {
-      setFormData({
-        ...initialFormData,
-        ...teacher,
-        dob: teacher.dob ? new Date(teacher.dob) : null,
-        medicalInfo: {
-          allergies: teacher.medicalInfo?.allergies?.join(', ') ?? '',
-          nurseComments: teacher.medicalInfo?.nurseComments ?? '',
-        },
-      });
-      setHasAllergies(!!teacher.medicalInfo?.allergies?.length);
-    } else if (!open) {
-      setFormData(initialFormData);
-      setShowNoteFields(false);
-      setHasAllergies(false);
-      setError(null);
+    if (open) {
+      dispatch(fetchStudents());
+      if (teacher) {
+        setFormData({
+          ...initialFormData,
+          ...teacher,
+          tutoredStudents: teacher.tutoredStudents || [],
+        });
+      } else {
+        setFormData(initialFormData);
+      }
     }
-  }, [teacher, open]);
-
-  const handleChange = (section, key, value) => {
-    if (!section) {
-      setFormData((prev) => ({ ...prev, [key]: value }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [key]: value,
-        },
-      }));
-    }
-  };
+  }, [open, teacher, dispatch]);
 
   const handleImageUpload = async (file) => {
     try {
       const uploadedUrl = await api.uploadImage(file);
-      if (uploadedUrl) {
-        handleChange(null, 'profilePicture', uploadedUrl);
-      }
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      setError('Image upload failed. Please try again.');
+      setFormData((prev) => ({ ...prev, profilePicture: uploadedUrl }));
+    } catch (err) {
+      setError('Image upload failed');
+      console.error('Upload error:', err);
     }
   };
 
-  const handleSave = async () => {
+  const handleAddStudent = (studentId) => {
+    if (!formData.tutoredStudents.includes(studentId)) {
+      setFormData((prev) => ({
+        ...prev,
+        tutoredStudents: [...prev.tutoredStudents, studentId],
+      }));
+    }
+  };
+
+  const handleRemoveStudent = (studentId) => {
+    setFormData((prev) => ({
+      ...prev,
+      tutoredStudents: prev.tutoredStudents.filter((id) => id !== studentId),
+    }));
+  };
+
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
 
     try {
-      console.log('Student ID:', teacher._id);
-
       const teacherData = {
-        ...formData,
-        medicalInfo: {
-          ...formData.medicalInfo,
-          allergies: hasAllergies
-            ? formData.medicalInfo.allergies.split(',').map((a) => a.trim())
-            : [],
-        },
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        profilePicture: formData.profilePicture,
+        subjects: formData.subjects,
+        isActive: formData.isActive,
+        qualifications: formData.qualifications,
+        yearsOfExperience: Number(formData.yearsOfExperience),
+        tutoredStudents: formData.tutoredStudents.map((id) =>
+          typeof id === 'object' ? id._id : id
+        ),
       };
 
       if (teacher?._id) {
@@ -133,19 +114,24 @@ const TeacherDialog = ({ open, onClose, teacher = {} }) => {
       } else {
         await dispatch(addTeacher(teacherData));
       }
-
       onClose();
-    } catch (error) {
-      console.error('Error saving teacher:', error);
-      setError(error.message || 'Failed to save teacher');
+    } catch (err) {
+      setError(
+        err.response?.data?.message || err.message || 'Failed to save teacher'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const availableStudents =
+    students?.filter(
+      (student) => !formData.tutoredStudents.includes(student._id)
+    ) || [];
+
   const renderTabPanel = () => {
     switch (tab) {
-      case 0:
+      case 0: // Basic Info
         return (
           <Box>
             <TextField
@@ -153,311 +139,199 @@ const TeacherDialog = ({ open, onClose, teacher = {} }) => {
               fullWidth
               margin="normal"
               value={formData.firstName}
-              onChange={(e) => handleChange(null, 'firstName', e.target.value)}
+              onChange={(e) =>
+                setFormData({ ...formData, firstName: e.target.value })
+              }
+              required
             />
             <TextField
               label="Last Name"
               fullWidth
               margin="normal"
               value={formData.lastName}
-              onChange={(e) => handleChange(null, 'lastName', e.target.value)}
-            />
-            <Box mt={2}>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    await handleImageUpload(file);
-                  }
-                }}
-                style={{ display: 'none' }}
-                id="upload-image"
-              />
-              <label htmlFor="upload-image">
-                <Button variant="contained" component="span">
-                  Upload Headshot
-                </Button>
-              </label>
-              {formData.profilePicture && (
-                <img
-                  src={formData.profilePicture}
-                  alt={formData.firstName}
-                  style={{ width: '100px', height: '100px', marginTop: '10px' }}
-                />
-              )}
-            </Box>
-            <TextField
-              label="Age"
-              fullWidth
-              margin="normal"
-              type="number"
-              value={formData.age}
-              onChange={(e) => handleChange(null, 'age', e.target.value)}
-            />
-            <TextField
-              label="Grade"
-              fullWidth
-              margin="normal"
-              value={formData.grade}
-              onChange={(e) => handleChange(null, 'grade', e.target.value)}
-            />
-            <TextField
-              label="Tutor"
-              fullWidth
-              margin="normal"
-              value={formData.tutor}
-              onChange={(e) => handleChange(null, 'tutor', e.target.value)}
-            />
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-              <Checkbox
-                checked={formData.isEnrolled}
-                onChange={(e) =>
-                  handleChange(null, 'isEnrolled', e.target.checked)
-                }
-              />
-              <Typography>Enrolled</Typography>
-            </Box>
-          </Box>
-        );
-      case 1:
-        return (
-          <Box>
-            <DatePicker
-              label="Date of Birth"
-              value={formData.dob}
-              onChange={(date) => handleChange(null, 'dob', date)}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth margin="normal" />
-              )}
-            />
-            <TextField
-              label="Nationality"
-              fullWidth
-              margin="normal"
-              value={formData.nationality}
               onChange={(e) =>
-                handleChange(null, 'nationality', e.target.value)
+                setFormData({ ...formData, lastName: e.target.value })
               }
-            />
-          </Box>
-        );
-      case 2:
-        return (
-          <Box>
-            <TextField
-              label="Emergency Contact Name"
-              fullWidth
-              margin="normal"
-              value={formData.emergencyContact.name}
-              onChange={(e) =>
-                handleChange('emergencyContact', 'name', e.target.value)
-              }
-            />
-            <TextField
-              label="Relation"
-              fullWidth
-              margin="normal"
-              value={formData.emergencyContact.relation}
-              onChange={(e) =>
-                handleChange('emergencyContact', 'relation', e.target.value)
-              }
-            />
-            <TextField
-              label="Phone"
-              fullWidth
-              margin="normal"
-              value={formData.emergencyContact.phone}
-              onChange={(e) =>
-                handleChange('emergencyContact', 'phone', e.target.value)
-              }
-            />
-          </Box>
-        );
-      case 3:
-        return (
-          <Box>
-            <TextField
-              label="Phone Number"
-              fullWidth
-              margin="normal"
-              value={formData.contactInfo.phone}
-              onChange={(e) =>
-                handleChange('contactInfo', 'phone', e.target.value)
-              }
+              required
             />
             <TextField
               label="Email"
               fullWidth
               margin="normal"
-              value={formData.contactInfo.email}
+              type="email"
+              value={formData.email}
               onChange={(e) =>
-                handleChange('contactInfo', 'email', e.target.value)
+                setFormData({ ...formData, email: e.target.value })
               }
+              required
             />
-            <TextField
-              label="Street"
-              fullWidth
-              margin="normal"
-              value={formData.address.street}
-              onChange={(e) =>
-                handleChange('address', 'street', e.target.value)
-              }
-            />
-            <TextField
-              label="City"
-              fullWidth
-              margin="normal"
-              value={formData.address.city}
-              onChange={(e) => handleChange('address', 'city', e.target.value)}
-            />
-            <TextField
-              label="State"
-              fullWidth
-              margin="normal"
-              value={formData.address.state}
-              onChange={(e) => handleChange('address', 'state', e.target.value)}
-            />
-            <TextField
-              label="Zip Code"
-              fullWidth
-              margin="normal"
-              value={formData.address.zipCode}
-              onChange={(e) =>
-                handleChange('address', 'zipCode', e.target.value)
-              }
-            />
+            <Box sx={{ mt: 2 }}>
+              <input
+                type="file"
+                accept="image/*"
+                id="teacher-upload"
+                hidden
+                onChange={(e) => {
+                  if (e.target.files[0]) handleImageUpload(e.target.files[0]);
+                }}
+              />
+              <label htmlFor="teacher-upload">
+                <Button variant="contained" component="span">
+                  Upload Profile Picture
+                </Button>
+              </label>
+              {formData.profilePicture && (
+                <Box sx={{ mt: 1 }}>
+                  <img
+                    src={formData.profilePicture}
+                    alt="Teacher"
+                    style={{ maxWidth: 100, maxHeight: 100 }}
+                  />
+                </Box>
+              )}
+            </Box>
           </Box>
         );
-      case 4:
+
+      case 1: // Subjects & Qualifications
         return (
           <Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={hasAllergies}
-                  onChange={(e) => setHasAllergies(e.target.checked)}
-                />
+            <Autocomplete
+              multiple
+              options={[
+                'Math',
+                'Science',
+                'English',
+                'History',
+                'Art',
+                'Music',
+                'PE',
+                'Computers',
+                'Languages',
+              ]}
+              value={formData.subjects}
+              onChange={(e, newValue) =>
+                setFormData({ ...formData, subjects: newValue })
               }
-              label="Has Allergies?"
+              renderInput={(params) => (
+                <TextField {...params} label="Subjects" margin="normal" />
+              )}
             />
-
-            {hasAllergies && (
-              <TextField
-                label="Allergies (comma-separated)"
-                fullWidth
-                multiline
-                rows={4}
-                margin="normal"
-                value={formData.medicalInfo.allergies}
-                onChange={(e) =>
-                  handleChange('medicalInfo', 'allergies', e.target.value)
-                }
-              />
-            )}
-
-            {hasNursePermissions && (
-              <TextField
-                label="Nurse Comments"
-                fullWidth
-                multiline
-                rows={4}
-                margin="normal"
-                value={formData.medicalInfo.nurseComments}
-                onChange={(e) =>
-                  handleChange('medicalInfo', 'nurseComments', e.target.value)
-                }
-              />
-            )}
-
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={() => setShowNoteFields(true)}
-                disabled={showNoteFields}
-              >
-                Add Note
-              </Button>
-            </Box>
-
-            {showNoteFields && (
-              <>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Alert Flag</InputLabel>
-                  <Select
-                    value={formData.alerts.flag}
-                    onChange={(e) =>
-                      handleChange('alerts', 'flag', e.target.value)
-                    }
-                    label="Alert Flag"
-                  >
-                    <MenuItem value="warning">Warning</MenuItem>
-                    <MenuItem value="success">Success</MenuItem>
-                  </Select>
-                </FormControl>
-
-                {formData.alerts.flag === 'warning' && (
-                  <TextField
-                    label="Behavior Alert"
-                    fullWidth
-                    multiline
-                    rows={4}
-                    margin="normal"
-                    value={formData.alerts.behavior}
-                    onChange={(e) =>
-                      handleChange('alerts', 'behavior', e.target.value)
-                    }
-                  />
-                )}
-
-                {formData.alerts.flag === 'success' && (
-                  <TextField
-                    label="Academic Alert"
-                    fullWidth
-                    multiline
-                    rows={4}
-                    margin="normal"
-                    value={formData.alerts.academic}
-                    onChange={(e) =>
-                      handleChange('alerts', 'academic', e.target.value)
-                    }
-                  />
-                )}
-              </>
-            )}
+            <Autocomplete
+              multiple
+              options={[
+                'Bachelors',
+                'Masters',
+                'PhD',
+                'Teaching Certificate',
+                'Diploma',
+              ]}
+              value={formData.qualifications}
+              onChange={(e, newValue) =>
+                setFormData({ ...formData, qualifications: newValue })
+              }
+              renderInput={(params) => (
+                <TextField {...params} label="Qualifications" margin="normal" />
+              )}
+              sx={{ mt: 2 }}
+            />
+            <TextField
+              label="Years of Experience"
+              type="number"
+              fullWidth
+              margin="normal"
+              value={formData.yearsOfExperience}
+              onChange={(e) =>
+                setFormData({ ...formData, yearsOfExperience: e.target.value })
+              }
+            />
           </Box>
         );
+
+      case 2: // Assigned Students
+        return (
+          <Box>
+            <Typography variant="subtitle1" sx={{ mt: 1 }}>
+              Current Students
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1 }}>
+              {formData.tutoredStudents.map((studentId) => {
+                const student = students?.find((s) => s._id === studentId);
+                return student ? (
+                  <Chip
+                    key={studentId}
+                    label={`${student.firstName} ${student.lastName}`}
+                    onDelete={() => handleRemoveStudent(studentId)}
+                  />
+                ) : null;
+              })}
+            </Box>
+
+            <Autocomplete
+              options={availableStudents}
+              getOptionLabel={(option) =>
+                `${option.firstName} ${option.lastName}`
+              }
+              onChange={(e, newValue) =>
+                newValue && handleAddStudent(newValue._id)
+              }
+              renderInput={(params) => (
+                <TextField {...params} label="Assign Student" margin="normal" />
+              )}
+              fullWidth
+            />
+          </Box>
+        );
+
       default:
         return null;
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth>
-      <DialogTitle>{teacher?._id ? 'Edit Student' : 'Add Student'}</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+      <DialogTitle>{teacher ? 'Edit Teacher' : 'Add New Teacher'}</DialogTitle>
+
       <DialogContent>
-        <Tabs value={tab} onChange={(_, newTab) => setTab(newTab)}>
+        <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
           <Tab label="Basic Info" />
-          <Tab label="Personal Info" />
-          <Tab label="Emergency Contact" />
-          <Tab label="Address" />
-          <Tab label="Medical Info" />
+          <Tab label="Subjects & Qualifications" />
+          <Tab label="Assigned Students" />
         </Tabs>
+
         {renderTabPanel()}
-        {error && <Typography color="error">{error}</Typography>}
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={formData.isActive}
+              onChange={(e) =>
+                setFormData({ ...formData, isActive: e.target.checked })
+              }
+            />
+          }
+          label="Active Teacher"
+          sx={{ mt: 2 }}
+        />
+
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
+        )}
       </DialogContent>
+
       <DialogActions>
-        <Button onClick={onClose} color="secondary" disabled={isSubmitting}>
+        <Button onClick={onClose} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button
-          onClick={handleSave}
+          onClick={handleSubmit}
           color="primary"
           variant="contained"
           disabled={isSubmitting}
         >
-          Save
+          {isSubmitting ? 'Saving...' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
