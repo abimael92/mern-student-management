@@ -1,107 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchTeachers,
-  updateTeacherStatus,
   deleteTeacher,
-  updateTeacher,
+  updateTeacherStatus,
 } from '../../redux/actions/teacherActions';
 import TeacherList from './TeacherList';
 
 const TeacherContainer = () => {
   const dispatch = useDispatch();
-  const { teachers, isLoading, error } = useSelector((state) => state.teachers);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [filters, setFilters] = useState({
-    name: '',
-    clan: '',
-    age: '',
-    grade: '',
-    tutor: '',
-    nationality: '',
+  const { teachers, loading, error } = useSelector((state) => state.teachers);
+  const [filter, setFilter] = useState({
+    search: '',
+    status: 'all',
+    subject: '',
   });
 
   useEffect(() => {
     dispatch(fetchTeachers());
   }, [dispatch]);
 
-  const filteredStudents =
-    teachers?.filter((teacher) => {
-      if (Object.values(filters).every((val) => !val)) return true;
+  const filteredTeachers = teachers.filter((teacher) => {
+    const matchesSearch =
+      filter.search === '' ||
+      teacher.firstName.toLowerCase().includes(filter.search.toLowerCase()) ||
+      teacher.lastName.toLowerCase().includes(filter.search.toLowerCase()) ||
+      teacher.email.toLowerCase().includes(filter.search.toLowerCase());
 
-      const { name, clan, age, grade, tutor, nationality } = filters;
+    const matchesStatus =
+      filter.status === 'all' ||
+      (filter.status === 'active' && teacher.isActive) ||
+      (filter.status === 'inactive' && !teacher.isActive);
 
-      const matchesName =
-        !name || teacher.firstName?.toLowerCase().includes(name.toLowerCase());
-      const matchesClan =
-        !clan || teacher.lastName?.toLowerCase().includes(clan.toLowerCase());
-      const matchesAge = !age || teacher.age === Number(age);
-      const matchesGrade = !grade || teacher.grade === grade;
-      const matchesTutor =
-        !tutor || teacher.tutor?.toLowerCase().includes(tutor.toLowerCase());
-      const matchesNationality =
-        !nationality ||
-        teacher.nationality?.toLowerCase().includes(nationality.toLowerCase());
+    const matchesSubject =
+      filter.subject === '' || teacher.subjects.includes(filter.subject);
 
-      return (
-        matchesName &&
-        matchesClan &&
-        matchesAge &&
-        matchesGrade &&
-        matchesTutor &&
-        matchesNationality
-      );
-    }) || [];
+    return matchesSearch && matchesStatus && matchesSubject;
+  });
 
-  // Add these handler functions that were missing
-  const handleEdit = (teacher) => {
-    setSelectedStudent(teacher);
-    setDialogOpen(true);
-  };
-
-  const handleDelete = async (teacherNumber) => {
-    try {
-      await dispatch(deleteStudent(teacherNumber));
-    } catch (error) {
-      console.error('Delete failed:', error);
+  const handleDelete = async (teacherId) => {
+    if (window.confirm('Are you sure you want to delete this teacher?')) {
+      await dispatch(deleteTeacher(teacherId));
     }
   };
 
-  const handleToggleStatus = async (teacher) => {
-    if (!teacher?._id) return;
-    try {
-      await dispatch(updateTeacherStatus(teacher._id, !teacher.isEnrolled));
-    } catch (error) {
-      console.error('Status toggle failed:', error);
-    }
-  };
-
-  const handleUpdateStudent = async (updatedTeacher) => {
-    if (!updatedTeacher.teacherNumber) return;
-    try {
-      await dispatch(updateTeacher(updatedTeacher));
-      setDialogOpen(false);
-    } catch (error) {
-      console.error('Update failed:', error);
-    }
+  const handleStatusChange = async (teacherId, isActive) => {
+    await dispatch(updateTeacherStatus(teacherId, !isActive));
   };
 
   return (
     <TeacherList
-      teachers={filteredStudents}
-      isLoading={isLoading}
+      teachers={filteredTeachers}
+      loading={loading}
       error={error}
-      onFilter={setFilters}
-      onEdit={handleEdit}
+      filter={filter}
+      onFilterChange={setFilter}
       onDelete={handleDelete}
-      onToggleStatus={handleToggleStatus}
-      dialogOpen={dialogOpen}
-      selectedStudent={selectedStudent}
-      setDialogOpen={setDialogOpen}
-      setSelectedStudent={setSelectedStudent}
-      onUpdateStudent={handleUpdateStudent}
+      onStatusChange={handleStatusChange}
     />
   );
 };
