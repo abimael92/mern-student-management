@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Grid,
   Box,
+  Button,
+  Grid,
   Typography,
   CircularProgress,
   Alert,
-  Button,
 } from '@mui/material';
 import TeacherCard from './TeacherCard';
 import TeacherFilter from './TeacherFilter';
@@ -13,61 +13,65 @@ import TeacherDialog from './TeacherDialog';
 
 const TeacherList = ({
   teachers,
-  isLoading,
+  loading,
   error,
-  onFilter,
-  onEdit,
+  filter,
+  onFilterChange,
   onDelete,
-  onToggleStatus,
-  dialogOpen,
-  selectedStudent,
-  setDialogOpen,
-  setSelectedStudent,
-  onUpdateStudent,
+  onStatusChange,
 }) => {
-  if (isLoading) return <CircularProgress />;
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+
+  const handleEdit = (teacher) => {
+    setSelectedTeacher(teacher);
+    setOpenDialog(true);
+  };
+
+  const handleAddTeacher = () => {
+    setSelectedTeacher(null);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedTeacher(null);
+  };
+
+  if (loading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <Box sx={{ py: 4 }}>
-      <Typography variant="h4" textAlign="center" gutterBottom>
-        Teachers List
-      </Typography>
+    <Box>
+      <TeacherFilter filter={filter} onFilterChange={onFilterChange} />
 
-      <TeacherFilter onFilter={onFilter} />
-
-      <Grid container spacing={3} justifyContent="center">
-        {teachers.map((teacher) => (
-          <Grid item xs={12} sm={6} md={4} key={teacher.teacherNumber}>
-            <TeacherCard
-              teacher={teacher}
-              onEdit={onEdit}
-              onDelete={() => onDelete(teacher.teacherNumber)}
-              onToggleStatus={() => onToggleStatus(teacher)}
-            />
-          </Grid>
-        ))}
-      </Grid>
-
-      <Button
-        variant="contained"
-        onClick={() => {
-          setSelectedStudent(null);
-          setDialogOpen(true);
-        }}
-        sx={{ mt: 4 }}
-      >
-        Add New Student
+      <Button variant="contained" onClick={handleAddTeacher} sx={{ mb: 3 }}>
+        Add Teacher
       </Button>
 
+      {teachers.length === 0 ? (
+        <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+          No teachers found
+        </Typography>
+      ) : (
+        <Grid container spacing={3}>
+          {teachers.map((teacher) => (
+            <Grid item key={teacher._id} xs={12} sm={6} md={4}>
+              <TeacherCard
+                teacher={teacher}
+                onEdit={handleEdit}
+                onDelete={onDelete}
+                onStatusChange={onStatusChange}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
       <TeacherDialog
-        open={dialogOpen}
-        onClose={() => {
-          setDialogOpen(false);
-          setSelectedStudent(null);
-        }}
-        teacher={selectedStudent}
-        onUpdate={onUpdateStudent}
+        open={openDialog}
+        onClose={handleCloseDialog}
+        teacher={selectedTeacher}
       />
     </Box>
   );
