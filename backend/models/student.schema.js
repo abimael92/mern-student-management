@@ -17,7 +17,6 @@ const studentSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
-
     age: { type: Number, default: null },
     grade: { type: String, default: "N/A" },
     classroomId: { type: String, default: null },
