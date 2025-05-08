@@ -15,10 +15,13 @@ import {
   Tabs,
   Tab,
   FormControl,
+  IconButton,
+  Input,
   InputLabel,
   Select,
   MenuItem,
 } from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTeacher, updateTeacher } from '../../redux/actions/teacherActions';
 import { fetchStudents } from '../../redux/actions/studentActions';
@@ -33,16 +36,35 @@ const initialFormData = {
   isActive: true,
   tutoredStudents: [],
   qualifications: [],
+  certificates: [],
   yearsOfExperience: 0,
+  emergencyContact: {
+    name: '',
+    relation: '',
+    phone: '',
+  },
+  salary: {
+    base: '',
+    paymentSchedule: '',
+  },
 };
 
 const TeacherDialog = ({ open, onClose, teacher = null }) => {
   const dispatch = useDispatch();
-  const students = useSelector((state) => state.students.list);
+
+  const studentsState = useSelector((state) => state.students);
+  const students = studentsState?.students || [];
+
+  const [inputValue, setInputValue] = useState('');
+
   const [tab, setTab] = useState(0);
+  const [certificates, setCertificates] = useState([]);
+  const [hasCertificates, setHasCertificates] = useState(false);
+
   const [formData, setFormData] = useState(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [studentInput, setStudentInput] = useState('');
 
   useEffect(() => {
     if (open) {
@@ -51,6 +73,15 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
         setFormData({
           ...initialFormData,
           ...teacher,
+          emergencyContact: teacher.emergencyContact || {
+            name: '',
+            relation: '',
+            phone: '',
+          },
+          salary: teacher.salary || {
+            base: '',
+            paymentSchedule: '',
+          },
           tutoredStudents: teacher.tutoredStudents || [],
         });
       } else {
@@ -70,11 +101,12 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
   };
 
   const handleAddStudent = (studentId) => {
-    if (!formData.tutoredStudents.includes(studentId)) {
+    if (studentId && !formData.tutoredStudents.includes(studentId)) {
       setFormData((prev) => ({
         ...prev,
         tutoredStudents: [...prev.tutoredStudents, studentId],
       }));
+      setStudentInput('');
     }
   };
 
@@ -85,19 +117,22 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
     }));
   };
 
+  const handleCertificateChange = (index, value) => {
+    const updated = [...certificates];
+    updated[index] = value;
+    setCertificates(updated);
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
 
     try {
       const teacherData = {
+        ...formData,
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
-        profilePicture: formData.profilePicture,
-        subjects: formData.subjects,
-        isActive: formData.isActive,
-        qualifications: formData.qualifications,
         yearsOfExperience: Number(formData.yearsOfExperience),
         tutoredStudents: formData.tutoredStudents.map((id) =>
           typeof id === 'object' ? id._id : id
@@ -105,12 +140,7 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
       };
 
       if (teacher?._id) {
-        await dispatch(
-          updateTeacher({
-            id: teacher._id,
-            teacherData,
-          })
-        );
+        await dispatch(updateTeacher({ id: teacher._id, teacherData }));
       } else {
         await dispatch(addTeacher(teacherData));
       }
@@ -124,14 +154,9 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
     }
   };
 
-  const availableStudents =
-    students?.filter(
-      (student) => !formData.tutoredStudents.includes(student._id)
-    ) || [];
-
   const renderTabPanel = () => {
     switch (tab) {
-      case 0: // Basic Info
+      case 0:
         return (
           <Box>
             <TextField
@@ -190,10 +215,23 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
                 </Box>
               )}
             </Box>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isActive}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                />
+              }
+              label="Active Teacher"
+              sx={{ mt: 2 }}
+            />
           </Box>
         );
 
-      case 1: // Subjects & Qualifications
+      case 1:
         return (
           <Box>
             <Autocomplete
@@ -219,13 +257,7 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
             />
             <Autocomplete
               multiple
-              options={[
-                'Bachelors',
-                'Masters',
-                'PhD',
-                'Teaching Certificate',
-                'Diploma',
-              ]}
+              options={['Bachelors', 'Masters', 'PhD']}
               value={formData.qualifications}
               onChange={(e, newValue) =>
                 setFormData({ ...formData, qualifications: newValue })
@@ -235,6 +267,60 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
               )}
               sx={{ mt: 2 }}
             />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={hasCertificates}
+                  onChange={(e) => setHasCertificates(e.target.checked)}
+                />
+              }
+              label="Do you have certificates?"
+              sx={{ mt: 2 }}
+            />
+
+            {hasCertificates && (
+              <Box sx={{ borderRadius: 2, p: 1 }}>
+                <Button
+                  onClick={() => setCertificates([...certificates, ''])}
+                  startIcon={<AddIcon />}
+                  variant="contained"
+                  disabled={certificates.length >= 6}
+                >
+                  Add certificate
+                </Button>
+                {certificates.map((name, index) => (
+                  <Box
+                    key={`certificate-${index}`}
+                    sx={{ display: 'flex', alignItems: 'center' }}
+                  >
+                    <TextField
+                      label={`Certificate ${index + 1}`}
+                      variant="outlined"
+                      fullWidth
+                      margin="normal"
+                      value={name}
+                      onChange={(e) =>
+                        handleCertificateChange(index, e.target.value)
+                      }
+                    />
+
+                    <IconButton
+                      onClick={() => {
+                        const newCertificates = certificates.filter(
+                          (_, i) => i !== index
+                        );
+                        setCertificates(newCertificates);
+                      }}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
+
             <TextField
               label="Years of Experience"
               type="number"
@@ -248,7 +334,14 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
           </Box>
         );
 
-      case 2: // Assigned Students
+      case 2:
+        console.log('--- DEBUGGING STUDENT AUTOCOMPLETE ---');
+        console.log('All students from Redux:', students);
+        console.log(
+          'Currently assigned student IDs:',
+          formData.tutoredStudents
+        );
+
         return (
           <Box>
             <Typography variant="subtitle1" sx={{ mt: 1 }}>
@@ -268,18 +361,117 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
             </Box>
 
             <Autocomplete
-              options={availableStudents}
-              getOptionLabel={(option) =>
-                `${option.firstName} ${option.lastName}`
+              options={students} // Now this is the actual array of students
+              getOptionLabel={(student) =>
+                `${student.firstName} ${student.lastName}`
               }
-              onChange={(e, newValue) =>
-                newValue && handleAddStudent(newValue._id)
-              }
+              inputValue={inputValue}
+              onInputChange={(event, newInputValue) => {
+                setInputValue(newInputValue);
+              }}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  handleAddStudent(newValue._id);
+                  setInputValue(''); // Clear the input after selection
+                }
+              }}
               renderInput={(params) => (
-                <TextField {...params} label="Assign Student" margin="normal" />
+                <TextField
+                  {...params}
+                  label="Select students"
+                  placeholder="Type to search..."
+                  fullWidth
+                  margin="normal"
+                />
               )}
-              fullWidth
+              noOptionsText="No students available"
+              loading={students.length === 0}
+              loadingText="Loading students..."
+              sx={{ mt: 2 }}
             />
+          </Box>
+        );
+
+      case 3:
+        return (
+          <Box>
+            <TextField
+              label="Emergency Contact Name"
+              fullWidth
+              margin="normal"
+              value={formData.emergencyContact?.name || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  emergencyContact: {
+                    ...formData.emergencyContact,
+                    name: e.target.value,
+                  },
+                })
+              }
+            />
+            <TextField
+              label="Emergency Contact Relation"
+              fullWidth
+              margin="normal"
+              value={formData.emergencyContact?.relation || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  emergencyContact: {
+                    ...formData.emergencyContact,
+                    relation: e.target.value,
+                  },
+                })
+              }
+            />
+            <TextField
+              label="Emergency Contact Phone"
+              fullWidth
+              margin="normal"
+              value={formData.emergencyContact?.phone || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  emergencyContact: {
+                    ...formData.emergencyContact,
+                    phone: e.target.value,
+                  },
+                })
+              }
+            />
+            <TextField
+              label="Base Salary"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={formData.salary?.base || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  salary: { ...formData.salary, base: e.target.value },
+                })
+              }
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Payment Schedule</InputLabel>
+              <Select
+                value={formData.salary?.paymentSchedule || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    salary: {
+                      ...formData.salary,
+                      paymentSchedule: e.target.value,
+                    },
+                  })
+                }
+              >
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
+                <MenuItem value="hourly">Hourly</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         );
 
@@ -297,41 +489,26 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
           <Tab label="Basic Info" />
           <Tab label="Subjects & Qualifications" />
           <Tab label="Assigned Students" />
+          <Tab label="Emergency Contact & Salary" />
         </Tabs>
 
         {renderTabPanel()}
 
-        <FormControlLabel
-          control={
-            <Switch
-              checked={formData.isActive}
-              onChange={(e) =>
-                setFormData({ ...formData, isActive: e.target.checked })
-              }
-            />
-          }
-          label="Active Teacher"
-          sx={{ mt: 2 }}
-        />
-
         {error && (
-          <Typography color="error" sx={{ mt: 2 }}>
+          <Typography color="error" sx={{ mt: 1 }}>
             {error}
           </Typography>
         )}
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={isSubmitting}>
-          Cancel
-        </Button>
+        <Button onClick={onClose}>Cancel</Button>
         <Button
           onClick={handleSubmit}
-          color="primary"
           variant="contained"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : 'Save'}
+          {teacher ? 'Update' : 'Add'}
         </Button>
       </DialogActions>
     </Dialog>
