@@ -17,12 +17,11 @@ const studentSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
-
     age: { type: Number, default: null },
     grade: { type: String, default: "N/A" },
     classroomId: { type: String, default: null },
     tutor: { type: String, default: "N/A" },
-    tutorId: { type: String, default: null },
+    tutorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null },
     emergencyContact: {
         name: { type: String, default: "N/A" },
         relation: { type: String, default: "N/A" },

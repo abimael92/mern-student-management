@@ -1,114 +1,82 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  TextField,
   Box,
-  Button,
+  TextField,
   MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
-const TeacherFilter = ({ onFilter }) => {
-  const [filters, setFilters] = useState({
-    name: '',
-    clan: '',
-    age: '',
-    grade: '',
-    tutor: '',
-    nationality: '',
-  });
+const subjects = [
+  'Math',
+  'Science',
+  'English',
+  'History',
+  'Art',
+  'Music',
+  'PE',
+  'Computers',
+  'Languages',
+];
 
-  const handleChange = (field) => (event) => {
-    const updated = { ...filters, [field]: event.target.value };
-    setFilters(updated);
-    onFilter(updated);
+const TeacherFilter = ({ filter, onFilterChange }) => {
+  const handleChange = (field) => (e) => {
+    onFilterChange({ ...filter, [field]: e.target.value });
   };
 
-  const handleClear = () => {
-    const cleared = {
-      name: '',
-      clan: '',
-      age: '',
-      grade: '',
-      tutor: '',
-      nationality: '',
-    };
-    setFilters(cleared);
-    onFilter(cleared);
+  const clearSearch = () => {
+    onFilterChange({ ...filter, search: '' });
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        mb: 3,
-      }}
-    >
+    <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
       <TextField
-        label="Search Name"
-        variant="outlined"
-        value={filters.name}
-        onChange={handleChange('name')}
-        sx={{ width: 250 }}
+        label="Search"
+        value={filter.search}
+        onChange={handleChange('search')}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+          endAdornment: filter.search && (
+            <IconButton onClick={clearSearch} size="small">
+              <ClearIcon />
+            </IconButton>
+          ),
+        }}
+        sx={{ minWidth: 250 }}
       />
 
       <TextField
-        label="Search Clan"
-        variant="outlined"
-        value={filters.clan}
-        onChange={handleChange('clan')}
-        sx={{ width: 250 }}
-      />
+        select
+        label="Status"
+        value={filter.status}
+        onChange={handleChange('status')}
+        sx={{ minWidth: 150 }}
+      >
+        <MenuItem value="all">All Status</MenuItem>
+        <MenuItem value="active">Active</MenuItem>
+        <MenuItem value="inactive">Inactive</MenuItem>
+      </TextField>
 
       <TextField
-        label="Age"
-        type="number"
-        variant="outlined"
-        value={filters.age}
-        onChange={handleChange('age')}
-        sx={{ width: 120 }}
-      />
-
-      <FormControl sx={{ minWidth: 140 }}>
-        <InputLabel>Grade</InputLabel>
-        <Select
-          value={filters.grade}
-          onChange={handleChange('grade')}
-          label="Grade"
-        >
-          <MenuItem value="">
-            <em>Any</em>
+        select
+        label="Subject"
+        value={filter.subject}
+        onChange={handleChange('subject')}
+        sx={{ minWidth: 150 }}
+      >
+        <MenuItem value="">All Subjects</MenuItem>
+        {subjects.map((subject) => (
+          <MenuItem key={subject} value={subject}>
+            {subject}
           </MenuItem>
-          <MenuItem value="A">A</MenuItem>
-          <MenuItem value="B">B</MenuItem>
-          <MenuItem value="C">C</MenuItem>
-        </Select>
-      </FormControl>
-
-      <TextField
-        label="Tutor"
-        variant="outlined"
-        value={filters.tutor}
-        onChange={handleChange('tutor')}
-        sx={{ width: 160 }}
-      />
-
-      <TextField
-        label="Nationality"
-        variant="outlined"
-        value={filters.nationality}
-        onChange={handleChange('nationality')}
-        sx={{ width: 160 }}
-      />
-
-      <Button variant="contained" color="error" onClick={handleClear}>
-        Clear
-      </Button>
+        ))}
+      </TextField>
     </Box>
   );
 };
