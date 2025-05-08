@@ -55,16 +55,23 @@ const TeacherList = ({
         </Typography>
       ) : (
         <Grid container spacing={3}>
-          {teachers.map((teacher) => (
-            <Grid item key={teacher._id} xs={12} sm={6} md={4}>
-              <TeacherCard
-                teacher={teacher}
-                onEdit={handleEdit}
-                onDelete={onDelete}
-                onStatusChange={onStatusChange}
-              />
-            </Grid>
-          ))}
+          {Array.isArray(teachers) &&
+            teachers.filter(Boolean).map((teacher) => (
+              <Grid
+                item
+                key={teacher._id || teacher.teacherNumber || Math.random()}
+                xs={12}
+                sm={6}
+                md={4}
+              >
+                <TeacherCard
+                  teacher={teacher}
+                  onEdit={handleEdit}
+                  onDelete={onDelete}
+                  onStatusChange={onStatusChange}
+                />
+              </Grid>
+            ))}
         </Grid>
       )}
 
