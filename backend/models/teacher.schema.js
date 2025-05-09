@@ -32,11 +32,8 @@ const teacherSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    subjects: {
-        type: [String],
-        enum: ['Math', 'Science', 'English', 'History', 'Art', 'Music', 'PE', 'Computers', 'Languages'],
-        default: []
-    },
+    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject', default: [] }],
+    totalWeeklyHours: { type: Number, default: 0 },
     qualifications: {
         type: [String],
         default: [],

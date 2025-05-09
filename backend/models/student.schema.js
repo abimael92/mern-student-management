@@ -43,7 +43,7 @@ const studentSchema = new mongoose.Schema({
         allergies: { type: [String], default: [] },
         nurseComments: { type: String, default: '' }
     },
-
+    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject', default: [] }],
     alerts: {
         behavior: { type: String, default: '' },
         academic: { type: String, default: '' },
