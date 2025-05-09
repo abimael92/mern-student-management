@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import s3 from '../config/s3.js';
 
 const router = express.Router();
@@ -21,8 +22,9 @@ router.post('/', upload.single('file'), async (req, res) => {
     };
 
     try {
-        const data = await s3.upload(params).promise();
-        res.status(200).json({ url: data.Location });
+        // Use the send method for v3 SDK
+        const data = await s3.send(new PutObjectCommand(params));
+        res.status(200).json({ url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}` });
     } catch (error) {
         console.error('S3 Upload Error:', error);
         res.status(500).json({ message: 'Error uploading file', error: error.message });
