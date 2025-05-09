@@ -68,7 +68,7 @@ const Header = () => {
       name: 'Academics',
       path: '/academics',
       icon: <SchoolOutlinedIcon />,
-      comingSoon: true,
+      // comingSoon: true,
     },
     {
       name: 'Attendance',
