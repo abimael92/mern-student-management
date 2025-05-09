@@ -82,7 +82,7 @@ export const api = {
         const res = await fetch(`${BASE}/api/teachers/${teacher.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(teacher),
+            body: JSON.stringify({ ...teacher }),
         });
         if (!res.ok) throw new Error(await res.text());
         return res.json();
@@ -157,4 +157,42 @@ export const api = {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
+
+
+    // === SUBJECT CRUD ===
+    fetchSubjects: async () => {
+        const res = await fetch(`${BASE}/api/subjects`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    addSubject: async (data) => {
+        const res = await fetch(`${BASE}/api/subjects`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    updateSubject: async (subject) => {
+        const res = await fetch(`${BASE}/api/subjects/${subject.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(subject),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    deleteSubject: async (id) => {
+        const res = await fetch(`${BASE}/api/subjects/${id}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+
 };

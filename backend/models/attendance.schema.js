@@ -11,6 +11,11 @@ const attendanceSchema = new mongoose.Schema({
         required: true,
         enum: ['Student', 'Teacher', 'Staff']
     },
+    subject: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subject',
+        default: null
+    },
     date: {
         type: Date,
         required: true,
@@ -21,18 +26,15 @@ const attendanceSchema = new mongoose.Schema({
         enum: ['Present', 'Absent', 'Late', 'Excused'],
         required: true
     },
-    checkInTime: {
-        type: Date
-    },
-    checkOutTime: {
-        type: Date
-    },
+    checkInTime: Date,
+    checkOutTime: Date,
     remarks: {
         type: String,
         maxlength: 200
     }
 }, { timestamps: true });
 
+// Ensure one attendance per person per day
 attendanceSchema.index({ person: 1, date: 1 }, { unique: true });
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);

@@ -8,7 +8,7 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         configure: (proxy, options) => {
-          console.log('Proxying request:', options);
+          // console.log('Proxying request:', options);
         },
       },
     },

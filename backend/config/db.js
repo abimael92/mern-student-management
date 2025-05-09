@@ -2,24 +2,24 @@ import mongoose from 'mongoose';
 
 mongoose.set('strictQuery', true);
 
-
 const connectDB = async () => {
+    const uri = process.env.MONGO_URI;
 
-    if (!process.env.MONGO_URI) {
+    if (!uri) {
         console.error('MongoDB URI is undefined in .env');
-        process.exit(1); // Force exit if URI is missing
+        process.exit(1);
     }
 
-
     try {
-        // const conn = await mongoose.connect(process.env.MONGO_URI, {
-        //     useNewUrlParser: true,
-        //     useUnifiedTopology: true,
-        // });
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log('MongoDB Connected:', conn.connection.host);
+        const start = Date.now();
+        const conn = await mongoose.connect(uri);
+        const timeTaken = Date.now() - start;
+
+        console.log(`MongoDB connected to: ${conn.connection.name}`);
+        console.log(`Host: ${conn.connection.host}`);
+        console.log(`Connection time: ${timeTaken}ms`);
     } catch (error) {
-        console.error('DB Error:', error);
+        console.error('MongoDB connection error:', error.message);
         process.exit(1);
     }
 };

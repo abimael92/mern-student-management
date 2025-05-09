@@ -90,13 +90,19 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
     }
   }, [open, teacher, dispatch]);
 
-  const handleImageUpload = async (file) => {
-    try {
-      const uploadedUrl = await api.uploadImage(file);
-      setFormData((prev) => ({ ...prev, profilePicture: uploadedUrl }));
-    } catch (err) {
-      setError('Image upload failed');
-      console.error('Upload error:', err);
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]; // Get the file from the event
+    if (file) {
+      try {
+        const uploadedUrl = await api.uploadImage(file); // Upload the image
+        setFormData((prev) => ({
+          ...prev,
+          profilePicture: uploadedUrl, // Store the image URL in form data
+        }));
+      } catch (err) {
+        setError('Image upload failed');
+        console.error('Upload error:', err);
+      }
     }
   };
 
@@ -134,6 +140,7 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
         yearsOfExperience: Number(formData.yearsOfExperience),
+        profilePicture: formData.profilePicture,
         tutoredStudents: formData.tutoredStudents.map((id) =>
           typeof id === 'object' ? id._id : id
         ),
@@ -196,9 +203,7 @@ const TeacherDialog = ({ open, onClose, teacher = null }) => {
                 accept="image/*"
                 id="teacher-upload"
                 hidden
-                onChange={(e) => {
-                  if (e.target.files[0]) handleImageUpload(e.target.files[0]);
-                }}
+                onChange={handleImageUpload}
               />
               <label htmlFor="teacher-upload">
                 <Button variant="contained" component="span">
