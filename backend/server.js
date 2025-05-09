@@ -10,7 +10,6 @@ import uploadRoutes from './routes/upload.js';  // Use import for consistency
 
 dotenv.config();
 
-console.log(process.env.MONGO_URI); // Check if MONGO_URI is loaded correctly
 const app = express();
 
 app.use(express.json());
