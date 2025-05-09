@@ -89,6 +89,10 @@ export const updateStudent = async (req, res) => {
         return res.status(400).json({ message: 'Invalid student ID' });
     }
 
+    if (req.body.tutorId === "") {
+        req.body.tutorId = null;  // Set tutorId to null if it's an empty string
+    }
+
     try {
         const updatedStudent = await Student.findByIdAndUpdate(studentId, req.body, { new: true });
         if (!updatedStudent) {

@@ -6,9 +6,7 @@ import Teacher from '../../models/teacher.schema.js';
 
 export const getTeachers = async (req, res) => {
     try {
-        console.log("Fetching teachers...");
         const teachers = await Teacher.find().select('-__v').lean();
-        console.log("Teachers fetched:", teachers);
         res.status(200).json(teachers);
     } catch (error) {
         console.error('Error fetching teachers:', error);
@@ -81,13 +79,21 @@ export const createTeacher = async (req, res) => {
 // ----- UPDATE -----
 export const updateTeacher = async (req, res) => {
     const { id: teacherId } = req.params;
+    const { teacherData } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(teacherId)) {
         return res.status(400).json({ message: 'Invalid teacher ID' });
     }
 
+    if (teacherData.tutorId === "") {
+        teacherData.tutorId = null;
+    }
+
+
+
     try {
-        const updatedTeacher = await Teacher.findByIdAndUpdate(teacherId, req.body, { new: true });
+        const updatedTeacher = await Teacher.findByIdAndUpdate(teacherId, teacherData, { new: true });
+
         if (!updatedTeacher) {
             return res.status(404).json({ message: 'Teacher not found' });
         }
@@ -142,7 +148,7 @@ export const deleteTeacher = async (req, res) => {
 
         res.status(200).json({ message: `Successfully deleted teacher with ID ${id}` });
     } catch (error) {
-        logger.error(`Error deleting teacher with ID ${id}: ${error.message}`, {
+        console.error(`Error deleting teacher with ID ${id}: ${error.message}`, {
             method: req.method,
             route: req.originalUrl,
             params: req.params
