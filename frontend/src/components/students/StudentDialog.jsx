@@ -94,15 +94,19 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
     }
   };
 
-  const handleImageUpload = async (file) => {
-    try {
-      const uploadedUrl = await api.uploadImage(file);
-      if (uploadedUrl) {
-        handleChange(null, 'profilePicture', uploadedUrl);
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]; // Get the file from the event
+    if (file) {
+      try {
+        const uploadedUrl = await api.uploadImage(file); // Upload the image
+        setFormData((prev) => ({
+          ...prev,
+          profilePicture: uploadedUrl, // Store the image URL in form data
+        }));
+      } catch (err) {
+        setError('Image upload failed');
+        console.error('Upload error:', err);
       }
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      setError('Image upload failed. Please try again.');
     }
   };
 
@@ -166,26 +170,23 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    await handleImageUpload(file);
-                  }
-                }}
-                style={{ display: 'none' }}
-                id="upload-image"
+                id="teacher-upload"
+                hidden
+                onChange={handleImageUpload} // Trigger the handleImageUpload on file select
               />
-              <label htmlFor="upload-image">
+              <label htmlFor="teacher-upload">
                 <Button variant="contained" component="span">
-                  Upload Headshot
+                  Upload Profile Picture
                 </Button>
               </label>
               {formData.profilePicture && (
-                <img
-                  src={formData.profilePicture}
-                  alt={formData.firstName}
-                  style={{ width: '100px', height: '100px', marginTop: '10px' }}
-                />
+                <Box sx={{ mt: 1 }}>
+                  <img
+                    src={formData.profilePicture}
+                    alt="Teacher"
+                    style={{ maxWidth: 100, maxHeight: 100 }}
+                  />
+                </Box>
               )}
             </Box>
             <TextField
