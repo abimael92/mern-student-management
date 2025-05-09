@@ -1,4 +1,4 @@
-import { api } from '../api'; // Assuming you have an api file for API calls
+import { api } from '../../utils/api'; // Assuming you have an api file for API calls
 import {
     FETCH_SUBJECTS,
     FETCH_SUBJECTS_REQUEST,
@@ -11,7 +11,7 @@ import {
     UPDATE_SUBJECT_SUCCESS,
     UPDATE_SUBJECT_FAILURE,
     DELETE_SUBJECT,
-} from './actionTypes';
+} from './../subjectsActionTypes';
 
 // === FETCH SUBJECTS ===
 export const fetchSubjects = () => async (dispatch) => {
