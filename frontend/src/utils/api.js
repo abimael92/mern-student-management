@@ -82,7 +82,7 @@ export const api = {
         const res = await fetch(`${BASE}/api/teachers/${teacher.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(teacher),
+            body: JSON.stringify({ ...teacher }),
         });
         if (!res.ok) throw new Error(await res.text());
         return res.json();
