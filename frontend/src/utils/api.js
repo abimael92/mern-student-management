@@ -177,11 +177,18 @@ export const api = {
     },
 
     updateSubject: async (subject) => {
-        const res = await fetch(`${BASE}/api/subjects/${subject.id}`, {
+
+        if (!subject._id) {
+            console.log("subject Id: ", subject._id);
+            throw new Error('Invalid subject ID format');
+        }
+
+        const res = await fetch(`${BASE}/api/subjects/${subject._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(subject),
         });
+
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
