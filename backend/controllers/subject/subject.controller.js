@@ -39,9 +39,6 @@ export const getSubjectById = async (req, res) => {
 export const updateSubject = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = { ...req.body };
-
-
 
         // Check if subject exists
         const existingSubject = await Subject.findById(id);
