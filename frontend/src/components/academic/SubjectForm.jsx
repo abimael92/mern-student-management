@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Grid, MenuItem } from '@mui/material';
 
-const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
+const SubjectForm = ({
+  selectedSubject,
+  setSelectedSubject,
+  onSave,
+  teachers,
+  students,
+}) => {
   const [subjectData, setSubjectData] = useState({
     name: '',
     code: '',
@@ -62,19 +68,27 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
 
     try {
       await onSave(dataToSave);
-
-      setSubjectData({
-        name: '',
-        code: '',
-        description: '',
-        classLevel: '',
-        teacher: '',
-        students: [],
-        weeklyHours: 0,
-      });
+      onCancel();
     } catch (error) {
       console.error('Submission error:', error);
     }
+  };
+
+  const onCancel = async (e) => {
+    e.preventDefault();
+
+    // Check if the name is empty
+    setSubjectData({
+      name: '',
+      code: '',
+      description: '',
+      classLevel: '',
+      teacher: '',
+      students: [],
+      weeklyHours: 0,
+    });
+
+    setSelectedSubject(null);
   };
 
   return (
@@ -168,9 +182,18 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
           </TextField>
         </Grid>
         <Grid item xs={12}>
-          <Button type="submit" variant="contained" color="primary">
-            {selectedSubject ? 'Update' : 'Add'} Subject
-          </Button>
+          <Grid container spacing={2} justifyContent="center">
+            <Grid item>
+              <Button onClick={onCancel} variant="contained" color="secondary">
+                Cancel
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button type="submit" variant="contained" color="primary">
+                {selectedSubject ? 'Update' : 'Add'} Subject
+              </Button>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </form>
