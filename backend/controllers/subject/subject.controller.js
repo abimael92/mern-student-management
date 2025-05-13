@@ -34,18 +34,14 @@ export const getSubjectById = async (req, res) => {
     }
 };
 
-// Update subject
-import mongoose from 'mongoose';
 
 // Subject controller
 export const updateSubject = async (req, res) => {
     try {
         const { id } = req.params;
+        const updateData = { ...req.body };
 
-        // Validate ID format
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: 'Invalid subject ID format' });
-        }
+
 
         // Check if subject exists
         const existingSubject = await Subject.findById(id);
@@ -57,7 +53,7 @@ export const updateSubject = async (req, res) => {
         const updatedSubject = await Subject.findByIdAndUpdate(
             id,
             req.body,
-            { new: true, runValidators: true }
+            { new: true }
         );
 
         res.json(updatedSubject);
