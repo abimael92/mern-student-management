@@ -65,7 +65,9 @@ const SubjectManagement = () => {
               selectedSubject={selectedSubject}
               onSave={(data) => {
                 if (selectedSubject) {
-                  dispatch(updateSubject(data));
+                  dispatch(
+                    updateSubject({ ...data, _id: selectedSubject._id })
+                  );
                 } else {
                   dispatch(addSubject(data));
                 }
