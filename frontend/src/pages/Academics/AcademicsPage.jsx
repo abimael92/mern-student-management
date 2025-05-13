@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-import SubjectManagement from '../../components/academic/SubjectManagement'; // Import the SubjectManagement component
+import SubjectManagement from '../../components/academic/SubjectManagement';
+import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview'; // Import the SubjectManagement component
 
 const AcademicsPage = () => {
   return (
@@ -16,6 +17,11 @@ const AcademicsPage = () => {
 
       <Paper sx={{ p: 2, mt: 2 }}>
         <SubjectManagement />
+      </Paper>
+
+      {/* Subjects & Performance Overview */}
+      <Paper sx={{ p: 2, mt: 2 }}>
+        <SubjectsPerformanceOverview />
       </Paper>
 
       <Paper sx={{ p: 2, mt: 2 }}>
