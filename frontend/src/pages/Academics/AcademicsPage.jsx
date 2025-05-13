@@ -15,8 +15,6 @@ const AcademicsPage = () => {
       </Paper>
 
       <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="h6">Subjects</Typography>
-        {/* Subject Management component for managing subjects */}
         <SubjectManagement />
       </Paper>
 
