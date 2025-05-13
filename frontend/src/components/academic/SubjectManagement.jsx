@@ -46,15 +46,6 @@ const SubjectManagement = () => {
         Subject Management
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleAddClick}
-        style={{ marginBottom: '20px' }}
-      >
-        Add New Subject
-      </Button>
-
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
 
@@ -63,6 +54,7 @@ const SubjectManagement = () => {
           <Paper style={{ padding: '20px' }}>
             <SubjectForm
               selectedSubject={selectedSubject}
+              setSelectedSubject={setSelectedSubject}
               onSave={(data) => {
                 if (selectedSubject) {
                   dispatch(
