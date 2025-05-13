@@ -8,7 +8,7 @@ import {
     UPDATE_SUBJECT_SUCCESS,
     UPDATE_SUBJECT_FAILURE,
     DELETE_SUBJECT,
-} from '../actions/actionTypes';
+} from '../subjectsActionTypes.js';
 
 const initialState = {
     subjects: [],
@@ -16,8 +16,7 @@ const initialState = {
     error: null,
 };
 
-// Reducer function for subjects
-const subjectReducer = (state = initialState, action) => {
+export const subjectReducer = (state = initialState, action) => {
     switch (action.type) {
         case FETCH_SUBJECTS_REQUEST:
             return { ...state, loading: true };
@@ -55,4 +54,3 @@ const subjectReducer = (state = initialState, action) => {
     }
 };
 
-export default subjectReducer;

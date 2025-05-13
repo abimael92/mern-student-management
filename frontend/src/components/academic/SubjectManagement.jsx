@@ -8,6 +8,10 @@ import {
 } from '../../redux/actions/subjectsActions';
 import SubjectList from './SubjectList';
 import SubjectForm from './SubjectForm';
+
+import { fetchTeachers } from '../../redux/actions/teacherActions';
+import { fetchStudents } from '../../redux/actions/studentActions';
+
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
 import { Grid, Paper, Typography, Button } from '@mui/material';
@@ -15,12 +19,19 @@ import { Grid, Paper, Typography, Button } from '@mui/material';
 const SubjectManagement = () => {
   const dispatch = useDispatch();
   const subjectsState = useSelector((state) => state.subjects || {});
+  const teachersState = useSelector((state) => state.teachers || {});
+  const studentsState = useSelector((state) => state.students || {});
+
   const { subjects = [], loading = false, error = null } = subjectsState;
+  const { teachers = [] } = teachersState;
+  const { students = [] } = studentsState;
 
   const [selectedSubject, setSelectedSubject] = useState(null);
 
   useEffect(() => {
     dispatch(fetchSubjects());
+    dispatch(fetchTeachers());
+    dispatch(fetchStudents());
   }, [dispatch]);
 
   const handleAddClick = () => setSelectedSubject(null);
@@ -60,6 +71,8 @@ const SubjectManagement = () => {
                 }
                 setSelectedSubject(null);
               }}
+              teachers={teachers}
+              students={students}
             />
           </Paper>
         </Grid>

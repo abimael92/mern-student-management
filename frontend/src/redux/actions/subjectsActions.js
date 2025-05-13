@@ -35,9 +35,15 @@ export const addSubject = (subjectData) => async (dispatch) => {
 };
 
 // === UPDATE SUBJECT ===
+// subjectsActions.js - Only change the updateSubject action
 export const updateSubject = (subjectData) => async (dispatch) => {
     dispatch({ type: UPDATE_SUBJECT_START });
     try {
+        // Verify we have an ID
+        if (!subjectData._id) {
+            throw new Error('No subject ID provided for update');
+        }
+
         const updatedSubject = await api.updateSubject(subjectData);
         dispatch({ type: UPDATE_SUBJECT_SUCCESS, payload: updatedSubject });
     } catch (error) {

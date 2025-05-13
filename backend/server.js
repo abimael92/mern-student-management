@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import studentRoutes from './routes/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
+import subjectRoutes from './routes/subject.routes.js';
 import connectDB from './config/db.js';
 import uploadRoutes from './routes/upload.js';  // Use import for consistency
 
@@ -21,6 +22,7 @@ app.use(cors({
 
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/subjects', subjectRoutes);
 app.use('/api/upload', uploadRoutes);
 
 
