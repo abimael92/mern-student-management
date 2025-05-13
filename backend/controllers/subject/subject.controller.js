@@ -1,9 +1,11 @@
 import Subject from '../../models/subject.schema.js';
+import { generateSubjectCode } from '../../services/subjectCode.service.js';
 
 // Create a new subject
 export const createSubject = async (req, res) => {
     try {
-        const subject = new Subject(req.body);
+        const subjectCode = await generateSubjectCode(req.body.name); // Generate the subject code
+        const subject = new Subject({ ...req.body, code: subjectCode }); // Add the generated code to the subject
         await subject.save();
         res.status(201).json(subject);
     } catch (err) {
@@ -12,7 +14,7 @@ export const createSubject = async (req, res) => {
 };
 
 // Get all subjects
-export const getAllSubjects = async (req, res) => {
+export const getSubjects = async (req, res) => {
     try {
         const subjects = await Subject.find();
         res.json(subjects);
@@ -33,13 +35,34 @@ export const getSubjectById = async (req, res) => {
 };
 
 // Update subject
+import mongoose from 'mongoose';
+
+// Subject controller
 export const updateSubject = async (req, res) => {
     try {
-        const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!subject) return res.status(404).json({ error: 'Subject not found' });
-        res.json(subject);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+        const { id } = req.params;
+
+        // Validate ID format
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid subject ID format' });
+        }
+
+        // Check if subject exists
+        const existingSubject = await Subject.findById(id);
+        if (!existingSubject) {
+            return res.status(404).json({ error: 'Subject not found' });
+        }
+
+        // Proceed with update
+        const updatedSubject = await Subject.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        res.json(updatedSubject);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
