@@ -45,27 +45,35 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedSubject) {
-      onSave(subjectData);
-    } else {
-      try {
-        if (!subjectData.name || !subjectData.code) {
-          throw new Error('Name and Code are required');
-        }
+    // Check if the name is empty
+    if (!subjectData.name) {
+      console.error('Name is required');
+      return; // Exit early if validation fails
+    }
 
-        const dataToSave = {
-          ...subjectData,
-          weeklyHours: Number(subjectData.weeklyHours) || 0,
-          teacher: subjectData.teacher || null, // Convert empty string to null
-          students: Array.isArray(subjectData.students)
-            ? subjectData.students.filter((id) => id) // Remove empty strings
-            : [],
-        };
+    const dataToSave = {
+      ...subjectData,
+      weeklyHours: Number(subjectData.weeklyHours) || 0,
+      teacher: subjectData.teacher || null, // Convert empty string to null
+      students: Array.isArray(subjectData.students)
+        ? subjectData.students.filter((id) => id) // Remove empty strings
+        : [],
+    };
 
-        await onSave(dataToSave);
-      } catch (error) {
-        console.error('Submission error:', error);
-      }
+    try {
+      await onSave(dataToSave);
+
+      setSubjectData({
+        name: '',
+        code: '',
+        description: '',
+        classLevel: '',
+        teacher: '',
+        students: [],
+        weeklyHours: 0,
+      });
+    } catch (error) {
+      console.error('Submission error:', error);
     }
   };
 
