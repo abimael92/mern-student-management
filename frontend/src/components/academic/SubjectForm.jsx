@@ -24,16 +24,6 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
         students: selectedSubject.students?.map((s) => s._id) || [],
         weeklyHours: selectedSubject.weeklyHours || 0,
       });
-    } else {
-      setSubjectData({
-        name: '',
-        code: '',
-        description: '',
-        classLevel: '',
-        teacher: '',
-        students: [],
-        weeklyHours: 0,
-      });
     }
   }, [selectedSubject]);
 
@@ -55,39 +45,27 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      if (!subjectData.name || !subjectData.code) {
-        throw new Error('Name and Code are required');
+    if (!selectedSubject) {
+      onSave(subjectData);
+    } else {
+      try {
+        if (!subjectData.name || !subjectData.code) {
+          throw new Error('Name and Code are required');
+        }
+
+        const dataToSave = {
+          ...subjectData,
+          weeklyHours: Number(subjectData.weeklyHours) || 0,
+          teacher: subjectData.teacher || null, // Convert empty string to null
+          students: Array.isArray(subjectData.students)
+            ? subjectData.students.filter((id) => id) // Remove empty strings
+            : [],
+        };
+
+        await onSave(dataToSave);
+      } catch (error) {
+        console.error('Submission error:', error);
       }
-
-      const dataToSave = {
-        ...subjectData,
-        weeklyHours: Number(subjectData.weeklyHours) || 0,
-        students: Array.isArray(subjectData.students)
-          ? subjectData.students
-          : [],
-      };
-
-      // Always include _id if we have a selectedSubject
-      if (selectedSubject) {
-        dataToSave._id = selectedSubject._id;
-      }
-
-      await onSave(dataToSave);
-
-      if (!selectedSubject) {
-        setSubjectData({
-          name: '',
-          code: '',
-          description: '',
-          classLevel: '',
-          teacher: '',
-          students: [],
-          weeklyHours: 0,
-        });
-      }
-    } catch (error) {
-      console.error('Submission error:', error);
     }
   };
 
@@ -95,6 +73,17 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
     <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
+          {selectedSubject && (
+            <TextField
+              label="Subject Code"
+              name="code"
+              value={subjectData.code}
+              fullWidth
+              disabled
+            />
+          )}
+        </Grid>
+        <Grid item xs={12} md={12}>
           <TextField
             label="Subject Name"
             name="name"
@@ -104,16 +93,7 @@ const SubjectForm = ({ selectedSubject, onSave, teachers, students }) => {
             required
           />
         </Grid>
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="Subject Code"
-            name="code"
-            value={subjectData.code}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
-        </Grid>
+
         <Grid item xs={12}>
           <TextField
             label="Description"
