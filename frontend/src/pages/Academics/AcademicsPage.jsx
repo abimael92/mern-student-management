@@ -1,7 +1,12 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import SubjectManagement from '../../components/academic/SubjectManagement';
-import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview'; // Import the SubjectManagement component
+import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview';
+import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
+import CourseList from '../../components/academic/CourseList';
+import GradeHistory from '../../components/academic/GradeHistory';
+
+import { courses, gradeHistory } from '../../utils/mock/AcademicsPage';
 
 const AcademicsPage = () => {
   return (
@@ -12,7 +17,7 @@ const AcademicsPage = () => {
 
       <Paper sx={{ p: 2, mt: 2 }}>
         <Typography variant="h6">Courses</Typography>
-        {/* Insert Courses component or table here */}
+        <CourseList courses={courses} />
       </Paper>
 
       <Paper sx={{ p: 2, mt: 2 }}>
@@ -25,8 +30,12 @@ const AcademicsPage = () => {
       </Paper>
 
       <Paper sx={{ p: 2, mt: 2 }}>
+        <SubjectsStatusView />
+      </Paper>
+
+      <Paper sx={{ p: 2, mt: 2 }}>
         <Typography variant="h6">Grades</Typography>
-        {/* Insert Grades view here */}
+        <GradeHistory history={gradeHistory} />
       </Paper>
     </Box>
   );
