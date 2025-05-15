@@ -74,7 +74,7 @@ const Header = () => {
       name: 'Attendance',
       path: '/attendance',
       icon: <PeopleIcon />,
-      comingSoon: true,
+      // comingSoon: true,
     },
   ];
 

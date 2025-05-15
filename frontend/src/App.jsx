@@ -9,6 +9,7 @@ import StudentPage from './pages/Students/StudentPage';
 import StudentForm from './components/students/StudentForm';
 import TeacherPage from './pages/Teachers/TeacherPage';
 import AcademicsPage from './pages/Academics/AcademicsPage';
+import AttendancePage from './pages/Attendance/AttendancePage';
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -41,6 +42,7 @@ const App = () => {
                   <Route path="/add-student" element={<StudentForm />} />
                   <Route path="/edit-student/:id" element={<StudentForm />} />
                   <Route path="/academics" element={<AcademicsPage />} />
+                  <Route path="/attendance" element={<AttendancePage />} />
                 </Routes>
               </Container>
             </Box>
