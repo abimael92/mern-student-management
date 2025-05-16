@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import booksRoutes from './routes/books.route.js';
 import studentRoutes from './routes/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
 import subjectRoutes from './routes/subject.routes.js';
@@ -22,6 +23,7 @@ app.use(cors({
 
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/library', booksRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/upload', uploadRoutes);
 
