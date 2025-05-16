@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import FeesPage from './pages/Fees/FeesPage';
 import StudentPage from './pages/Students/StudentPage';
 import StudentForm from './components/students/StudentForm';
 import TeacherPage from './pages/Teachers/TeacherPage';
@@ -43,6 +44,8 @@ const App = () => {
                   <Route path="/edit-student/:id" element={<StudentForm />} />
                   <Route path="/academics" element={<AcademicsPage />} />
                   <Route path="/attendance" element={<AttendancePage />} />
+                  <Route path="/fees" element={<FeesPage />} />
+                  /fees
                 </Routes>
               </Container>
             </Box>
