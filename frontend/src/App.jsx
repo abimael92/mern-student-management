@@ -9,6 +9,7 @@ import FeesPage from './pages/Fees/FeesPage';
 import StudentPage from './pages/Students/StudentPage';
 import StudentForm from './components/students/StudentForm';
 import TeacherPage from './pages/Teachers/TeacherPage';
+import TransportPage from './pages/Transport/TransportPage';
 import AcademicsPage from './pages/Academics/AcademicsPage';
 import AttendancePage from './pages/Attendance/AttendancePage';
 
@@ -45,6 +46,7 @@ const App = () => {
                   <Route path="/academics" element={<AcademicsPage />} />
                   <Route path="/attendance" element={<AttendancePage />} />
                   <Route path="/fees" element={<FeesPage />} />
+                  <Route path="/transport" element={<TransportPage />} />
                   /fees
                 </Routes>
               </Container>
