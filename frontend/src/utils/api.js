@@ -1,4 +1,3 @@
-import axios from 'axios';
 const BASE = import.meta.env.VITE_API_URL;
 
 export const api = {
@@ -200,6 +199,12 @@ export const api = {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
+
+    fetchTextbooks: async () => {
+        const response = await fetch(`${BASE}/api/library`);
+        const data = await response.json();
+        return data;
+    }
 
 
 };

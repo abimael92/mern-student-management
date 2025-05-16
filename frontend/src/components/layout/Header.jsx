@@ -92,7 +92,6 @@ const Header = () => {
       name: 'Library',
       path: '/library',
       icon: <LibraryBooksIcon />,
-      comingSoon: true,
     },
   ];
 

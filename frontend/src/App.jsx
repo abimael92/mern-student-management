@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import FeesPage from './pages/Fees/FeesPage';
+import LibraryPage from './pages/Library/LibraryPage';
 import StudentPage from './pages/Students/StudentPage';
 import StudentForm from './components/students/StudentForm';
 import TeacherPage from './pages/Teachers/TeacherPage';
@@ -47,6 +48,7 @@ const App = () => {
                   <Route path="/attendance" element={<AttendancePage />} />
                   <Route path="/fees" element={<FeesPage />} />
                   <Route path="/transport" element={<TransportPage />} />
+                  <Route path="/library" element={<LibraryPage />} />
                   /fees
                 </Routes>
               </Container>
