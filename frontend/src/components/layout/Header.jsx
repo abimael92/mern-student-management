@@ -79,7 +79,7 @@ const Header = () => {
   ];
 
   const financialLogisticsItems = [
-    { name: 'Fees', path: '/fees', icon: <ReceiptIcon />, comingSoon: true },
+    { name: 'Fees', path: '/fees', icon: <ReceiptIcon /> },
     {
       name: 'Transport',
       path: '/transport',
