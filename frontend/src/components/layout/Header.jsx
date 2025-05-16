@@ -84,7 +84,6 @@ const Header = () => {
       name: 'Transport',
       path: '/transport',
       icon: <LocalShippingIcon />,
-      comingSoon: true,
     },
   ];
 
