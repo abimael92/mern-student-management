@@ -16,7 +16,7 @@ const LibraryPage = () => {
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Open Textbook Library
+        Textbook Library
       </Typography>
       <Grid container spacing={4}>
         {textbooks.map((book) => (

@@ -49,7 +49,6 @@ const App = () => {
                   <Route path="/fees" element={<FeesPage />} />
                   <Route path="/transport" element={<TransportPage />} />
                   <Route path="/library" element={<LibraryPage />} />
-                  /fees
                 </Routes>
               </Container>
             </Box>
