@@ -13,7 +13,6 @@ import TeacherPage from './pages/Teachers/TeacherPage';
 import TransportPage from './pages/Transport/TransportPage';
 import AcademicsPage from './pages/Academics/AcademicsPage';
 import AttendancePage from './pages/Attendance/AttendancePage';
-import FeesPage from './pages/Fees/FeesPage';
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -50,7 +49,6 @@ const App = () => {
                   <Route path="/fees" element={<FeesPage />} />
                   <Route path="/transport" element={<TransportPage />} />
                   <Route path="/library" element={<LibraryPage />} />
-                  /fees
                 </Routes>
               </Container>
             </Box>
