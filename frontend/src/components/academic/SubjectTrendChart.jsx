@@ -12,20 +12,32 @@ import {
 import { mockSubjects } from '../../utils/mock/mockSubjectsData';
 
 const SubjectTrendChart = ({ subjects }) => {
-  const data = mockSubjects.map((subject) => ({
-    name: subject.name,
-    gradeTrend: subject.gradeTrend, // Assuming `gradeTrend` is an array of grades over time
-  }));
+  const terms = mockSubjects[0].gradeTrend.map((entry) => entry.term);
+
+  const data = terms.map((term, i) => {
+    const entry = { term };
+    mockSubjects.forEach((subject) => {
+      entry[subject.name] = subject.gradeTrend[i].grade;
+    });
+    return entry;
+  });
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
+        <XAxis dataKey="term" />
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="gradeTrend" stroke="#8884d8" />
+        {mockSubjects.map((subject) => (
+          <Line
+            key={subject.name}
+            type="monotone"
+            dataKey={subject.name}
+            stroke="#8884d8"
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );
