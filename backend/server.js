@@ -7,6 +7,7 @@ import booksRoutes from './routes/books.route.js';
 import studentRoutes from './routes/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
 import subjectRoutes from './routes/subject.routes.js';
+import courseRoutes from './routes/course.routes.js';
 import connectDB from './config/db.js';
 import uploadRoutes from './routes/upload.js';  // Use import for consistency
 
@@ -25,6 +26,7 @@ app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/library', booksRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/courses', courseRoutes);
 app.use('/api/upload', uploadRoutes);
 
 
