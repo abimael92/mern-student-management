@@ -106,6 +106,7 @@ npm run build --prefix backend
 
 The folder structure for this project is as follows:
 
+```
 /mern-student-management
 │
 ├── /frontend # Frontend React App
@@ -128,6 +129,7 @@ The folder structure for this project is as follows:
 ├── .eslintrc.js # ESLint configuration
 ├── .prettierrc # Prettier configuration
 └── /logs # Log files (e.g., server logs, error logs)
+```
 
 ---
 
