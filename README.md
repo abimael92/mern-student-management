@@ -135,6 +135,7 @@ If there are files that are no longer necessary in either the frontend or backen
 
 If no longer needed, delete:
 
+
 - **Unnecessary Components**: If you have components that aren't being used, you can delete them from `frontend/src/components/`.
 
   Example:
