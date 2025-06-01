@@ -14,25 +14,33 @@ Follow these steps to get your environment up and running:
 
 Clone the repository to your local machine:
 
+ ```
 git clone https://github.com/yourusername/mern-student-management.git cd mern-student-management
+ ```
 
 ### 2. Install Root Dependencies
 
 From the root directory, install the root-level dependencies:
 
+ ```
 npm install
+ ```
 
 ### 3. Install Frontend Dependencies
 
 Navigate to the `frontend` folder and install its dependencies:
 
+ ```
 npm install --prefix frontend
+ ```
 
 ### 4. Install Backend Dependencies
 
 Navigate to the `backend` folder and install its dependencies:
 
+ ```
 npm install --prefix backend
+ ```
 
 ---
 
@@ -126,6 +134,7 @@ If there are files that are no longer necessary in either the frontend or backen
 ### **Frontend:**
 
 If no longer needed, delete:
+
 
 - **Unnecessary Components**: If you have components that aren't being used, you can delete them from `frontend/src/components/`.
 
