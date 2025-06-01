@@ -88,13 +88,17 @@ To build the frontend and backend for production, run the following commands:
 
 Navigate to the `frontend` directory and run:
 
+```
 npm run build --prefix frontend
+```
 
 ### Build the Backend
 
 Navigate to the `backend` directory and run:
 
+```
 npm run build --prefix backend
+```
 
 ---
 
