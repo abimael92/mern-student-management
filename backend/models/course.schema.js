@@ -12,7 +12,8 @@ const courseSchema = new mongoose.Schema({
     teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: [] }], // co-teachers or subject-specific
 
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student', default: [] }],
-    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject', default: [] }]
+    subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', default: null }
+
 
 }, { timestamps: true });
 

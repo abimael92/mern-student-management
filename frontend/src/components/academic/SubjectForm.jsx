@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { TextField, Button, Grid, MenuItem } from '@mui/material';
 
-const SubjectForm = ({
-  selectedSubject,
-  setSelectedSubject,
-  onSave,
-  teachers,
-  students,
-}) => {
+const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
+  const teachers = useSelector((state) => state.teachers.teachers || []);
+  const students = useSelector((state) => state.students.students || []);
+
   const [subjectData, setSubjectData] = useState({
     name: '',
     code: '',
@@ -91,6 +89,9 @@ const SubjectForm = ({
     setSelectedSubject(null);
   };
 
+  console.log('Teachers:', teachers);
+  console.log('Students:', students);
+
   return (
     <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
@@ -159,7 +160,7 @@ const SubjectForm = ({
             <MenuItem value="">None</MenuItem>
             {teachers.map((teacher) => (
               <MenuItem key={teacher._id} value={teacher._id}>
-                {teacher.name}
+                {`${teacher.firstName} ${teacher.lastName}`.trim()}
               </MenuItem>
             ))}
           </TextField>
@@ -176,7 +177,7 @@ const SubjectForm = ({
           >
             {students.map((student) => (
               <MenuItem key={student._id} value={student._id}>
-                {student.name}
+                {`${student.firstName} ${student.lastName}`.trim()}
               </MenuItem>
             ))}
           </TextField>
