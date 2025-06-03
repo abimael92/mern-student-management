@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
 
 const teacherSchema = new mongoose.Schema({
+    // 🔹 General Identification
+    teacherNumber: {
+        type: String,
+        required: true,
+        unique: true
+    },
     firstName: {
         type: String,
         required: true,
@@ -13,6 +19,12 @@ const teacherSchema = new mongoose.Schema({
         trim: true,
         maxlength: 50
     },
+    profilePicture: {
+        type: String,
+        default: '',
+    },
+
+    // 🔹 Contact Information
     email: {
         type: String,
         unique: true,
@@ -22,35 +34,6 @@ const teacherSchema = new mongoose.Schema({
             validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
             message: props => `${props.value} is not a valid email!`
         }
-    },
-    profilePicture: {
-        type: String,
-        default: '',
-    },
-    teacherNumber: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject', default: [] }],
-    totalWeeklyHours: { type: Number, default: 0 },
-    qualifications: {
-        type: [String],
-        default: [],
-        enum: ['Bachelors', 'Masters', 'PhD', 'Teaching Certificate', 'Diploma', 'Recognition', 'Certificate']
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    },
-    joiningDate: {
-        type: Date,
-        default: Date.now
-    },
-    salary: {
-        base: { type: Number, min: 0 },
-        currency: { type: String, default: 'USD' },
-        paymentSchedule: { type: String, enum: ['monthly', 'bi-weekly', 'weekly'], default: 'monthly' }
     },
     address: {
         street: { type: String, maxlength: 100 },
@@ -70,7 +53,31 @@ const teacherSchema = new mongoose.Schema({
             }
         }
     },
-    // Classes assigned (hourly, Mon-Fri, 8am-4pm)
+
+    // 🔹 Employment Details
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    joiningDate: {
+        type: Date,
+        default: Date.now
+    },
+    salary: {
+        base: { type: Number, min: 0 },
+        currency: { type: String, default: 'USD' },
+        paymentSchedule: { type: String, enum: ['monthly', 'bi-weekly', 'weekly'], default: 'monthly' }
+    },
+    qualifications: {
+        type: [String],
+        default: [],
+        enum: ['Bachelors', 'Masters', 'PhD', 'Teaching Certificate', 'Diploma', 'Recognition', 'Certificate']
+    },
+    totalWeeklyHours: { type: Number, default: 0 },
+
+    // 🔹 Teaching Assignments
+    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
+    courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
     classesAssigned: [{
         classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', required: true },
         subject: {
@@ -90,36 +97,34 @@ const teacherSchema = new mongoose.Schema({
             required: true
         }
     }],
-    // Attendance reference (external schema)
-    attendance: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Attendance'
-    }],
-    // Performance reviews
+
+    // 🔹 Relations with Students
+    tutoredStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
+    tutorForStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
+
+    // 🔹 Attendance & Performance
+    attendance: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Attendance' }],
     performanceReviews: [{
         date: { type: Date, default: Date.now },
         reviewer: { type: String, required: true },
         rating: { type: Number, min: 1, max: 5 },
         comments: String
     }],
-    // Notes left for students
     studentNotes: [{
         studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
         note: { type: String, required: true },
         date: { type: Date, default: Date.now }
-    }],
-    // Students they tutor
-    tutoredStudents: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Student'
     }]
+
 }, { timestamps: true });
 
 // Virtuals
 teacherSchema.virtual('fullName').get(function () {
     return `${this.firstName} ${this.lastName}`;
 });
+
 teacherSchema.virtual('yearsAtSchool').get(function () {
+    if (!this.joiningDate) return 0;
     return new Date().getFullYear() - this.joiningDate.getFullYear();
 });
 
