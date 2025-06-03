@@ -200,6 +200,42 @@ export const api = {
         return res.json();
     },
 
+    // === COURSE CRUD ===
+    fetchCourses: async () => {
+        const res = await fetch(`${BASE}/api/courses`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    addCourse: async (data) => {
+        const res = await fetch(`${BASE}/api/courses`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    updateCourse: async (course) => {
+        if (!course._id) throw new Error('Invalid course ID');
+        const res = await fetch(`${BASE}/api/courses/${course._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(course),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    deleteCourse: async (id) => {
+        const res = await fetch(`${BASE}/api/courses/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(await res.text());
+        return res.status === 204 ? null : res.json();
+    },
+
+
+
     fetchTextbooks: async () => {
         const response = await fetch(`${BASE}/api/library`);
         const data = await response.json();
