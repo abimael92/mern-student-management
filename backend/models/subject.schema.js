@@ -6,8 +6,9 @@ const subjectSchema = new mongoose.Schema({
     description: { type: String, default: '' },
     classLevel: { type: String, default: '' },
 
-    teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null },
+    teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: [] }],
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student', default: [] }],
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
 
     weeklyHours: { type: Number, default: 0 }
 }, { timestamps: true });

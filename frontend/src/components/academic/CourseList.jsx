@@ -6,14 +6,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  Box,
   IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const CourseList = ({ courses, onEdit, onDelete }) => (
-  <TableContainer component={Paper}>
+  <TableContainer component={Box}>
     <Table size="small">
       <TableHead>
         <TableRow>
@@ -27,17 +27,24 @@ const CourseList = ({ courses, onEdit, onDelete }) => (
       </TableHead>
       <TableBody>
         {courses.map((course) => (
-          <TableRow key={course.id || course._id || course.code}>
+          <TableRow key={course._id || course.code}>
             <TableCell>{course.code}</TableCell>
             <TableCell>{course.name}</TableCell>
-            <TableCell>{course.instructor?.name || '-'}</TableCell>
+            <TableCell>
+              {course.instructor && typeof course.instructor === 'object'
+                ? `${course.instructor.firstName || ''} ${course.instructor.lastName || ''}`.trim()
+                : 'Unassigned'}
+            </TableCell>
             <TableCell>{course.semester}</TableCell>
             <TableCell>{course.grade}</TableCell>
             <TableCell>
-              <IconButton onClick={() => onEdit(course)}>
+              <IconButton onClick={() => onEdit(course)} aria-label="edit">
                 <EditIcon />
               </IconButton>
-              <IconButton onClick={() => onDelete(course._id)}>
+              <IconButton
+                onClick={() => onDelete(course._id)}
+                aria-label="delete"
+              >
                 <DeleteIcon />
               </IconButton>
             </TableCell>

@@ -1,48 +1,70 @@
-import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { Box, Typography, Paper, Button } from '@mui/material';
 import SubjectManagement from '../../components/academic/SubjectManagement';
-import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview';
-import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
-import CourseList from '../../components/academic/CourseList';
-import CourseForm from '../../components/academic/CourseForm'; // inside
-
-import GradeHistory from '../../components/academic/GradeHistory';
-
-import { courses, gradeHistory } from '../../utils/mock/AcademicsPage';
+import CoursesManager from '../../components/academic//CoursesManager';
 
 const AcademicsPage = () => {
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const navigate = useNavigate();
+
+  const handleAddCourse = (course) => {
+    const newCourse = { ...course, id: Date.now().toString() };
+    setCourses((prev) => [...prev, newCourse]);
+    setSelectedCourse(null);
+  };
+
+  const handleEditCourse = (updatedCourse) => {
+    if (!selectedCourse) return;
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.id === selectedCourse.id
+          ? { ...updatedCourse, id: selectedCourse.id }
+          : c
+      )
+    );
+    setSelectedCourse(null);
+  };
+
+  const handleDeleteCourse = (id) => {
+    setCourses((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const handleEditClick = (course) => {
+    setSelectedCourse(course);
+  };
+
+  const handleCancel = () => {
+    setSelectedCourse(null);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Academics Overview
       </Typography>
       <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="h6">Courses</Typography>
-        <CourseList courses={courses} />
+        <CoursesManager />
       </Paper>
-      AcademicsPage return, add above CourseList
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="h6">Add New Course</Typography>
-        <CourseForm
-          onSubmit={(newCourse) => {
-            // handle new course submit here (e.g. API call, state update)
-            console.log('New course data:', newCourse);
-          }}
-        />
-      </Paper>
+
       <Paper sx={{ p: 2, mt: 2 }}>
         <SubjectManagement />
-      </Paper>
-      {/* Subjects & Performance Overview */}
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <SubjectsPerformanceOverview />
-      </Paper>
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <SubjectsStatusView />
-      </Paper>
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="h6">Grades</Typography>
-        <GradeHistory history={gradeHistory} />
+        <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/academics/performance')}
+          >
+            View Performance Reports
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/academics/grades-analytics')}
+          >
+            View Grades Analytics
+          </Button>
+        </Box>
       </Paper>
     </Box>
   );
