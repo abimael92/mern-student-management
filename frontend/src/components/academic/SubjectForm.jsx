@@ -5,6 +5,7 @@ import { TextField, Button, Grid, MenuItem } from '@mui/material';
 const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
   const teachers = useSelector((state) => state.teachers.teachers || []);
   const students = useSelector((state) => state.students.students || []);
+  const courses = useSelector((state) => state.courses.courses || []); // <-- use courses from store
 
   const [subjectData, setSubjectData] = useState({
     name: '',
@@ -14,11 +15,11 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
     teacher: '',
     students: [],
     weeklyHours: 0,
+    availableCourses: [], // <-- will hold course IDs, not strings
   });
 
   useEffect(() => {
     if (selectedSubject) {
-      console.log('Selected Subject ID:', selectedSubject._id);
       setSubjectData({
         name: selectedSubject.name || '',
         code: selectedSubject.code || '',
@@ -27,40 +28,53 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
         teacher: selectedSubject.teacher?._id || '',
         students: selectedSubject.students?.map((s) => s._id) || [],
         weeklyHours: selectedSubject.weeklyHours || 0,
+        availableCourses:
+          selectedSubject.availableCourses?.map((c) =>
+            typeof c === 'object' ? c._id : c
+          ) || [],
       });
     }
   }, [selectedSubject]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSubjectData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setSubjectData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleStudentSelect = (e) => {
+    const { value } = e.target;
     setSubjectData((prev) => ({
       ...prev,
-      students: Array.from(e.target.selectedOptions, (option) => option.value),
+      students: typeof value === 'string' ? value.split(',') : value,
+    }));
+  };
+
+  const handleAvailableCoursesChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSubjectData((prev) => ({
+      ...prev,
+      availableCourses: typeof value === 'string' ? value.split(',') : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Check if the name is empty
     if (!subjectData.name) {
       console.error('Name is required');
-      return; // Exit early if validation fails
+      return;
     }
 
     const dataToSave = {
       ...subjectData,
       weeklyHours: Number(subjectData.weeklyHours) || 0,
-      teacher: subjectData.teacher || null, // Convert empty string to null
+      teacher: subjectData.teacher || null,
       students: Array.isArray(subjectData.students)
-        ? subjectData.students.filter((id) => id) // Remove empty strings
+        ? subjectData.students.filter((id) => id)
+        : [],
+      availableCourses: Array.isArray(subjectData.availableCourses)
+        ? subjectData.availableCourses.filter((id) => id)
         : [],
     };
 
@@ -72,10 +86,8 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
     }
   };
 
-  const onCancel = async (e) => {
-    e.preventDefault();
-
-    // Check if the name is empty
+  const onCancel = (e) => {
+    if (e) e.preventDefault();
     setSubjectData({
       name: '',
       code: '',
@@ -84,19 +96,16 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
       teacher: '',
       students: [],
       weeklyHours: 0,
+      availableCourses: [],
     });
-
     setSelectedSubject(null);
   };
-
-  console.log('Teachers:', teachers);
-  console.log('Students:', students);
 
   return (
     <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          {selectedSubject && (
+        {selectedSubject && (
+          <Grid item xs={12} md={6}>
             <TextField
               label="Subject Code"
               name="code"
@@ -104,8 +113,8 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
               fullWidth
               disabled
             />
-          )}
-        </Grid>
+          </Grid>
+        )}
         <Grid item xs={12} md={12}>
           <TextField
             label="Subject Name"
@@ -116,7 +125,6 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
             required
           />
         </Grid>
-
         <Grid item xs={12}>
           <TextField
             label="Description"
@@ -168,11 +176,18 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
         <Grid item xs={12} md={6}>
           <TextField
             select
-            SelectProps={{ multiple: true }}
             label="Students"
             name="students"
             value={subjectData.students}
             onChange={handleStudentSelect}
+            SelectProps={{
+              multiple: true,
+              renderValue: (selected) =>
+                students
+                  .filter((s) => selected.includes(s._id))
+                  .map((s) => `${s.firstName} ${s.lastName}`)
+                  .join(', '),
+            }}
             fullWidth
           >
             {students.map((student) => (
@@ -182,6 +197,32 @@ const SubjectForm = ({ selectedSubject, setSelectedSubject, onSave }) => {
             ))}
           </TextField>
         </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            select
+            label="Available Courses"
+            name="availableCourses"
+            value={subjectData.availableCourses}
+            onChange={handleAvailableCoursesChange}
+            SelectProps={{
+              multiple: true,
+              renderValue: (selected) =>
+                courses
+                  .filter((c) => selected.includes(c._id))
+                  .map((c) => c.name)
+                  .join(', '),
+            }}
+            fullWidth
+          >
+            {courses.map((course) => (
+              <MenuItem key={course._id} value={course._id}>
+                {course.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+
         <Grid item xs={12}>
           <Grid container spacing={2} justifyContent="center">
             <Grid item>
