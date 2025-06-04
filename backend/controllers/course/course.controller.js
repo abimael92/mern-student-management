@@ -6,7 +6,6 @@ import { generateCourseCode } from '../../services/subjectCode.service.js';
 export const getCourses = async (req, res) => {
     try {
         const courses = await Course.find();
-        console.log('Courses fetched:', courses.length);
         res.status(200).json(courses);
     } catch (err) {
         res.status(500).json({ message: err.message });
