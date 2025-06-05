@@ -1,75 +1,61 @@
+// GPAStudentList.jsx
 import React, { useState } from 'react';
 import {
-  Box,
-  Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
   Paper,
+  Box,
+  Collapse,
+  Typography,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import StudentItem from './GPAStudentItem';
+import GPAStudentItem from './GPAStudentItem';
 
-const StudentList = ({ students = [], subjects = [] }) => {
-  const [expandedSubject, setExpandedSubject] = useState(null);
-
-  const handleAccordionChange = (subjectId) => {
-    setExpandedSubject((prev) => (prev === subjectId ? null : subjectId));
-  };
+const GPAStudentList = ({
+  students,
+  subjects,
+  courses,
+  subjectFilter,
+  courseFilter,
+}) => {
+  const getSubject = (id) => subjects.find((s) => s.id === id);
+  const getTeacher = (subjectId) => getSubject(subjectId)?.teacher ?? 'N/A';
 
   return (
-    <Box sx={{ overflowX: 'auto', p: 2 }}>
-      {(subjects || []).map((subject) => (
-        <Accordion
-          key={subject.id ?? subject.name}
-          expanded={expandedSubject === subject.id}
-          onChange={() => handleAccordionChange(subject.id)}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">
-              {subject.name ?? 'Unnamed Subject'}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Paper sx={{ minWidth: 800 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Student Name</TableCell>
-                    {(subject.courses || []).map((course) => (
-                      <TableCell key={course.id ?? course.name}>
-                        {course.name ?? 'Unnamed Course'}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(students || [])
-                    .filter(
-                      (student) =>
-                        Array.isArray(student.subjects) &&
-                        student.subjects.includes(subject.id)
-                    )
-                    .map((student) => (
-                      <StudentItem
-                        key={student.id ?? student.name}
-                        student={student}
-                        courses={subject.courses || []}
-                      />
-                    ))}
-                </TableBody>
-              </Table>
-            </Paper>
-          </AccordionDetails>
-        </Accordion>
-      ))}
-    </Box>
+    <Paper sx={{ mt: 4 }}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Student</TableCell>
+            <TableCell>Teacher</TableCell>
+            <TableCell>Subject</TableCell>
+            <TableCell>Score</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {students.map((student) => {
+            const subjectsToShow = subjectFilter
+              ? (student.subjects || []).filter((sid) => sid === subjectFilter)
+              : student.subjects || [];
+
+            return subjectsToShow.map((subId) => (
+              <GPAStudentItem
+                key={`${student.id}-${subId}`}
+                student={student}
+                subjectId={subId}
+                subject={getSubject(subId)}
+                teacher={getTeacher(subId)}
+                courses={courses.filter((c) => c.subjectId === subId)}
+                courseFilter={courseFilter}
+              />
+            ));
+          })}
+        </TableBody>
+      </Table>
+    </Paper>
   );
 };
 
-export default StudentList;
+export default GPAStudentList;
