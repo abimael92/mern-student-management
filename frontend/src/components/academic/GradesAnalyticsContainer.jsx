@@ -27,6 +27,7 @@ const GradesAnalyticsContainer = () => {
       </Typography>
 
       {/* Section: GPA Summary Cards */}
+      {/* Section: GPA Summary Cards */}
       <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
         GPA Summary Cards
       </Typography>
@@ -34,17 +35,7 @@ const GradesAnalyticsContainer = () => {
         Key indicators like average GPA, most improved student, and difficult
         subjects. These provide high-level insights at a glance.
       </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={4}>
-          <Paper sx={{ p: 2 }}>School Average GPA</Paper>
-        </Grid>
-        <Grid item xs={4}>
-          <Paper sx={{ p: 2 }}>Most Improved Student</Paper>
-        </Grid>
-        <Grid item xs={4}>
-          <Paper sx={{ p: 2 }}>Most Challenging Subject</Paper>
-        </Grid>
-      </Grid>
+      <GpaSummaryCards />
 
       {/* Section: Filters */}
       <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
