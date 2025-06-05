@@ -1,25 +1,31 @@
-// GPAStudentFilter.jsx
 import React from 'react';
 import { Box, Grid, TextField, MenuItem } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const GPAStudentFilter = ({
   subjectFilter,
   setSubjectFilter,
   courseFilter,
   setCourseFilter,
+  teacherFilter,
+  setTeacherFilter,
   studentNameFilter,
   setStudentNameFilter,
+  semesterFilter,
+  setSemesterFilter,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
   subjects,
   courses,
+  teachers,
 }) => {
-  const filteredCourses = courses.filter(
-    (course) => subjectFilter && course.subjectId === subjectFilter
-  );
-
   return (
     <Box sx={{ p: 2 }}>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={4}>
+        {/* Subject Filter */}
+        <Grid item xs={12} sm={3}>
           <TextField
             select
             label="Subject"
@@ -29,36 +35,86 @@ const GPAStudentFilter = ({
           >
             <MenuItem value="">All</MenuItem>
             {subjects.map((s) => (
-              <MenuItem key={`subject-${s.id}`} value={s.id}>
+              <MenuItem key={s.id} value={s.id}>
                 {s.name}
               </MenuItem>
             ))}
           </TextField>
         </Grid>
-        {subjectFilter && (
-          <Grid item xs={12} sm={4}>
-            <TextField
-              select
-              label="Course"
-              value={courseFilter}
-              onChange={(e) => setCourseFilter(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="">All</MenuItem>
-              {filteredCourses.map((c) => (
-                <MenuItem key={`course-${c.id}`} value={c.id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-        )}
-        <Grid item xs={12} sm={4}>
+
+        {/* Course Filter */}
+        <Grid item xs={12} sm={3}>
+          <TextField
+            select
+            label="Course"
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+            fullWidth
+          >
+            <MenuItem value="">All</MenuItem>
+            {courses.map((c) => (
+              <MenuItem key={c.id} value={c.id}>
+                {c.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+
+        {/* Teacher Filter */}
+        <Grid item xs={12} sm={3}>
+          <TextField
+            select
+            label="Teacher"
+            value={teacherFilter}
+            onChange={(e) => setTeacherFilter(e.target.value)}
+            fullWidth
+          >
+            <MenuItem value="">All</MenuItem>
+            {teachers.map((t) => (
+              <MenuItem key={t.id} value={t.id}>
+                {t.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+
+        {/* Student Name Filter */}
+        <Grid item xs={12} sm={3}>
           <TextField
             label="Student Name"
             value={studentNameFilter}
             onChange={(e) => setStudentNameFilter(e.target.value)}
             fullWidth
+          />
+        </Grid>
+
+        {/* Semester Filter */}
+        <Grid item xs={12} sm={3}>
+          <TextField
+            label="Semester / Grade"
+            value={semesterFilter}
+            onChange={(e) => setSemesterFilter(e.target.value)}
+            fullWidth
+          />
+        </Grid>
+
+        {/* Start Date Picker */}
+        <Grid item xs={12} sm={3}>
+          <DatePicker
+            label="Start Date"
+            value={startDate}
+            onChange={(date) => setStartDate(date)}
+            slotProps={{ textField: { fullWidth: true } }}
+          />
+        </Grid>
+
+        {/* End Date Picker */}
+        <Grid item xs={12} sm={3}>
+          <DatePicker
+            label="End Date"
+            value={endDate}
+            onChange={(date) => setEndDate(date)}
+            slotProps={{ textField: { fullWidth: true } }}
           />
         </Grid>
       </Grid>
