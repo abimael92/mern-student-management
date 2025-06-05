@@ -1,27 +1,22 @@
+// GPAStudentsManager.jsx
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
 import { fetchStudents } from '../../redux/actions/studentActions';
 import { fetchSubjects } from '../../redux/actions/subjectsActions';
 import { fetchCourses } from '../../redux/actions/coursesActions';
-
-import StudentFilter from './GPAStudentFilter';
-import StudentList from './GPAStudentList';
-
+import GPAStudentFilter from './GPAStudentFilter';
+import GPAStudentList from './GPAStudentList';
 import { Typography, Box } from '@mui/material';
 
-const StudentsManager = () => {
+const GPAStudentsManager = () => {
   const dispatch = useDispatch();
-
-  // Added students selector here
   const students = useSelector((state) => state.students.students) || [];
   const subjects = useSelector((state) => state.subjects.subjects) || [];
   const courses = useSelector((state) => state.courses.courses) || [];
 
-  const [courseFilter, setCourseFilter] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('');
+  const [courseFilter, setCourseFilter] = useState('');
   const [studentNameFilter, setStudentNameFilter] = useState('');
-  const [dateRangeFilter, setDateRangeFilter] = useState('');
 
   useEffect(() => {
     dispatch(fetchStudents());
@@ -30,43 +25,39 @@ const StudentsManager = () => {
   }, [dispatch]);
 
   const filteredStudents = students.filter((student) => {
-    const courseIdStr = student.courseId?.toString();
-    const matchesCourse = courseFilter ? courseIdStr === courseFilter : true;
-
-    // Assuming student.subjects is array of subject IDs (string or number)
-    const subjectsIdsStr = (student.subjects || []).map((id) => id.toString());
     const matchesSubject = subjectFilter
-      ? subjectsIdsStr.includes(subjectFilter)
+      ? student.subjects?.includes(subjectFilter)
       : true;
-
     const matchesName = studentNameFilter
       ? student.name.toLowerCase().includes(studentNameFilter.toLowerCase())
       : true;
-
-    // TODO: implement date filtering if your student has date field
-    return matchesCourse && matchesSubject && matchesName;
+    return matchesSubject && matchesName;
   });
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Student Management
+        GPA Student Manager
       </Typography>
-      <StudentFilter
-        courseFilter={courseFilter}
-        setCourseFilter={setCourseFilter}
+      <GPAStudentFilter
         subjectFilter={subjectFilter}
         setSubjectFilter={setSubjectFilter}
+        courseFilter={courseFilter}
+        setCourseFilter={setCourseFilter}
         studentNameFilter={studentNameFilter}
         setStudentNameFilter={setStudentNameFilter}
-        dateRangeFilter={dateRangeFilter}
-        setDateRangeFilter={setDateRangeFilter}
-        courses={courses}
         subjects={subjects}
+        courses={courses}
       />
-      <StudentList students={filteredStudents} subjects={subjects} />
+      <GPAStudentList
+        students={filteredStudents}
+        subjects={subjects}
+        courses={courses}
+        subjectFilter={subjectFilter}
+        courseFilter={courseFilter}
+      />
     </Box>
   );
 };
 
-export default StudentsManager;
+export default GPAStudentsManager;
