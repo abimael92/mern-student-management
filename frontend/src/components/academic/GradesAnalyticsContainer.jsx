@@ -6,6 +6,7 @@ import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerfo
 import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
 
 import GpaSummaryCards from '../../components/academic/GpaSummaryCards';
+import GPAManager from '../../components/academic/GPAManager';
 
 import CourseList from '../../components/academic/CourseList';
 import CourseForm from '../../components/academic/CourseForm'; // inside
@@ -48,7 +49,9 @@ const GradesAnalyticsContainer = () => {
         Allows filtering by class, subject, student name, and date range.
         Adjusts the data shown in the table and charts below.
       </Typography>
-      <Paper sx={{ p: 2 }}>Filter Controls Placeholder</Paper>
+      <Paper sx={{ p: 2 }}>
+        <GPAManager />
+      </Paper>
 
       {/* Section: Grades Table */}
       <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
