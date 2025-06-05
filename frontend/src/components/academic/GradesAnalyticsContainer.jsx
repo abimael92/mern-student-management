@@ -4,6 +4,9 @@ import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 import SubjectManagement from '../../components/academic/SubjectManagement';
 import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview';
 import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
+
+import GpaSummaryCards from '../../components/academic/GpaSummaryCards';
+
 import CourseList from '../../components/academic/CourseList';
 import CourseForm from '../../components/academic/CourseForm'; // inside
 
