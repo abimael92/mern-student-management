@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { mockSubjects } from '../../utils/mock/mockSubjectsData';
 
-const c = ({ subjects }) => {
+const SubjectTrendChart = ({ subjects }) => {
   const terms = mockSubjects[0].gradeTrend.map((entry) => entry.term);
 
   const data = terms.map((term, i) => {
