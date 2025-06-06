@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStudents } from '../../redux/actions/studentActions';
 import { fetchSubjects } from '../../redux/actions/subjectsActions';
 import { fetchCourses } from '../../redux/actions/coursesActions';
-import { fetchTeachers } from '../../redux/actions/teacherActions'; // Added
+import { fetchTeachers } from '../../redux/actions/teacherActions';
 import GPAStudentFilter from './GPAStudentFilter';
 import GPAStudentList from './GPAStudentList';
 import { Typography, Box } from '@mui/material';
@@ -14,34 +14,47 @@ const GPAStudentsManager = () => {
   const students = useSelector((state) => state.students.students) || [];
   const subjects = useSelector((state) => state.subjects.subjects) || [];
   const courses = useSelector((state) => state.courses.courses) || [];
-  const teachers = useSelector((state) => state.teachers.teachers) || []; // Added
+  const teachers = useSelector((state) => state.teachers.teachers) || [];
 
-  const [subjectFilter, setSubjectFilter] = useState('');
-  const [courseFilter, setCourseFilter] = useState('');
-  const [teacherFilter, setTeacherFilter] = useState(''); // Added
-  const [studentNameFilter, setStudentNameFilter] = useState('');
-  const [semesterFilter, setSemesterFilter] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  // All filters state here
+  const [filters, setFilters] = useState({
+    subjectFilter: '',
+    courseFilter: '',
+    teacherFilter: '',
+    studentNameFilter: '',
+    semesterFilter: '',
+    startDate: null,
+    endDate: null,
+  });
+
+  const {
+    subjectFilter,
+    courseFilter,
+    teacherFilter,
+    studentNameFilter,
+    semesterFilter,
+    startDate,
+    endDate,
+  } = filters;
 
   useEffect(() => {
     dispatch(fetchStudents());
     dispatch(fetchSubjects());
     dispatch(fetchCourses());
-    dispatch(fetchTeachers()); // Added
+    dispatch(fetchTeachers());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (!subjectFilter) setCourseFilter('');
-  }, [subjectFilter]);
+  // Memoized filter change handler to prevent infinite loops
+  const handleFilterChange = useCallback((newFilters) => {
+    setFilters(newFilters);
+  }, []);
 
+  // Filtering logic
   const filteredStudents = students.filter((student) => {
-    // Filter by Subject
     const matchesSubject = subjectFilter
       ? student.subjects?.includes(subjectFilter)
       : true;
 
-    // Filter by Course
     const matchesCourse = courseFilter
       ? (() => {
           const courseSubjects = subjects
@@ -51,7 +64,6 @@ const GPAStudentsManager = () => {
         })()
       : true;
 
-    // Filter by Teacher (assuming each subject has a teacherId, check if student has a subject taught by selected teacher)
     const matchesTeacher = teacherFilter
       ? (() => {
           const teacherSubjectIds = subjects
@@ -61,18 +73,15 @@ const GPAStudentsManager = () => {
         })()
       : true;
 
-    // Filter by Student Name
     const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
     const matchesName = studentNameFilter
       ? fullName.includes(studentNameFilter.toLowerCase())
       : true;
 
-    // Filter by Semester
     const matchesSemester = semesterFilter
       ? student.semester?.toLowerCase().includes(semesterFilter.toLowerCase())
       : true;
 
-    // Filter by Date
     const matchesDate =
       startDate || endDate
         ? (() => {
@@ -90,7 +99,7 @@ const GPAStudentsManager = () => {
     return (
       matchesSubject &&
       matchesCourse &&
-      matchesTeacher && // Added
+      matchesTeacher &&
       matchesName &&
       matchesSemester &&
       matchesDate
@@ -103,32 +112,18 @@ const GPAStudentsManager = () => {
         GPA Student Manager
       </Typography>
       <GPAStudentFilter
-        subjectFilter={subjectFilter}
-        setSubjectFilter={setSubjectFilter}
-        courseFilter={courseFilter}
-        setCourseFilter={setCourseFilter}
-        teacherFilter={teacherFilter} // Added
-        setTeacherFilter={setTeacherFilter} // Added
-        studentNameFilter={studentNameFilter}
-        setStudentNameFilter={setStudentNameFilter}
-        semesterFilter={semesterFilter}
-        setSemesterFilter={setSemesterFilter}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
+        filters={filters}
+        onFilterChange={handleFilterChange}
         subjects={subjects}
         courses={courses}
-        teachers={teachers} // Added
+        teachers={teachers}
       />
       <GPAStudentList
         students={filteredStudents}
         subjects={subjects}
-        subjectFilter={subjectFilter}
-        courseFilter={courseFilter}
-        teacherFilter={teacherFilter} // Added if needed in list
         courses={courses}
-        teachers={teachers} // Added if needed in list
+        teachers={teachers}
+        teacherFilter={teacherFilter}
       />
     </Box>
   );
