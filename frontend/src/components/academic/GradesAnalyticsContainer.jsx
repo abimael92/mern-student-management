@@ -43,7 +43,11 @@ const GradesAnalyticsContainer = () => {
 
       {/* Section: Filters */}
       <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
-        Filters
+        Grades Table
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Table showing all student grades. Supports editing or deleting grade
+        entries.
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Allows filtering by class, subject, student name, and date range.
@@ -53,14 +57,6 @@ const GradesAnalyticsContainer = () => {
         <GPAManager />
       </Paper>
 
-      {/* Section: Grades Table */}
-      <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
-        Grades Table
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Table showing all student grades. Supports editing or deleting grade
-        entries.
-      </Typography>
       <Paper sx={{ p: 2, minHeight: 200 }}>Grades Table Placeholder</Paper>
 
       {/* Section: Charts */}
@@ -70,14 +66,7 @@ const GradesAnalyticsContainer = () => {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Visual representation of GPA trends and subject performance comparisons.
       </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Paper sx={{ p: 2 }}>GPA Trend Line Chart</Paper>
-        </Grid>
-        <Grid item xs={6}>
-          <Paper sx={{ p: 2 }}>Subject Comparison Bar Chart</Paper>
-        </Grid>
-      </Grid>
+      <SubjectsPerformanceOverview />
 
       {/* Section: At-Risk Students */}
       <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
@@ -104,9 +93,7 @@ const GradesAnalyticsContainer = () => {
         </Typography>
 
         {/* Subjects & Performance Overview */}
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <SubjectsPerformanceOverview />
-        </Paper>
+
         <Paper sx={{ p: 2, mt: 2 }}>
           <SubjectsStatusView />
         </Paper>
