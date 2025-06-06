@@ -10,10 +10,13 @@ import {
 } from 'recharts';
 import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-const COLORS = ['#4caf50', '#f44336']; // green pass, red fail
+const COLORS = ['#4caf50', '#f44336'];
 const PASS_GRADE = 60;
 
-const getRandomGrade = () => Math.floor(Math.random() * 101);
+const getRandomGrade = () => {
+  const grade = Math.floor(Math.random() * 101);
+  return grade;
+};
 
 const PassFailPieChart = () => {
   const subjects = useSelector((state) => state.subjects?.subjects || []);
@@ -22,63 +25,58 @@ const PassFailPieChart = () => {
   const subjectNames = subjects.map((s) => s.name);
   const [selectedSubject, setSelectedSubject] = useState(subjectNames[0] || '');
 
-  // Use a ref to cache random grades to avoid re-render loops
-  const randomGradesCache = useRef({});
+  // Cache structure: { [subjectName]: { [studentId]: grade } }
+  const gradesCache = useRef({});
 
-  // When subject changes, generate and cache random grades for all students missing a grade for the subject
+  // Initialize cache ONCE when component mounts or when subjects/students change
   useEffect(() => {
-    if (!selectedSubject) return;
+    if (subjectNames.length === 0 || students.length === 0) return;
 
     const newCache = {};
 
-    students.forEach((student) => {
-      // Try to get real grade from student
-      let hasRealGrade = false;
+    subjectNames.forEach((subject) => {
+      newCache[subject] = {};
 
-      if (student.grades) {
-        if (Array.isArray(student.grades)) {
-          const found = student.grades.find(
-            (g) => g.subject === selectedSubject
-          );
-          if (found && typeof found.grade === 'number') {
-            hasRealGrade = true;
-          }
-        } else if (typeof student.grades === 'object') {
-          if (typeof student.grades[selectedSubject] === 'number') {
-            hasRealGrade = true;
+      students.forEach((student) => {
+        const studentId = student.id || student._id;
+
+        // Skip if already cached (shouldn't happen with this one-time init)
+        if (gradesCache.current[subject]?.[studentId]) {
+          newCache[subject][studentId] =
+            gradesCache.current[subject][studentId];
+          return;
+        }
+
+        // Check for real grade first
+        let realGrade = null;
+        if (student.grades) {
+          if (Array.isArray(student.grades)) {
+            const found = student.grades.find((g) => g.subject === subject);
+            if (found) realGrade = found.grade;
+          } else if (student.grades[subject] !== undefined) {
+            realGrade = student.grades[subject];
           }
         }
-      }
 
-      if (!hasRealGrade) {
-        newCache[`${student.id}-${selectedSubject}`] = getRandomGrade();
-      }
+        // Store either real grade or generate random one ONCE
+        newCache[subject][studentId] =
+          realGrade !== null ? realGrade : getRandomGrade();
+      });
     });
 
-    randomGradesCache.current = newCache;
-  }, [selectedSubject, students]);
+    gradesCache.current = newCache;
+    console.log('Full grades cache:', JSON.parse(JSON.stringify(newCache)));
+  }, [subjectNames, students]); // Only runs when subjects or students change
 
   const getStudentGrade = (student, subjectName) => {
-    // Try real grade first
-    if (student.grades) {
-      if (Array.isArray(student.grades)) {
-        const record = student.grades.find((g) => g.subject === subjectName);
-        if (record && typeof record.grade === 'number') {
-          return record.grade;
-        }
-      } else if (typeof student.grades === 'object') {
-        const grade = student.grades[subjectName];
-        if (typeof grade === 'number') {
-          return grade;
-        }
-      }
+    const studentId = student.id || student._id;
+    const cachedGrade = gradesCache.current[subjectName]?.[studentId];
+
+    if (cachedGrade !== undefined) {
+      return cachedGrade;
     }
 
-    // fallback to cached random grade
-    return (
-      randomGradesCache.current[`${student.id}-${subjectName}`] ??
-      getRandomGrade()
-    );
+    return getRandomGrade();
   };
 
   const calcPassFail = (subjectName) => {
@@ -87,16 +85,19 @@ const PassFailPieChart = () => {
 
     students.forEach((student) => {
       const grade = getStudentGrade(student, subjectName);
-      if (typeof grade === 'number') {
-        if (grade >= PASS_GRADE) pass++;
-        else fail++;
-      }
+      if (grade >= PASS_GRADE) pass++;
+      else fail++;
     });
+
+    console.log(
+      `%cPASS/FAIL RESULTS | ${subjectName}: ${pass} passed, ${fail} failed`,
+      'color: #4caf50; font-weight: bold;  padding: 2px;'
+    );
 
     return { pass, fail };
   };
 
-  // Set initial selectedSubject when subjects load
+  // Set initial selectedSubject
   useEffect(() => {
     if (subjectNames.length > 0 && !selectedSubject) {
       setSelectedSubject(subjectNames[0]);
@@ -115,6 +116,7 @@ const PassFailPieChart = () => {
   }
 
   const handleChange = (event) => {
+    console.log('Subject changed to:', event.target.value);
     setSelectedSubject(event.target.value);
   };
 
