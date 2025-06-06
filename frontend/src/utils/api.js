@@ -58,11 +58,7 @@ export const api = {
 
     // === TEACHER CRUD ===
     fetchTeachers: async () => {
-        console.log('fetrching teachers');
-        console.log('BASE URL:', BASE, '/api/teachers');
-
         const res = await fetch(`${BASE}/api/teachers`);
-        console.log(res);
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
