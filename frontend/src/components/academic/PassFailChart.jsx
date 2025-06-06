@@ -163,9 +163,24 @@ const PassFailPieChart = () => {
 
   return (
     <Box
-      sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 2, display: 'flex' }}
+      sx={{
+        width: '100%',
+        maxWidth: 1200,
+        mx: 'auto',
+        p: 2,
+        display: 'flex',
+        flexDirection: selectedCategory ? 'row' : 'column',
+        alignItems: selectedCategory ? 'flex-start' : 'center',
+        justifyContent: 'center',
+        transition: 'all 0.4s ease',
+      }}
     >
-      <Box sx={{ width: '50%' }}>
+      <Box
+        sx={{
+          width: selectedCategory ? '50%' : '100%',
+          transition: 'width 0.4s ease',
+        }}
+      >
         <FormControl fullWidth>
           <InputLabel id="subject-select-label">Select Subject</InputLabel>
           <Select
@@ -189,7 +204,13 @@ const PassFailPieChart = () => {
           label={showPercentage ? 'Percentage' : 'Absolute Numbers'}
         />
 
-        <Box sx={{ width: '100%' }}>
+        <Box
+          sx={{
+            width: selectedCategory ? '50%' : '100%',
+            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)', // smoother easing
+            transform: selectedCategory ? 'translateX(0)' : 'translateX(0)', // add transform if you want sliding effect
+          }}
+        >
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
@@ -199,50 +220,28 @@ const PassFailPieChart = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={120}
-                activeIndex={
-                  selectedCategory === 'passed'
-                    ? 0
-                    : selectedCategory === 'failed'
-                      ? 1
-                      : null
-                }
-                activeShape={(props) => (
-                  <g>
-                    <defs>
-                      <filter
-                        id="glow"
-                        x="-50%"
-                        y="-50%"
-                        width="200%"
-                        height="200%"
-                      >
-                        <feDropShadow
-                          dx="0"
-                          dy="0"
-                          stdDeviation="4"
-                          floodColor="#ffeb3b"
-                        />
-                      </filter>
-                    </defs>
-                    <path
-                      d={props.sectorPath}
-                      fill={props.fill}
-                      filter="url(#glow)"
-                    />
-                  </g>
-                )}
-                onClick={handlePieClick}
                 label={({ name, percent }) =>
                   showPercentage
                     ? `${name}: ${(percent * 100).toFixed(0)}%`
                     : `${name}: ${data.find((d) => d.name === name).value}`
                 }
+                isAnimationActive={true}
+                onClick={handlePieClick}
               >
                 {data.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index]}
-                    style={{ cursor: 'pointer' }}
+                    style={{
+                      cursor: 'pointer',
+                      filter:
+                        selectedCategory &&
+                        ((selectedCategory === 'passed' && index === 0) ||
+                          (selectedCategory === 'failed' && index === 1))
+                          ? 'brightness(1.3) drop-shadow(0 0 6px #888)'
+                          : 'none',
+                      transition: 'filter 0.3s ease',
+                    }}
                   />
                 ))}
               </Pie>
