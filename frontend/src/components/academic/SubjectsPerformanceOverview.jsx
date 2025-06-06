@@ -34,17 +34,13 @@ const SubjectsPerformanceOverview = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Subjects & Performance
-      </Typography>
-
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
             <SubjectTrendChart subjects={subjectStats} />
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
             <PassFailChart subjects={subjectStats} />
           </Paper>

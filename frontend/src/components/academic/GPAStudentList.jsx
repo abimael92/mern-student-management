@@ -1,60 +1,185 @@
-// GPAStudentList.jsx
 import React, { useState } from 'react';
 import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
   Paper,
-  Box,
   Collapse,
+  Box,
   Typography,
 } from '@mui/material';
-import GPAStudentItem from './GPAStudentItem';
 
 const GPAStudentList = ({
   students,
   subjects,
-  courses,
   subjectFilter,
-  courseFilter,
+  studentNameFilter,
+  courses,
 }) => {
-  const getSubject = (id) => subjects.find((s) => s.id === id);
-  const getTeacher = (subjectId) => getSubject(subjectId)?.teacher ?? 'N/A';
+  const [orderBy, setOrderBy] = useState('studentName');
+  const [order, setOrder] = useState('asc');
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
+
+  const getSubject = (id) => subjects.find((s) => s.id === id) || {};
+
+  const handleSort = (field) => {
+    const isAsc = orderBy === field && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(field);
+  };
+
+  const rows = students.flatMap((student) => {
+    const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+    if (
+      studentNameFilter &&
+      !fullName.includes(studentNameFilter.toLowerCase())
+    )
+      return [];
+
+    const subs =
+      Array.isArray(student.subjects) && student.subjects.length > 0
+        ? student.subjects
+        : [null];
+
+    return subs
+      .filter((subId) => !subjectFilter || subId === subjectFilter)
+      .map((subId) => {
+        const subject = subId ? getSubject(subId) : {};
+        return {
+          id: `${student._id}-${subId || 'none'}`,
+          student,
+          subject,
+          studentName:
+            `${student.firstName} ${student.lastName}`.trim() || 'No Name',
+          teacher: subject.teacher || 'N/A',
+          subjectName: subject.name || 'None',
+          gpa: '-', // Placeholder
+        };
+      });
+  });
+
+  const sortedRows = [...rows].sort((a, b) => {
+    const aVal = (a[orderBy] || '').toString().toLowerCase();
+    const bVal = (b[orderBy] || '').toString().toLowerCase();
+    return order === 'asc'
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  const handleRowClick = (row) => {
+    const isSame = selectedRow === row.id;
+    setSelectedRow(isSame ? null : row.id);
+    setSelectedData(isSame ? null : row);
+  };
 
   return (
-    <Paper sx={{ mt: 4 }}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Student</TableCell>
-            <TableCell>Teacher</TableCell>
-            <TableCell>Subject</TableCell>
-            <TableCell>Score</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {students.map((student) => {
-            const subjectsToShow = subjectFilter
-              ? (student.subjects || []).filter((sid) => sid === subjectFilter)
-              : student.subjects || [];
+    <>
+      <TableContainer component={Paper} sx={{ width: '100%', mt: 4 }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#1976d2' }}>
+            <TableRow>
+              {['studentName', 'teacher', 'subjectName', 'gpa'].map((field) => (
+                <TableCell key={field} sx={{ color: 'white' }}>
+                  <TableSortLabel
+                    active={orderBy === field}
+                    direction={orderBy === field ? order : 'asc'}
+                    onClick={() => handleSort(field)}
+                    sx={{ color: 'white' }}
+                  >
+                    {field === 'studentName'
+                      ? 'Student'
+                      : field.charAt(0).toUpperCase() + field.slice(1)}
+                  </TableSortLabel>
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedRows.map((row, index) => {
+              const isSelected = selectedRow === row.id;
+              return (
+                <TableRow
+                  key={row.id}
+                  hover
+                  tabIndex={-1}
+                  onClick={() => handleRowClick(row)}
+                  sx={{
+                    cursor: 'pointer',
+                    backgroundColor: isSelected
+                      ? 'rgba(25, 118, 210, 0.3) !important'
+                      : index % 2 === 0
+                        ? '#f5f5f5 !important'
+                        : '#e0e0e0 !important',
+                    '&:hover': {
+                      backgroundColor: isSelected
+                        ? 'rgba(25, 118, 210, 0.7) !important'
+                        : 'rgba(255, 255, 153, 0.5) !important',
+                    },
+                  }}
+                >
+                  <TableCell>{row.studentName}</TableCell>
+                  <TableCell>{row.teacher}</TableCell>
+                  <TableCell>{row.subjectName}</TableCell>
+                  <TableCell>{row.gpa}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-            return subjectsToShow.map((subId) => (
-              <GPAStudentItem
-                key={`${student.id}-${subId}`}
-                student={student}
-                subjectId={subId}
-                subject={getSubject(subId)}
-                teacher={getTeacher(subId)}
-                courses={courses.filter((c) => c.subjectId === subId)}
-                courseFilter={courseFilter}
-              />
-            ));
-          })}
-        </TableBody>
-      </Table>
-    </Paper>
+      <Collapse in={!!selectedData} timeout="auto" unmountOnExit>
+        {selectedData && (
+          <Box
+            sx={{
+              p: 3,
+              mt: 2,
+              backgroundColor: '#fafafa',
+              borderRadius: 1,
+              boxShadow: 1,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              {selectedData.student.firstName} {selectedData.student.lastName}
+            </Typography>
+            <Typography variant="subtitle1" gutterBottom>
+              Subject: {selectedData.subject.name || 'None'}
+            </Typography>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Course</TableCell>
+                  <TableCell>Grade</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(
+                  courses?.filter((course) =>
+                    selectedData.subject?.courses?.includes(course.id)
+                  ) || []
+                ).map((course) => {
+                  const grade =
+                    selectedData.student.grades?.find(
+                      (g) => g.courseId === course.id
+                    )?.score ?? 'N/A';
+                  return (
+                    <TableRow key={course.id}>
+                      <TableCell>{course.name}</TableCell>
+                      <TableCell>{grade}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Box>
+        )}
+      </Collapse>
+    </>
   );
 };
 
