@@ -8,15 +8,28 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Switch,
+  FormControlLabel,
+  Paper,
+  Typography,
+} from '@mui/material';
+import { saveAs } from 'file-saver';
+import * as Papa from 'papaparse';
 
 const COLORS = ['#4caf50', '#f44336'];
 const PASS_GRADE = 60;
 
-const getRandomGrade = () => {
-  const grade = Math.floor(Math.random() * 101);
-  return grade;
-};
+const getRandomGrade = () => Math.floor(Math.random() * 101);
 
 const PassFailPieChart = () => {
   const subjects = useSelector((state) => state.subjects?.subjects || []);
@@ -24,8 +37,11 @@ const PassFailPieChart = () => {
 
   const subjectNames = subjects.map((s) => s.name);
   const [selectedSubject, setSelectedSubject] = useState(subjectNames[0] || '');
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showPercentage, setShowPercentage] = useState(false);
+  const [detailedStudents, setDetailedStudents] = useState([]);
 
-  // Cache structure: { [subjectName]: { [studentId]: grade } }
+  // Cache structure:
   const gradesCache = useRef({});
 
   // Initialize cache ONCE when component mounts or when subjects/students change
@@ -40,14 +56,12 @@ const PassFailPieChart = () => {
       students.forEach((student) => {
         const studentId = student.id || student._id;
 
-        // Skip if already cached (shouldn't happen with this one-time init)
         if (gradesCache.current[subject]?.[studentId]) {
           newCache[subject][studentId] =
             gradesCache.current[subject][studentId];
           return;
         }
 
-        // Check for real grade first
         let realGrade = null;
         if (student.grades) {
           if (Array.isArray(student.grades)) {
@@ -58,25 +72,17 @@ const PassFailPieChart = () => {
           }
         }
 
-        // Store either real grade or generate random one ONCE
         newCache[subject][studentId] =
           realGrade !== null ? realGrade : getRandomGrade();
       });
     });
 
     gradesCache.current = newCache;
-    console.log('Full grades cache:', JSON.parse(JSON.stringify(newCache)));
-  }, [subjectNames, students]); // Only runs when subjects or students change
+  }, [subjectNames, students]);
 
   const getStudentGrade = (student, subjectName) => {
     const studentId = student.id || student._id;
-    const cachedGrade = gradesCache.current[subjectName]?.[studentId];
-
-    if (cachedGrade !== undefined) {
-      return cachedGrade;
-    }
-
-    return getRandomGrade();
+    return gradesCache.current[subjectName]?.[studentId] ?? getRandomGrade();
   };
 
   const calcPassFail = (subjectName) => {
@@ -89,12 +95,43 @@ const PassFailPieChart = () => {
       else fail++;
     });
 
-    console.log(
-      `%cPASS/FAIL RESULTS | ${subjectName}: ${pass} passed, ${fail} failed`,
-      'color: #4caf50; font-weight: bold;  padding: 2px;'
-    );
-
     return { pass, fail };
+  };
+
+  const handlePieClick = (data, index) => {
+    const category = index === 0 ? 'passed' : 'failed';
+    setSelectedCategory(category);
+
+    // Filter students based on pass/fail
+    const filteredStudents = students
+      .filter((student) => {
+        const grade = getStudentGrade(student, selectedSubject);
+        return category === 'passed' ? grade >= PASS_GRADE : grade < PASS_GRADE;
+      })
+      .map((student) => ({
+        id: student._id,
+        name: `${student.firstName} ${student.lastName}`,
+        grade: getStudentGrade(student, selectedSubject),
+      }));
+
+    setDetailedStudents(filteredStudents);
+  };
+
+  const exportToCSV = () => {
+    if (!selectedCategory) return;
+
+    const csvData = detailedStudents.map((student) => {
+      return {
+        'Student ID': student.id,
+        'Student Name': student.name,
+        Grade: student.grade,
+        Status: selectedCategory,
+      };
+    });
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `${selectedSubject}_${selectedCategory}_students.csv`);
   };
 
   // Set initial selectedSubject
@@ -116,50 +153,145 @@ const PassFailPieChart = () => {
   }
 
   const handleChange = (event) => {
-    console.log('Subject changed to:', event.target.value);
     setSelectedSubject(event.target.value);
+    setSelectedCategory(null);
+  };
+
+  const togglePercentage = () => {
+    setShowPercentage(!showPercentage);
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 400, mx: 'auto', p: 2 }}>
-      <FormControl fullWidth>
-        <InputLabel id="subject-select-label">Select Subject</InputLabel>
-        <Select
-          labelId="subject-select-label"
-          value={selectedSubject}
-          label="Select Subject"
-          onChange={handleChange}
-        >
-          {subjectNames.map((name) => (
-            <MenuItem key={name} value={name}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            label={({ name, percent }) =>
-              `${name}: ${(percent * 100).toFixed(0)}%`
-            }
-            isAnimationActive={false}
+    <Box
+      sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 2, display: 'flex' }}
+    >
+      <Box sx={{ width: '50%' }}>
+        <FormControl fullWidth>
+          <InputLabel id="subject-select-label">Select Subject</InputLabel>
+          <Select
+            labelId="subject-select-label"
+            value={selectedSubject}
+            label="Select Subject"
+            onChange={handleChange}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index]} />
+            {subjectNames.map((name) => (
+              <MenuItem key={name} value={name}>
+                {name}
+              </MenuItem>
             ))}
-          </Pie>
-          <Tooltip formatter={(value) => `${value} students`} />
-          <Legend verticalAlign="bottom" height={36} />
-        </PieChart>
-      </ResponsiveContainer>
+          </Select>
+        </FormControl>
+
+        <FormControlLabel
+          control={
+            <Switch checked={showPercentage} onChange={togglePercentage} />
+          }
+          label={showPercentage ? 'Percentage' : 'Absolute Numbers'}
+        />
+
+        <Box sx={{ width: '100%' }}>
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                activeIndex={
+                  selectedCategory === 'passed'
+                    ? 0
+                    : selectedCategory === 'failed'
+                      ? 1
+                      : null
+                }
+                activeShape={(props) => (
+                  <g>
+                    <defs>
+                      <filter
+                        id="glow"
+                        x="-50%"
+                        y="-50%"
+                        width="200%"
+                        height="200%"
+                      >
+                        <feDropShadow
+                          dx="0"
+                          dy="0"
+                          stdDeviation="4"
+                          floodColor="#ffeb3b"
+                        />
+                      </filter>
+                    </defs>
+                    <path
+                      d={props.sectorPath}
+                      fill={props.fill}
+                      filter="url(#glow)"
+                    />
+                  </g>
+                )}
+                onClick={handlePieClick}
+                label={({ name, percent }) =>
+                  showPercentage
+                    ? `${name}: ${(percent * 100).toFixed(0)}%`
+                    : `${name}: ${data.find((d) => d.name === name).value}`
+                }
+              >
+                {data.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index]}
+                    style={{ cursor: 'pointer' }}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value) =>
+                  showPercentage
+                    ? [
+                        `${((value / students.length) * 100).toFixed(1)}%`,
+                        data.find((d) => d.value === value).name,
+                      ]
+                    : [
+                        `${value} students`,
+                        data.find((d) => d.value === value).name,
+                      ]
+                }
+              />
+              <Legend verticalAlign="bottom" height={36} />
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+
+      {selectedCategory && (
+        <Box sx={{ width: '50%', pl: 2 }}>
+          <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              {selectedCategory === 'passed' ? 'Passed' : 'Failed'} Students (
+              {detailedStudents.length})
+              <Button
+                variant="outlined"
+                onClick={exportToCSV}
+                sx={{ float: 'right' }}
+              >
+                Export to CSV
+              </Button>
+            </Typography>
+            <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+              {detailedStudents.map((student) => (
+                <ListItem key={student.id}>
+                  <ListItemText
+                    primary={student.name}
+                    secondary={`Grade: ${student.grade}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 };
