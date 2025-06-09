@@ -12,6 +12,7 @@ import {
   Box,
   Typography,
 } from '@mui/material';
+import GradesChart from './GradesChart';
 
 const GPAStudentList = ({
   students,
@@ -58,7 +59,7 @@ const GPAStudentList = ({
             `${student.firstName} ${student.lastName}`.trim() || 'No Name',
           teacher: subject.teacher || 'N/A',
           subjectName: subject.name || 'None',
-          gpa: '-', // Placeholder
+          gpa: '-',
         };
       });
   });
@@ -176,6 +177,27 @@ const GPAStudentList = ({
                 })}
               </TableBody>
             </Table>
+
+            <Box sx={{ mt: 4 }}>
+              <GradesChart
+                grades={
+                  courses
+                    ?.filter((course) =>
+                      selectedData.subject?.courses?.includes(course.id)
+                    )
+                    .map((course) => {
+                      const score =
+                        selectedData.student.grades?.find(
+                          (g) => g.courseId === course.id
+                        )?.score ?? null;
+                      return score !== null
+                        ? { name: course.name, grade: score }
+                        : null;
+                    })
+                    .filter(Boolean) || []
+                }
+              />
+            </Box>
           </Box>
         )}
       </Collapse>
