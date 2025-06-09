@@ -57,8 +57,6 @@ const GradesAnalyticsContainer = () => {
         <GPAManager />
       </Paper>
 
-      <Paper sx={{ p: 2, minHeight: 200 }}>Grades Table Placeholder</Paper>
-
       {/* Section: Charts */}
       <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
         Performance Charts
@@ -93,7 +91,6 @@ const GradesAnalyticsContainer = () => {
         </Typography>
 
         {/* Subjects & Performance Overview */}
-
         <Paper sx={{ p: 2, mt: 2 }}>
           <SubjectsStatusView />
         </Paper>
