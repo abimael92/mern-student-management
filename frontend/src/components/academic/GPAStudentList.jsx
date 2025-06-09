@@ -11,8 +11,10 @@ import {
   Collapse,
   Box,
   Typography,
+  Button,
 } from '@mui/material';
-import GradesChart from './GradesChart';
+import GradesChart from './GradesBarChart';
+import TrendComparisonChart from './TrendComparisonChart';
 
 const GPAStudentList = ({
   students,
@@ -25,6 +27,7 @@ const GPAStudentList = ({
   const [order, setOrder] = useState('asc');
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
+  const [showTrend, setShowTrend] = useState(false);
 
   const getSubject = (id) => subjects.find((s) => s.id === id) || {};
 
@@ -41,7 +44,6 @@ const GPAStudentList = ({
       !fullName.includes(studentNameFilter.toLowerCase())
     )
       return [];
-
     const subs =
       Array.isArray(student.subjects) && student.subjects.length > 0
         ? student.subjects
@@ -59,7 +61,7 @@ const GPAStudentList = ({
             `${student.firstName} ${student.lastName}`.trim() || 'No Name',
           teacher: subject.teacher || 'N/A',
           subjectName: subject.name || 'None',
-          gpa: '-',
+          gpa: '-', // placeholder
         };
       });
   });
@@ -76,6 +78,7 @@ const GPAStudentList = ({
     const isSame = selectedRow === row.id;
     setSelectedRow(isSame ? null : row.id);
     setSelectedData(isSame ? null : row);
+    setShowTrend(false);
   };
 
   return (
@@ -100,6 +103,7 @@ const GPAStudentList = ({
               ))}
             </TableRow>
           </TableHead>
+
           <TableBody>
             {sortedRows.map((row, index) => {
               const isSelected = selectedRow === row.id;
@@ -145,12 +149,14 @@ const GPAStudentList = ({
               boxShadow: 1,
             }}
           >
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6">
               {selectedData.student.firstName} {selectedData.student.lastName}
             </Typography>
-            <Typography variant="subtitle1" gutterBottom>
+            <Typography variant="subtitle1">
               Subject: {selectedData.subject.name || 'None'}
             </Typography>
+
+            {/* Course grades */}
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -160,8 +166,8 @@ const GPAStudentList = ({
               </TableHead>
               <TableBody>
                 {(
-                  courses?.filter((course) =>
-                    selectedData.subject?.courses?.includes(course.id)
+                  courses?.filter((c) =>
+                    (selectedData.subject?.courses || []).includes(c.id)
                   ) || []
                 ).map((course) => {
                   const grade =
@@ -178,26 +184,41 @@ const GPAStudentList = ({
               </TableBody>
             </Table>
 
+            {/* Current Grades Chart */}
             <Box sx={{ mt: 4 }}>
               <GradesChart
-                grades={
-                  courses
-                    ?.filter((course) =>
-                      selectedData.subject?.courses?.includes(course.id)
-                    )
-                    .map((course) => {
-                      const score =
-                        selectedData.student.grades?.find(
-                          (g) => g.courseId === course.id
-                        )?.score ?? null;
-                      return score !== null
-                        ? { name: course.name, grade: score }
-                        : null;
-                    })
-                    .filter(Boolean) || []
-                }
+                grades={(
+                  courses?.filter((c) =>
+                    (selectedData.subject?.courses || []).includes(c.id)
+                  ) || []
+                )
+                  .map((course) => {
+                    const score = selectedData.student.grades?.find(
+                      (g) => g.courseId === course.id
+                    )?.score;
+                    return score != null
+                      ? { name: course.name, grade: score }
+                      : null;
+                  })
+                  .filter(Boolean)}
               />
             </Box>
+
+            {/* Trend toggle */}
+            <Button
+              variant="contained"
+              sx={{ mt: 2 }}
+              onClick={() => setShowTrend(!showTrend)}
+            >
+              {showTrend ? 'Hide' : 'Show'} Grade Trend
+            </Button>
+
+            <Collapse in={showTrend} timeout="auto" unmountOnExit>
+              <TrendComparisonChart
+                student={selectedData.student}
+                subject={selectedData.subject}
+              />
+            </Collapse>
           </Box>
         )}
       </Collapse>
