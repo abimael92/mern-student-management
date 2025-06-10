@@ -1,21 +1,23 @@
-import mongoose from 'mongoose';
+// 📁 models/Course.js
+const mongoose = require('mongoose');
 
 const courseSchema = new mongoose.Schema({
-    // 🔹 General Info
+    // ======================= 🔹 CORE IDENTIFICATION =======================
     name: { type: String, required: true },
-    code: { type: String, unique: true, required: true },
-    semester: { type: String },
-    grade: { type: String },
 
-    // 🔹 Linked Entities
-    instructor: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null }, // optional main instructor
-    teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: [] }], // co-teachers or subject-specific
+    // ======================= 🔹 SYSTEM REFERENCES =======================
+    subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
+    semester: { type: mongoose.Schema.Types.ObjectId, ref: 'Semester', required: true },
 
-    students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student', default: [] }],
-    subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', default: null }
+    // ======================= 🔹 PERSONAL DETAILS =======================
+    description: { type: String },
 
-
+    // ======================= 🔹 META & TIMESTAMPS =======================
 }, { timestamps: true });
 
-const Course = mongoose.model('Course', courseSchema);
-export default Course;
+courseSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+courseSchema.set('toJSON', { virtuals: true });
+
+module.exports = mongoose.model('Course', courseSchema);
