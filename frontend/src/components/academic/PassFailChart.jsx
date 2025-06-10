@@ -246,18 +246,17 @@ const PassFailPieChart = () => {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value) =>
-                  showPercentage
+                formatter={(value) => {
+                  const matched = data.find((d) => d.value === value);
+                  return showPercentage
                     ? [
                         `${((value / students.length) * 100).toFixed(1)}%`,
-                        data.find((d) => d.value === value).name,
+                        matched?.name || '',
                       ]
-                    : [
-                        `${value} students`,
-                        data.find((d) => d.value === value).name,
-                      ]
-                }
+                    : [`${value} students`, matched?.name || ''];
+                }}
               />
+
               <Legend verticalAlign="bottom" height={36} />
             </PieChart>
           </ResponsiveContainer>

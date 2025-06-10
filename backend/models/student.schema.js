@@ -1,71 +1,80 @@
 import mongoose from 'mongoose';
 
 const studentSchema = new mongoose.Schema({
-    // 🔹 General Identification
+    // ======================= 🔹 CORE IDENTIFICATION =======================
     studentNumber: {
         type: String,
         unique: true,
+        default: '',
         validate: {
             validator: function (value) {
-                return /^ST\d{4}-\d{3}$/.test(value) // Example: ST2022-001
+                return value === '' || /^ST\d{4}-\d{3}$/.test(value);
             },
             message: props => `${props.value} is not a valid student number!`
         }
     },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    firstName: { type: String, default: '' },
+    lastName: { type: String, default: '' },
     profilePicture: { type: String, default: '' },
 
-    // 🔹 Personal Details
-    dateOfBirth: { type: String, default: null },
-    age: { type: Number, default: null },
-    nationality: { type: String, default: null },
+    // ======================= 🔹 ACADEMIC STATUS =======================
+    isActive: { type: Boolean, default: true },
+    enrollmentDate: { type: Date, default: null },
+    gradeLevel: { type: Number, default: null, min: 1, max: 12 },
+    homeroom: { type: mongoose.Schema.Types.ObjectId, ref: 'Classroom', default: null },
 
-    // 🔹 Contact Information
-    contactInfo: {
-        phone: { type: String, default: null },
-        email: { type: String, default: null },
-    },
-    address: {
-        street: { type: String, default: null },
-        city: { type: String, default: null },
-        state: { type: String, default: null },
-        zipCode: { type: String, default: null },
-    },
-    emergencyContact: {
-        name: { type: String, default: null },
-        relation: { type: String, default: null },
-        phone: { type: String, default: null },
-    },
-
-    // 🔹 Academic Status
-    isEnrolled: { type: Boolean, required: true },
-    enrollmentDate: { type: Date, default: Date.now },
-
-    // 🔹 Health Info
-    medicalInfo: {
-        allergies: { type: [String], default: [] },
-        nurseComments: { type: String, default: '' },
-    },
-
-    // 🔹 Alerts (behavioral/academic flags)
-    alerts: {
-        behavior: { type: String, default: '' },
-        academic: { type: String, default: '' },
-        flag: {
-            type: String,
-            enum: ['warning', 'success', 'none'],
-            default: 'none'
+    // ======================= 🔹 CONTACT INFORMATION =======================
+    contact: {
+        email: { type: String, lowercase: true, default: '' },
+        phone: { type: String, default: '' },
+        address: {
+            street: { type: String, default: '' },
+            city: { type: String, default: '' },
+            state: { type: String, default: '' },
+            postalCode: { type: String, default: '' },
+            country: { type: String, default: '' }
         }
     },
+    emergencyContacts: [{
+        name: { type: String, default: '' },
+        relationship: { type: String, default: '' },
+        phone: { type: String, default: '' },
+        priority: { type: Number, default: 1 }
+    }],
 
-    // 🔹 Linked References
-    tutorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null },
-    classroom: { type: mongoose.Schema.Types.ObjectId, ref: 'Classroom', default: null }, // for actual classroom object
-    grades: [{
-        subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
-        grade: { type: String, default: '' }
-    }]
+    // ======================= 🔹 PERSONAL DETAILS =======================
+    dateOfBirth: { type: Date, default: null },
+    gender: { type: String, default: '', enum: ['', 'male', 'female', 'other', 'prefer-not-to-say'] },
+    nationality: { type: String, default: '' },
+
+    // ======================= 🔹 SYSTEM REFERENCES =======================
+    enrolledClasses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Class',
+        default: []
+    }],
+    advisor: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null },
+    extracurriculars: [{
+        group: { type: mongoose.Schema.Types.ObjectId, ref: 'ExtraCurricular', default: null },
+        role: { type: String, default: '' }
+    }],
+    noteIds: [{ type: mongoose.Types.ObjectId, ref: 'StudentNote' }],
+
+    // ======================= 🔹 META & TIMESTAMPS =======================
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+studentSchema.virtual('fullName').get(function () {
+    return `${this.firstName} ${this.lastName}`.trim();
+});
+
+studentSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
 });
 
 const Student = mongoose.model('Student', studentSchema);
