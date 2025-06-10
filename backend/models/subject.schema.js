@@ -1,17 +1,20 @@
-import mongoose from 'mongoose';
+// 📁 models/Subject.js
+const mongoose = require('mongoose');
 
 const subjectSchema = new mongoose.Schema({
+    // ======================= 🔹 CORE IDENTIFICATION =======================
     name: { type: String, required: true },
-    code: { type: String, unique: true, required: true },
-    description: { type: String, default: '' },
-    classLevel: { type: String, default: '' },
+    code: { type: String, required: true, unique: true },
 
-    teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: [] }],
-    students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student', default: [] }],
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+    // ======================= 🔹 PERSONAL DETAILS =======================
+    description: { type: String },
 
-    weeklyHours: { type: Number, default: 0 }
+    // ======================= 🔹 META & TIMESTAMPS =======================
 }, { timestamps: true });
 
-const Subject = mongoose.model('Subject', subjectSchema);
-export default Subject;
+subjectSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+subjectSchema.set('toJSON', { virtuals: true });
+
+module.exports = mongoose.model('Subject', subjectSchema);
