@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const extracurricularSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -15,4 +15,5 @@ const extracurricularSchema = new mongoose.Schema({
     // ======================= 🔹 META & TIMESTAMPS =======================
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-module.exports = mongoose.model('Extracurricular', extracurricularSchema);
+const Extracurricular = mongoose.model('Extracurricular', extracurricularSchema);
+export default Extracurricular;
