@@ -1,5 +1,5 @@
 import Subject from '../../models/subject.schema.js';
-import { generateSubjectCode } from '../../services/subjectCode.service.js';
+import { generateSubjectCode } from '../../services/codeGenerator.service.js';
 
 // Create a new subject
 export const createSubject = async (req, res) => {

@@ -1,5 +1,5 @@
 import Course from "../../models/course.schema.js";
-import { generateCourseCode } from '../../services/subjectCode.service.js';
+import { generateCourseCode } from '../../services/codeGenerator.service.js';
 
 
 // ----- READ -----

@@ -1,5 +1,4 @@
-// 📁 models/GradeRecord.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const gradeRecordSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -18,4 +17,5 @@ gradeRecordSchema.virtual('id').get(function () {
 });
 gradeRecordSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('GradeRecord', gradeRecordSchema);
+const GradeRecord = mongoose.model('GradeRecord', gradeRecordSchema);
+export default GradeRecord;

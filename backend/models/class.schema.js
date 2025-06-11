@@ -1,5 +1,4 @@
-// 📁 models/Class.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const classSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -19,4 +18,5 @@ classSchema.virtual('id').get(function () {
 });
 classSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('Class', classSchema);
+const Class = mongoose.model('Class', classSchema);
+export default Class;
