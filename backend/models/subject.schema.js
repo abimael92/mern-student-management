@@ -1,20 +1,46 @@
-// 📁 models/Subject.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { generateSubjectCode } from '../services/codeGenerator.service.js';
 
+/**
+ * SUBJECT SCHEMA
+ * Represents academic subjects
+ * Relationships:
+ * - courses: One-to-many with Course
+ * - department: Many-to-one with Department
+ */
 const subjectSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
+    subjectCode: {
+        type: String,
+        unique: true,
+        required: true,
+        default: async function () {
+            return await generateSubjectCode(this.name);
+        }
+    },
     name: { type: String, required: true },
-    code: { type: String, required: true, unique: true },
 
-    // ======================= 🔹 PERSONAL DETAILS =======================
-    description: { type: String },
+    // ======================= 🔹 ACADEMIC DETAILS =======================
+    description: { type: String, required: true },
+    creditValue: { type: Number, required: true },
+
+    // ======================= 🔹 SYSTEM REFERENCES =======================
+    department: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Department',
+        required: true
+    },
 
     // ======================= 🔹 META & TIMESTAMPS =======================
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true }
+});
 
+// ======================= 🔹 VIRTUALS =======================
 subjectSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
-subjectSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('Subject', subjectSchema);
+const Subject = mongoose.model('Subject', subjectSchema);
+export default Subject;
