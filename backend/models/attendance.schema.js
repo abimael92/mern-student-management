@@ -1,5 +1,4 @@
-// 📁 models/AttendanceRecord.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const attendanceSchema = new mongoose.Schema({
   // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -18,4 +17,5 @@ attendanceSchema.virtual('id').get(function () {
 });
 attendanceSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('AttendanceRecord', attendanceSchema);
+const AttendanceRecord = mongoose.model('AttendanceRecord', attendanceSchema);
+export default AttendanceRecord;
