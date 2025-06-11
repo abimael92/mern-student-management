@@ -1,5 +1,4 @@
-// 📁 models/Note.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const noteSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -20,4 +19,5 @@ noteSchema.virtual('id').get(function () {
 });
 noteSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('Note', noteSchema);
+const Note = mongoose.model('Note', noteSchema);
+export default Note;
