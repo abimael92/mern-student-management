@@ -69,7 +69,7 @@ const SubjectManagement = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Box style={{ padding: '20px' }}>
+          <Box style={{ padding: '2px' }}>
             <SubjectForm
               initialData={selectedSubject || {}}
               onSubmit={handleSave}
