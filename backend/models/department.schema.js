@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const departmentSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -15,4 +15,5 @@ const departmentSchema = new mongoose.Schema({
     // ======================= 🔹 META & TIMESTAMPS =======================
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-module.exports = mongoose.model('Department', departmentSchema);
+const Department = mongoose.model('Department', departmentSchema);
+export default Department;
