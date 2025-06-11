@@ -12,6 +12,29 @@ import {
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 
+const generateSubjectAbbr = (name) => {
+  if (!name) return '';
+
+  const words = name.trim().split(' ').filter(Boolean);
+  const abbrParts = [];
+
+  for (let i = 0; i < words.length && abbrParts.length < 2; i++) {
+    if (words[i].length >= 3) {
+      abbrParts.push(words[i].slice(0, 3).toUpperCase());
+    }
+  }
+
+  if (abbrParts.length < 2 && words.length > abbrParts.length) {
+    for (let i = 0; i < words.length && abbrParts.length < 2; i++) {
+      if (words[i].length < 3) {
+        abbrParts.push(words[i].slice(0, 3).toUpperCase());
+      }
+    }
+  }
+
+  return abbrParts.join('');
+};
+
 const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
   const departments = useSelector((state) => state.departments || []);
 
@@ -31,8 +54,16 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
       creditValue: initialData.creditValue || '',
       department: initialData.department?._id || '',
     });
-    console.log('Selected subject:', initialData); // <-- console log for debugging
+    console.log('Selected subject:', initialData);
   }, [initialData]);
+
+  // Update subject code abbreviation preview on name change if creating new
+  useEffect(() => {
+    if (!initialData._id) {
+      const abbr = generateSubjectAbbr(formData.name);
+      setFormData((prev) => ({ ...prev, subjectCode: abbr }));
+    }
+  }, [formData.name, initialData._id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,6 +83,36 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
       <form onSubmit={handleSubmit}>
         <Table>
           <TableBody>
+            {/* Show subject code only if editing */}
+            {initialData._id && (
+              <TableRow>
+                <TableCell>Subject Code</TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    name="subjectCode"
+                    value={formData.subjectCode}
+                    disabled
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+
+            {/* When creating new, show Subject Code as preview but disabled, on top */}
+            {!initialData._id && (
+              <TableRow>
+                <TableCell>Subject Code Preview</TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    name="subjectCode"
+                    value={formData.subjectCode}
+                    disabled
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>
@@ -61,19 +122,6 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                />
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell>Subject Code</TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  name="subjectCode"
-                  value={formData.subjectCode}
-                  onChange={handleChange}
-                  disabled={!!initialData._id}
                 />
               </TableCell>
             </TableRow>
