@@ -1,5 +1,4 @@
-// 📁 models/Semester.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const semesterSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -15,4 +14,5 @@ semesterSchema.virtual('id').get(function () {
 });
 semesterSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('Semester', semesterSchema);
+const Semester = mongoose.model('Semester', semesterSchema);
+export default Semester;
