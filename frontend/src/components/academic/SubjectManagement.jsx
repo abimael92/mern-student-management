@@ -71,9 +71,8 @@ const SubjectManagement = () => {
         <Grid item xs={12}>
           <Box style={{ padding: '20px' }}>
             <SubjectForm
-              selectedSubject={selectedSubject}
-              setSelectedSubject={setSelectedSubject}
-              onSave={handleSave}
+              initialData={selectedSubject || {}}
+              onSubmit={handleSave}
               onCancel={() => setSelectedSubject(null)}
             />
           </Box>
