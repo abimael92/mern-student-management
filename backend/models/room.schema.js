@@ -1,5 +1,4 @@
-// 📁 models/Room.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const roomSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
@@ -17,4 +16,5 @@ roomSchema.virtual('id').get(function () {
 });
 roomSchema.set('toJSON', { virtuals: true });
 
-module.exports = mongoose.model('Room', roomSchema);
+const Room = mongoose.model('Room', roomSchema);
+export default Room;
