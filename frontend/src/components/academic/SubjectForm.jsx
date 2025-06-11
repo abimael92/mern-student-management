@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TextField,
   Button,
@@ -16,12 +16,23 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
   const departments = useSelector((state) => state.departments || []);
 
   const [formData, setFormData] = useState({
-    name: initialData.name || '',
-    subjectCode: initialData.subjectCode || '',
-    description: initialData.description || '',
-    creditValue: initialData.creditValue || '',
-    department: initialData.department || '',
+    name: '',
+    subjectCode: '',
+    description: '',
+    creditValue: '',
+    department: '',
   });
+
+  useEffect(() => {
+    setFormData({
+      name: initialData.name || '',
+      subjectCode: initialData.subjectCode || '',
+      description: initialData.description || '',
+      creditValue: initialData.creditValue || '',
+      department: initialData.department?._id || '',
+    });
+    console.log('Selected subject:', initialData); // <-- console log for debugging
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,7 +47,7 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
   return (
     <Paper sx={{ p: 3, maxWidth: 600, margin: 'auto' }}>
       <Typography variant="h6" gutterBottom>
-        {initialData.id ? 'Edit Subject' : 'New Subject'}
+        {initialData._id ? 'Edit Subject' : 'New Subject'}
       </Typography>
       <form onSubmit={handleSubmit}>
         <Table>
@@ -62,7 +73,7 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
                   name="subjectCode"
                   value={formData.subjectCode}
                   onChange={handleChange}
-                  disabled
+                  disabled={!!initialData._id}
                 />
               </TableCell>
             </TableRow>
