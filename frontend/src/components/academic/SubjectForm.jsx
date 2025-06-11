@@ -1,14 +1,26 @@
 import React, { useState } from 'react';
-import { TextField, Button, Paper, Typography } from '@mui/material';
+import {
+  TextField,
+  Button,
+  Paper,
+  Typography,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from '@mui/material';
+import { useSelector } from 'react-redux';
 
 const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
+  const departments = useSelector((state) => state.departments || []);
+
   const [formData, setFormData] = useState({
     name: initialData.name || '',
-    code: initialData.code || '',
-    school: initialData.school || '',
+    subjectCode: initialData.subjectCode || '',
     description: initialData.description || '',
-    area: initialData.area || '',
-    courseCode: initialData.courseCode || '',
+    creditValue: initialData.creditValue || '',
+    department: initialData.department || '',
   });
 
   const handleChange = (e) => {
@@ -27,54 +39,85 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
         {initialData.id ? 'Edit Subject' : 'New Subject'}
       </Typography>
       <form onSubmit={handleSubmit}>
-        <TextField
-          fullWidth
-          label="Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Code"
-          name="code"
-          value={formData.code}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="School"
-          name="school"
-          value={formData.school}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Area"
-          name="area"
-          value={formData.area}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Course Code"
-          name="courseCode"
-          value={formData.courseCode}
-          onChange={handleChange}
-          margin="normal"
-        />
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell>Subject Code</TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  name="subjectCode"
+                  value={formData.subjectCode}
+                  onChange={handleChange}
+                  disabled
+                />
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell>Description</TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell>Credit Value</TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  type="number"
+                  name="creditValue"
+                  value={formData.creditValue}
+                  onChange={handleChange}
+                  inputProps={{ min: 0 }}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell>Department</TableCell>
+              <TableCell>
+                <TextField
+                  select
+                  fullWidth
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  required
+                >
+                  <MenuItem value="">Select Department</MenuItem>
+                  {departments.map((dept) => (
+                    <MenuItem key={dept._id} value={dept._id}>
+                      {dept.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+
         <Button
           type="submit"
           variant="contained"
