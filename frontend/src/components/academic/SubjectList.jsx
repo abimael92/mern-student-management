@@ -35,19 +35,23 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
       <Table>
         <TableHead sx={{ backgroundColor: '#1976d2' }}>
           <TableRow>
-            {['name', 'description'].map((field) => (
-              <TableCell key={field} sx={{ color: 'white' }}>
-                <TableSortLabel
-                  active={orderBy === field}
-                  direction={orderBy === field ? order : 'asc'}
-                  onClick={() => handleSort(field)}
-                  sx={{ color: 'white' }}
-                >
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-            <TableCell sx={{ color: 'white' }}>Linked Courses</TableCell>
+            {['subjectCode', 'name', 'description', 'creditValue'].map(
+              (field) => (
+                <TableCell key={field} sx={{ color: 'white' }}>
+                  <TableSortLabel
+                    active={orderBy === field}
+                    direction={orderBy === field ? order : 'asc'}
+                    onClick={() => handleSort(field)}
+                    sx={{ color: 'white' }}
+                  >
+                    {field === 'creditValue'
+                      ? 'Credits'
+                      : field.charAt(0).toUpperCase() + field.slice(1)}
+                  </TableSortLabel>
+                </TableCell>
+              )
+            )}
+            <TableCell sx={{ color: 'white' }}>Department</TableCell>
             <TableCell sx={{ color: 'white' }}>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -59,13 +63,11 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
                 backgroundColor: index % 2 === 0 ? '#f5f5f5' : '#e0e0e0',
               }}
             >
+              <TableCell>{subject.subjectCode}</TableCell>
               <TableCell>{subject.name}</TableCell>
-              <TableCell>{subject.description || '—'}</TableCell>
-              <TableCell>
-                {subject.courses && subject.courses.length > 0
-                  ? subject.courses.map((course) => course.name).join(', ')
-                  : 'Missing'}
-              </TableCell>
+              <TableCell>{subject.description}</TableCell>
+              <TableCell>{subject.creditValue}</TableCell>
+              <TableCell>{subject.department?.name || '—'}</TableCell>
               <TableCell>
                 <IconButton color="primary" onClick={() => onEdit(subject)}>
                   <Edit />
