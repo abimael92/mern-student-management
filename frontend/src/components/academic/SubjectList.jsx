@@ -37,12 +37,28 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
           <TableRow>
             {['subjectCode', 'name', 'description', 'creditValue'].map(
               (field) => (
-                <TableCell key={field} sx={{ color: 'white' }}>
+                <TableCell
+                  key={field}
+                  sx={{
+                    color: 'white',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                    fontSize: '0.95rem',
+                  }}
+                >
                   <TableSortLabel
                     active={orderBy === field}
                     direction={orderBy === field ? order : 'asc'}
                     onClick={() => handleSort(field)}
-                    sx={{ color: 'white' }}
+                    sx={{
+                      color: 'white',
+                      '&.Mui-active': {
+                        color: 'white',
+                      },
+                      '& .MuiTableSortLabel-icon': {
+                        color: 'white !important',
+                      },
+                    }}
                   >
                     {field === 'creditValue'
                       ? 'Credits'
@@ -51,8 +67,26 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
                 </TableCell>
               )
             )}
-            <TableCell sx={{ color: 'white' }}>Department</TableCell>
-            <TableCell sx={{ color: 'white' }}>Actions</TableCell>
+            <TableCell
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                letterSpacing: '0.5px',
+                fontSize: '0.95rem',
+              }}
+            >
+              Department
+            </TableCell>
+            <TableCell
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                letterSpacing: '0.5px',
+                fontSize: '0.95rem',
+              }}
+            >
+              Actions
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

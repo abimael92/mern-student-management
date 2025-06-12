@@ -69,11 +69,6 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const payload = {
-      ...formData,
-      department: formData.department || null,
-    };
-
     onSubmit(formData);
   };
 
@@ -83,23 +78,25 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
         {initialData._id ? 'Edit Subject' : 'New Subject'}
       </Typography>
       <form onSubmit={handleSubmit} noValidate>
-        <Box mb={2}>
-          <TextField
-            label={initialData._id ? 'Subject Code' : 'Subject Code Preview'}
-            fullWidth
-            name="subjectCode"
-            value={formData.subjectCode}
-            disabled
-            sx={{
-              maxWidth: 250,
-              mx: 'auto',
-              '& .MuiInputBase-root.Mui-disabled': {
-                backgroundColor: '#f0f0f0', // light gray background
-                color: '#888888', // darker gray text
-              },
-            }}
-          />
-        </Box>
+        {initialData._id && (
+          <Box mb={2}>
+            <TextField
+              label="Subject Code"
+              fullWidth
+              name="subjectCode"
+              value={formData.subjectCode}
+              disabled
+              sx={{
+                maxWidth: 250,
+                mx: 'auto',
+                '& .MuiInputBase-root.Mui-disabled': {
+                  backgroundColor: '#f0f0f0', // light gray background
+                  color: '#888888', // darker gray text
+                },
+              }}
+            />
+          </Box>
+        )}
 
         <Box mb={2}>
           <TextField

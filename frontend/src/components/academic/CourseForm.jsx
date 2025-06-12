@@ -1,161 +1,173 @@
 import React, { useState, useEffect } from 'react';
+import {
+  TextField,
+  Button,
+  MenuItem,
+  Grid,
+  Select,
+  InputLabel,
+  FormControl,
+  Checkbox,
+  ListItemText,
+  OutlinedInput,
+} from '@mui/material';
 import { useSelector } from 'react-redux';
-import { TextField, Button, Grid, MenuItem } from '@mui/material';
 
 const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
-  const teachers = useSelector((state) => state.teachers.teachers || []);
-  const subjects = useSelector((state) => state.subjects.subjects || []);
+  const subjects = useSelector((state) => state.subjects?.subjects || []);
+  const semesters = useSelector((state) => state.semesters?.semesters || []);
+  const courses = useSelector((state) => state.courses?.courses || []);
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: '',
-    code: '',
-    instructor: '',
+    credits: '',
+    description: '',
+    subject: '',
     semester: '',
-    grade: '',
-    subjectId: '',
+    prerequisites: [],
   });
 
   useEffect(() => {
     if (selectedCourse) {
-      setForm({
+      setFormData({
         name: selectedCourse.name || '',
-        code: selectedCourse.code || '',
-        instructor:
-          selectedCourse.instructor &&
-          typeof selectedCourse.instructor === 'object'
-            ? selectedCourse.instructor._id
-            : selectedCourse.instructor || '',
-        semester: selectedCourse.semester || '',
-        grade: selectedCourse.grade || '',
-        subjectId:
-          selectedCourse.subjectId &&
-          typeof selectedCourse.subjectId === 'object'
-            ? selectedCourse.subjectId._id
-            : selectedCourse.subjectId || '',
+        credits: selectedCourse.credits || '',
+        description: selectedCourse.description || '',
+        subject: selectedCourse.subject?._id || selectedCourse.subject || '',
+        semester: selectedCourse.semester?._id || selectedCourse.semester || '',
+        prerequisites:
+          selectedCourse.prerequisites?.map((p) =>
+            typeof p === 'object' ? p._id : p
+          ) || [],
       });
     } else {
-      setForm({
+      setFormData({
         name: '',
-        code: '',
-        instructor: '',
+        credits: '',
+        description: '',
+        subject: '',
         semester: '',
-        grade: '',
-        subjectId: '',
+        prerequisites: [],
       });
     }
   }, [selectedCourse]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await onSave(form);
-      if (!selectedCourse) {
-        setForm({
-          name: '',
-          code: '',
-          instructor: '',
-          semester: '',
-          grade: '',
-          subjectId: '',
-        });
-      }
-    } catch (error) {
-      console.error('Failed to save course:', error);
-    }
+    onSave(formData);
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
-        {selectedCourse && (
-          <Grid item xs={6}>
-            <TextField
-              label="Course Code"
-              name="code"
-              value={form.code}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
-          </Grid>
-        )}
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <TextField
-            label="Course Name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
             fullWidth
+            name="name"
+            label="Course Name"
+            value={formData.name}
+            onChange={handleChange}
             required
           />
         </Grid>
-        <Grid item xs={6}>
+
+        <Grid item xs={12} md={3}>
           <TextField
-            select
-            label="Instructor"
-            name="instructor"
-            value={form.instructor}
-            onChange={handleChange}
             fullWidth
-          >
-            <MenuItem value="">None</MenuItem>
-            {teachers.map((t) => (
-              <MenuItem key={t._id} value={t._id}>
-                {t.firstName} {t.lastName}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-        <Grid item xs={6}>
-          <TextField
-            label="Semester"
-            name="semester"
-            value={form.semester}
+            name="credits"
+            label="Credits"
+            type="number"
+            value={formData.credits}
             onChange={handleChange}
-            fullWidth
+            required
           />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField
-            label="Grade"
-            name="grade"
-            value={form.grade}
-            onChange={handleChange}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField
-            select
-            label="Subject"
-            name="subjectId"
-            value={form.subjectId}
-            onChange={handleChange}
-            fullWidth
-          >
-            <MenuItem value="">None</MenuItem>
-            {subjects.map((subject) => (
-              <MenuItem key={subject._id} value={subject._id}>
-                {subject.name}
-              </MenuItem>
-            ))}
-          </TextField>
         </Grid>
 
         <Grid item xs={12}>
+          <TextField
+            fullWidth
+            name="description"
+            label="Description"
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={handleChange}
+            required
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Subject</InputLabel>
+            <Select
+              name="subject"
+              value={formData.subject}
+              onChange={handleChange}
+              label="Subject"
+            >
+              {subjects.map((s) => (
+                <MenuItem key={s._id} value={s._id}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Semester</InputLabel>
+            <Select
+              name="semester"
+              value={formData.semester}
+              onChange={handleChange}
+              label="Semester"
+            >
+              {semesters.map((s) => (
+                <MenuItem key={s._id} value={s._id}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel>Prerequisites</InputLabel>
+            <Select
+              name="prerequisites"
+              multiple
+              value={formData.prerequisites}
+              onChange={handleChange}
+              input={<OutlinedInput label="Prerequisites" />}
+              renderValue={(selected) =>
+                courses
+                  .filter((c) => selected.includes(c._id))
+                  .map((c) => c.name)
+                  .join(', ')
+              }
+            >
+              {courses.map((c) => (
+                <MenuItem key={c._id} value={c._id}>
+                  <Checkbox checked={formData.prerequisites.includes(c._id)} />
+                  <ListItemText primary={c.name} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} sx={{ display: 'flex', gap: 2 }}>
           <Button type="submit" variant="contained" color="primary">
             {selectedCourse ? 'Update' : 'Add'} Course
           </Button>
-          <Button
-            onClick={onCancel}
-            color="secondary"
-            style={{ marginLeft: '1rem' }}
-            type="button"
-          >
+          <Button onClick={onCancel} variant="outlined" color="secondary">
             Cancel
           </Button>
         </Grid>

@@ -77,69 +77,44 @@ const CourseList = ({ courses, onEdit, onDelete }) => {
       <Table size="small">
         <TableHead sx={{ backgroundColor: '#e3f2fd' }}>
           <TableRow>
-            {['code', 'name', 'instructor', 'subject', 'semester', 'grade'].map(
-              (header) => (
-                <TableCell key={header}>
-                  <TableSortLabel
-                    active={orderBy === header}
-                    direction={orderBy === header ? order : 'asc'}
-                    onClick={() => handleSort(header)}
-                  >
-                    {header.charAt(0).toUpperCase() + header.slice(1)}
-                  </TableSortLabel>
-                </TableCell>
-              )
-            )}
+            {['courseCode', 'name', 'subject', 'semester'].map((header) => (
+              <TableCell key={header}>
+                <TableSortLabel
+                  active={orderBy === header}
+                  direction={orderBy === header ? order : 'asc'}
+                  onClick={() => handleSort(header)}
+                >
+                  {header.charAt(0).toUpperCase() + header.slice(1)}
+                </TableSortLabel>
+              </TableCell>
+            ))}
+
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedCourses.map((course, idx) => {
-            // instructor ID normalization
-            const instructorId =
-              course.instructor && typeof course.instructor === 'object'
-                ? course.instructor._id
-                : course.instructor;
-            const instructor = teachers.find((t) => t._id === instructorId);
-            const instructorName = instructor
-              ? `${instructor.firstName} ${instructor.lastName}`.trim()
-              : 'Unassigned';
-
-            // subject ID normalization
+          {sortedCourses.map((course) => {
             const subjectId =
-              course.subjectId && typeof course.subjectId === 'object'
-                ? course.subjectId._id
-                : course.subjectId;
+              course.subject && typeof course.subject === 'object'
+                ? course.subject._id
+                : course.subject;
             const subject = subjects.find((s) => s._id === subjectId);
-            const subjectName = subject ? subject.name : 'Unassigned';
+            const subjectName = subject ? subject.name : '—';
+
+            const semesterName = course.semester?.name || '—';
 
             return (
-              <TableRow
-                key={course._id || course.code}
-                sx={{ backgroundColor: idx % 2 === 0 ? '#f5f5f5' : '#ffffff' }}
-              >
-                <TableCell>{course.code}</TableCell>
+              <TableRow key={course._id}>
+                <TableCell>{course.courseCode}</TableCell>
                 <TableCell>{course.name}</TableCell>
-                <TableCell>{instructorName}</TableCell>
                 <TableCell>{subjectName}</TableCell>
-                <TableCell>{course.semester}</TableCell>
-                <TableCell>{course.grade}</TableCell>
+                <TableCell>{semesterName}</TableCell>
                 <TableCell>
-                  <IconButton
-                    onClick={() => onEdit(course)}
-                    aria-label="edit"
-                    color="primary"
-                    size="small"
-                  >
-                    <EditIcon fontSize="small" />
+                  <IconButton onClick={() => onEdit(course)}>
+                    <EditIcon />
                   </IconButton>
-                  <IconButton
-                    onClick={() => onDelete(course._id)}
-                    aria-label="delete"
-                    color="secondary"
-                    size="small"
-                  >
-                    <DeleteIcon fontSize="small" />
+                  <IconButton onClick={() => onDelete(course._id)}>
+                    <DeleteIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
