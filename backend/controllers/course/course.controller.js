@@ -15,28 +15,26 @@ export const getCourses = async (req, res) => {
 // ----- CREATE -----
 export const createCourse = async (req, res) => {
     try {
-        if (!req.body.name) {
-            return res.status(400).json({ message: "Course name is required" });
+        if (!req.body.name || !req.body.credits || !req.body.description || !req.body.subject || !req.body.semester || !req.body.prerequisites) {
+            return res.status(400).json({ message: "Missing required fields" });
         }
 
-        const code = await generateCourseCode(req.body.name);
-        if (!code) {
+        const courseCode = await generateCourseCode(req.body.name);
+        if (!courseCode) {
             return res.status(400).json({ message: "Failed to generate course code" });
         }
 
         const course = new Course({
             ...req.body,
-            code,  // Assign generated code here
+            courseCode, // 🔧 fix field name
         });
 
         await course.save();
         res.status(201).json(course);
-
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 };
-
 
 // ----- UPDATE -----
 export const updateCourse = async (req, res) => {
