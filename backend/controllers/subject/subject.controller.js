@@ -5,7 +5,7 @@ import { generateSubjectCode } from '../../services/codeGenerator.service.js';
 export const createSubject = async (req, res) => {
     try {
         const subjectCode = await generateSubjectCode(req.body.name); // Generate the subject code
-        const subject = new Subject({ ...req.body, code: subjectCode }); // Add the generated code to the subject
+        const subject = new Subject({ ...req.body, subjectCode }); // Add the generated code to the subject
         await subject.save();
         res.status(201).json(subject);
     } catch (err) {
