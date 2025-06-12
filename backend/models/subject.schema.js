@@ -14,9 +14,6 @@ const subjectSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true,
-        default: async function () {
-            return await generateSubjectCode(this.name);
-        }
     },
     name: { type: String, required: true },
 
@@ -28,8 +25,9 @@ const subjectSchema = new mongoose.Schema({
     department: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Department',
-        required: true
-    },
+        required: false,
+        default: null
+    }
 
     // ======================= 🔹 META & TIMESTAMPS =======================
 }, {
