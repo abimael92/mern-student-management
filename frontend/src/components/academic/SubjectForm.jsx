@@ -5,10 +5,7 @@ import {
   Paper,
   Typography,
   MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
+  Box,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 
@@ -54,7 +51,6 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
       creditValue: initialData.creditValue || '',
       department: initialData.department?._id || '',
     });
-    console.log('Selected subject:', initialData);
   }, [initialData]);
 
   // Update subject code abbreviation preview on name change if creating new
@@ -72,122 +68,99 @@ const SubjectForm = ({ onSubmit, initialData = {}, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const payload = {
+      ...formData,
+      department: formData.department || null,
+    };
+
     onSubmit(formData);
   };
 
   return (
-    <Paper sx={{ p: 3, maxWidth: 600, margin: 'auto' }}>
+    <Paper sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
       <Typography variant="h6" gutterBottom>
         {initialData._id ? 'Edit Subject' : 'New Subject'}
       </Typography>
-      <form onSubmit={handleSubmit}>
-        <Table>
-          <TableBody>
-            {/* Show subject code only if editing */}
-            {initialData._id && (
-              <TableRow>
-                <TableCell>Subject Code</TableCell>
-                <TableCell>
-                  <TextField
-                    fullWidth
-                    name="subjectCode"
-                    value={formData.subjectCode}
-                    disabled
-                  />
-                </TableCell>
-              </TableRow>
-            )}
+      <form onSubmit={handleSubmit} noValidate>
+        <Box mb={2}>
+          <TextField
+            label={initialData._id ? 'Subject Code' : 'Subject Code Preview'}
+            fullWidth
+            name="subjectCode"
+            value={formData.subjectCode}
+            disabled
+            sx={{
+              maxWidth: 250,
+              mx: 'auto',
+              '& .MuiInputBase-root.Mui-disabled': {
+                backgroundColor: '#f0f0f0', // light gray background
+                color: '#888888', // darker gray text
+              },
+            }}
+          />
+        </Box>
 
-            {/* When creating new, show Subject Code as preview but disabled, on top */}
-            {!initialData._id && (
-              <TableRow>
-                <TableCell>Subject Code Preview</TableCell>
-                <TableCell>
-                  <TextField
-                    fullWidth
-                    name="subjectCode"
-                    value={formData.subjectCode}
-                    disabled
-                  />
-                </TableCell>
-              </TableRow>
-            )}
+        <Box mb={2}>
+          <TextField
+            label="Name"
+            fullWidth
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </Box>
 
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </TableCell>
-            </TableRow>
+        <Box mb={2} display="flex" gap={2}>
+          <TextField
+            label="Credit"
+            type="number"
+            name="creditValue"
+            value={formData.creditValue}
+            onChange={handleChange}
+            inputProps={{ min: 0 }}
+            fullWidth
+            required
+          />
+          <TextField
+            select
+            label="Department"
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            fullWidth
+          >
+            <MenuItem value="">None</MenuItem>
+            {departments.map((dept) => (
+              <MenuItem key={dept._id} value={dept._id}>
+                {dept.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
 
-            <TableRow>
-              <TableCell>Description</TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                />
-              </TableCell>
-            </TableRow>
+        <Box mb={3}>
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            minRows={3}
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+          />
+        </Box>
 
-            <TableRow>
-              <TableCell>Credit Value</TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  type="number"
-                  name="creditValue"
-                  value={formData.creditValue}
-                  onChange={handleChange}
-                  inputProps={{ min: 0 }}
-                  required
-                />
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell>Department</TableCell>
-              <TableCell>
-                <TextField
-                  select
-                  fullWidth
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  required
-                >
-                  <MenuItem value="">Select Department</MenuItem>
-                  {departments.map((dept) => (
-                    <MenuItem key={dept._id} value={dept._id}>
-                      {dept.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2, mr: 1 }}
-        >
-          Save
-        </Button>
-        <Button variant="outlined" sx={{ mt: 2 }} onClick={onCancel}>
-          Cancel
-        </Button>
+        <Box display="flex" gap={2}>
+          <Button type="submit" variant="contained">
+            Save
+          </Button>
+          <Button variant="outlined" onClick={onCancel}>
+            Cancel
+          </Button>
+        </Box>
       </form>
     </Paper>
   );
