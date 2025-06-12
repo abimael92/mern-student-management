@@ -162,10 +162,19 @@ export const api = {
     },
 
     addSubject: async (data) => {
+
+        const { subjectCode, ...rest } = data;
+
+        const sanitized = {
+            ...rest,
+            department: data.department || null,
+        };
+
+
         const res = await fetch(`${BASE}/api/subjects`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify(sanitized),
         });
         if (!res.ok) throw new Error(await res.text());
         return res.json();
@@ -178,10 +187,15 @@ export const api = {
             throw new Error('Invalid subject ID format');
         }
 
+        const sanitized = {
+            ...subject,
+            department: subject.department || null,
+        };
+
         const res = await fetch(`${BASE}/api/subjects/${subject._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(subject),
+            body: JSON.stringify(sanitized),
         });
 
         if (!res.ok) throw new Error(await res.text());
