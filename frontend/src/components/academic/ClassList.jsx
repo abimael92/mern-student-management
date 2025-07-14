@@ -23,26 +23,16 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
   };
 
   const sorted = [...classes].sort((a, b) => {
-    const aVal = (
-      (a[field] =
-        orderBy === 'teacher'
-          ? a.teacher?.name
-          : orderBy === 'course'
-            ? a.course?.name
-            : a[orderBy]) || ''
-    )
-      .toString()
-      .toLowerCase();
-    const bVal = (
-      (b[field] =
-        orderBy === 'teacher'
-          ? b.teacher?.name
-          : orderBy === 'course'
-            ? b.course?.name
-            : b[orderBy]) || ''
-    )
-      .toString()
-      .toLowerCase();
+    const getValue = (item) => {
+      if (orderBy === 'teacher') return item.teacher?.name || '';
+      if (orderBy === 'course') return item.course?.name || '';
+      if (orderBy === 'room') return item.room?.name || '';
+      return item[orderBy] || '';
+    };
+
+    const aVal = getValue(a).toString().toLowerCase();
+    const bVal = getValue(b).toString().toLowerCase();
+
     return order === 'asc'
       ? aVal.localeCompare(bVal)
       : bVal.localeCompare(aVal);
@@ -77,16 +67,20 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
         </TableHead>
         <TableBody>
           {sorted.map((cls, i) => {
+            console.log(cls);
             return (
-              <TableRow
-                key={cls._id}
-                sx={{ backgroundColor: i % 2 ? '#f5f5f5' : '#ffffff' }}
-              >
+              <TableRow key={cls._id}>
                 <TableCell>{cls.schedule}</TableCell>
-                <TableCell>{cls.course?.name}</TableCell>
-                <TableCell>{cls.teacher?.name}</TableCell>
-                <TableCell>{cls.room?.name}</TableCell>
-                <TableCell>{cls.students.length}</TableCell>
+                <TableCell>{cls.course?.name || 'N/A'}</TableCell>
+                <TableCell>
+                  {cls.teacher
+                    ? `${cls.teacher.firstName} ${cls.teacher.lastName}`
+                    : 'N/A'}
+                </TableCell>
+                <TableCell>{cls.room?.name || 'N/A'}</TableCell>
+                <TableCell>
+                  {Array.isArray(cls.students) ? cls.students.length : 0}
+                </TableCell>
                 <TableCell>
                   <IconButton onClick={() => onEdit(cls)} color="primary">
                     <Edit />

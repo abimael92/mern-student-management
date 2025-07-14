@@ -13,9 +13,15 @@ import {
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 
+// Semester options with exact format you requested
+const SEMESTER_OPTIONS = [
+  'Fall 2024 (Aug-Dec)',
+  'Spring 2025 (Jan-May)',
+  'Summer 2025 (Jun-Jul)',
+];
+
 const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
   const subjects = useSelector((state) => state.subjects?.subjects || []);
-  const semesters = useSelector((state) => state.semesters?.semesters || []);
   const courses = useSelector((state) => state.courses?.courses || []);
 
   const [formData, setFormData] = useState({
@@ -34,20 +40,11 @@ const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
         credits: selectedCourse.credits || '',
         description: selectedCourse.description || '',
         subject: selectedCourse.subject?._id || selectedCourse.subject || '',
-        semester: selectedCourse.semester?._id || selectedCourse.semester || '',
+        semester: selectedCourse.semester || '',
         prerequisites:
           selectedCourse.prerequisites?.map((p) =>
             typeof p === 'object' ? p._id : p
           ) || [],
-      });
-    } else {
-      setFormData({
-        name: '',
-        credits: '',
-        description: '',
-        subject: '',
-        semester: '',
-        prerequisites: [],
       });
     }
   }, [selectedCourse]);
@@ -84,7 +81,6 @@ const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
             type="number"
             value={formData.credits}
             onChange={handleChange}
-            required
           />
         </Grid>
 
@@ -97,12 +93,11 @@ const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
             rows={3}
             value={formData.description}
             onChange={handleChange}
-            required
           />
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth required>
+          <FormControl fullWidth>
             <InputLabel>Subject</InputLabel>
             <Select
               name="subject"
@@ -120,7 +115,7 @@ const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth required>
+          <FormControl fullWidth>
             <InputLabel>Semester</InputLabel>
             <Select
               name="semester"
@@ -128,9 +123,12 @@ const CourseForm = ({ selectedCourse, onSave, onCancel }) => {
               onChange={handleChange}
               label="Semester"
             >
-              {semesters.map((s) => (
-                <MenuItem key={s._id} value={s._id}>
-                  {s.name}
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {SEMESTER_OPTIONS.map((semester) => (
+                <MenuItem key={semester} value={semester}>
+                  {semester}
                 </MenuItem>
               ))}
             </Select>

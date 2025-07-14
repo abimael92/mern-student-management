@@ -18,7 +18,7 @@ const initialState = {
     error: null,
 };
 
-const classesReducer = (state = initialState, action) => {
+export const classesReducer = (state = initialState, action) => {
     switch (action.type) {
         case FETCH_CLASSES_REQUEST:
         case UPDATE_CLASS_START:
@@ -55,4 +55,4 @@ const classesReducer = (state = initialState, action) => {
     }
 };
 
-export default classesReducer;
+

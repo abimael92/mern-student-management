@@ -1,15 +1,15 @@
 import express from "express";
 import {
-    getClasses,
+    getAllClasses,
     createClass,
     updateClass,
     deleteClass,
-} from "../controllers/subject/subject.controller.js";
+} from "../controllers/classes/classes.controller.js";
 
 const router = express.Router();
 
 // ----- READ -----
-router.get("/", getClasses);
+router.get("/", getAllClasses);
 
 // ----- CREATE -----
 router.post("/", createClass);

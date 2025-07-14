@@ -18,7 +18,7 @@ const initialState = {
     error: null,
 };
 
-const roomsReducer = (state = initialState, action) => {
+export const roomsReducer = (state = initialState, action) => {
     switch (action.type) {
         case FETCH_ROOMS_REQUEST:
         case UPDATE_ROOM_START:
@@ -58,4 +58,3 @@ const roomsReducer = (state = initialState, action) => {
     }
 };
 
-export default roomsReducer;
