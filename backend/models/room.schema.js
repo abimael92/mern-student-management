@@ -2,11 +2,12 @@ import mongoose from 'mongoose';
 
 const roomSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
-    roomNumber: { type: String, required: true },
+    // roomNumber: { type: String, required: true },
+    name: { type: String, required: true },
     capacity: { type: Number },
 
     // ======================= 🔹 PERSONAL DETAILS =======================
-    locationDescription: { type: String },
+    // locationDescription: { type: String },
 
     // ======================= 🔹 META & TIMESTAMPS =======================
 }, { timestamps: true });

@@ -32,7 +32,7 @@ const courseSchema = new mongoose.Schema({
         required: true
     },
     semester: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'Semester',
         required: true
     },
