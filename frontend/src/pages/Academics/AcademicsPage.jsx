@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Box, Typography, Paper, Button } from '@mui/material';
+import CourseBuilder from '../../components/academic/CourseBuilder';
 import SubjectManagement from '../../components/academic/SubjectManagement';
-import CoursesManager from '../../components/academic//CoursesManager';
-import ClassesManager from '../../components/academic//ClassesManager';
+import CoursesManager from '../../components/academic/CoursesManager';
+import ClassesManager from '../../components/academic/ClassesManager';
+import RoomManagement from '../../components/academic/RoomManagement';
 
 const AcademicsPage = () => {
   const navigate = useNavigate();
@@ -16,6 +18,10 @@ const AcademicsPage = () => {
       </Typography>
 
       <Paper sx={{ p: 2, mt: 2 }}>
+        <CourseBuilder />
+      </Paper>
+
+      <Paper sx={{ p: 2, mt: 2 }}>
         <SubjectManagement />
       </Paper>
 
@@ -25,6 +31,10 @@ const AcademicsPage = () => {
 
       <Paper sx={{ p: 2, mt: 2 }}>
         <ClassesManager />
+      </Paper>
+
+      <Paper sx={{ p: 2, mt: 2 }}>
+        <RoomManagement />
       </Paper>
 
       <Paper sx={{ p: 2, mt: 2 }}>

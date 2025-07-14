@@ -2,12 +2,12 @@ import mongoose from 'mongoose';
 
 const classSchema = new mongoose.Schema({
     // ======================= 🔹 CORE IDENTIFICATION =======================
-    schedule: { type: String, required: true }, // e.g. "Mon-Wed-Fri 10:00-11:00"
+    schedule: { type: String, default: null },// e.g. "Mon-Wed-Fri 10:00-11:00"
 
     // ======================= 🔹 SYSTEM REFERENCES =======================
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
-    teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true },
-    room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true },
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', default: null },
+    teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null },
+    room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', default: null },
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
 
     // ======================= 🔹 META & TIMESTAMPS =======================

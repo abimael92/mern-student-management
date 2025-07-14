@@ -244,6 +244,127 @@ export const api = {
         return res.status === 204 ? null : res.json();
     },
 
+    // === SEMESTER CRUD ===
+    fetchSemesters: async () => {
+        const res = await fetch(`${BASE}/api/semesters`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    addSemester: async (data) => {
+        const res = await fetch(`${BASE}/api/semesters`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    updateSemester: async (semester) => {
+        if (!semester._id) throw new Error('Invalid semester ID');
+        const res = await fetch(`${BASE}/api/semesters/${semester._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(semester),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    deleteSemester: async (id) => {
+        const res = await fetch(`${BASE}/api/semesters/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(await res.text());
+        return res.status === 204 ? null : res.json();
+    },
+
+    // === CLASS CRUD ===
+    fetchClasses: async () => {
+        const res = await fetch(`${BASE}/api/classes`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    addClass: async (data) => {
+        const sanitized = {
+            schedule: data.schedule || '',
+            course: typeof data.course === 'string' ? data.course : data.course?._id,
+            teacher: typeof data.teacher === 'string' ? data.teacher : data.teacher?._id,
+            room: typeof data.room === 'string' ? data.room : data.room?._id,
+            students: (data.students || []).map(s => typeof s === 'string' ? s : s._id)
+        };
+
+        const res = await fetch(`${BASE}/api/classes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sanitized),
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    updateClass: async (cls) => {
+        if (!cls._id) throw new Error('Invalid class ID');
+        const res = await fetch(`${BASE}/api/classes/${cls._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cls),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    deleteClass: async (id) => {
+        const res = await fetch(`${BASE}/api/classes/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(await res.text());
+        return res.status === 204 ? null : res.json();
+    },
+
+    // === ROOM CRUD ===
+    fetchRooms: async () => {
+        const res = await fetch(`${BASE}/api/rooms`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    addRoom: async (data) => {
+        const res = await fetch(`${BASE}/api/rooms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: data.name,
+                capacity: Number(data.capacity) || 0
+            }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    updateRoom: async (room) => {
+        if (!room._id) throw new Error('Invalid room ID');
+        const res = await fetch(`${BASE}/api/rooms/${room._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: room.name,
+                capacity: Number(room.capacity) || 0
+            }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    deleteRoom: async (id) => {
+        const res = await fetch(`${BASE}/api/rooms/${id}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.status === 204 ? null : res.json();
+    },
+
+
+    /** ==========book======= */
 
 
     fetchTextbooks: async () => {
