@@ -8,7 +8,7 @@ export const getAllClasses = async (req, res) => {
             .populate('teacher', 'firstName lastName')
             .populate('room', 'name');
 
-        console.log("Sample class data:", JSON.stringify(classes[0], null, 2));
+        // console.log("Sample class data:", JSON.stringify(classes[0], null, 2));
         res.json(classes);
     } catch (error) {
         res.status(500).json({ error: error.message });
