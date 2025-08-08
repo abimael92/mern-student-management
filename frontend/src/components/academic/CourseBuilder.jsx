@@ -4,7 +4,9 @@ import {
   Box,
   Typography,
   Grid,
+  Divider,
   Paper,
+  Stack,
   Select,
   MenuItem,
   Accordion,
@@ -54,10 +56,10 @@ const DraggableItem = ({ id, children }) => {
     padding: '10px',
     border: '1px solid #ccc',
     marginBottom: '8px',
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f9ff',
     borderRadius: '6px',
     cursor: 'grab',
-    boxShadow: '1px 1px 5px rgba(0,0,0,0.1)',
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.15)',
   };
   return (
     <div ref={setNodeRef} {...listeners} {...attributes} style={style}>
@@ -82,7 +84,15 @@ const DroppableTarget = ({
       expanded={open}
       onChange={onToggle}
       ref={setNodeRef}
-      sx={{ mb: 1 }}
+      sx={{
+        mb: 1,
+        border: '1px solid #ccc',
+        backgroundColor: isOver ? '#e8f5e9' : '#f5f9ff',
+        borderRadius: 2,
+        boxShadow: isOver
+          ? '0px 0px 10px rgba(76, 175, 80, 0.4)'
+          : '0px 2px 6px rgba(0,0,0,0.15)',
+      }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography sx={{ color: isOver ? 'primary.main' : 'inherit' }}>
@@ -91,22 +101,49 @@ const DroppableTarget = ({
       </AccordionSummary>
       <AccordionDetails>
         {assignedItems.length > 0 ? (
-          <List dense>
-            {assignedItems.map((item) => (
-              <ListItem key={item._id}>
-                <ListItemText
-                  primary={
-                    item.name ||
-                    item.firstName ||
-                    item.roomNumber ||
-                    item.schedule ||
-                    item.code ||
-                    'Unnamed'
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
+          Object.entries(
+            assignedItems.reduce((groups, item) => {
+              (groups[item._entityType] = groups[item._entityType] || []).push(
+                item
+              );
+              return groups;
+            }, {})
+          ).map(([entityType, items]) => (
+            <Box key={entityType} sx={{ mb: 2 }}>
+              <Typography
+                sx={{
+                  mb: 1,
+                  px: 1,
+                  py: 0.5,
+                  backgroundColor: '#eef2f7',
+                  borderRadius: 1,
+                  fontWeight: 500,
+                }}
+              >
+                {entityMap[entityType]?.label || entityType}
+              </Typography>
+
+              <List dense>
+                {items.map((item, index) => (
+                  <React.Fragment key={item._id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={
+                          item.name ||
+                          item.firstName ||
+                          item.roomNumber ||
+                          item.schedule ||
+                          item.code ||
+                          'Unnamed'
+                        }
+                      />
+                    </ListItem>
+                    {index < items.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            </Box>
+          ))
         ) : (
           <Typography variant="body2" color="text.secondary">
             No assigned items yet.
@@ -119,13 +156,35 @@ const DroppableTarget = ({
 
 // --- TOP NAV ---
 const TopNav = ({ onSelectLeft }) => (
-  <AppBar position="static" color="default" sx={{ mb: 2 }}>
-    <Toolbar>
-      {Object.keys(entityMap).map((key) => (
-        <Button key={key} onClick={() => onSelectLeft(key)}>
-          {entityMap[key].label}
-        </Button>
-      ))}
+  <AppBar
+    position="static"
+    color="default"
+    sx={{
+      mb: 2,
+      boxShadow: 1,
+      borderRadius: 1,
+    }}
+  >
+    <Toolbar sx={{ justifyContent: 'center', gap: 2 }}>
+      {Object.keys(entityMap)
+        .filter((key) => validAssignments[key]?.length > 0)
+        .map((key) => (
+          <Button
+            key={key}
+            variant="outlined"
+            color="tertiary"
+            onClick={() => onSelectLeft(key)}
+            sx={{
+              px: 3,
+              py: 1,
+              borderRadius: 3,
+              fontWeight: 500,
+              textTransform: 'none',
+            }}
+          >
+            {entityMap[key].label}
+          </Button>
+        ))}
     </Toolbar>
   </AppBar>
 );
@@ -174,7 +233,13 @@ const RelationBuilder = () => {
     setAssignedMap((prev) => {
       const existing = prev[rightItemId] || [];
       if (existing.some((i) => i._id === droppedItem._id)) return prev; // avoid duplicates
-      return { ...prev, [rightItemId]: [...existing, droppedItem] };
+      return {
+        ...prev,
+        [rightItemId]: [
+          ...existing,
+          { ...droppedItem, _entityType: leftEntity },
+        ],
+      };
     });
 
     setOpenAccordions((prev) => ({ ...prev, [rightItemId]: true }));
@@ -182,22 +247,30 @@ const RelationBuilder = () => {
 
   return (
     <Box p={2}>
-      <TopNav
-        onSelectLeft={(key) => {
-          setLeftEntity(key);
-          const validRights = validAssignments[key] || [];
-          if (!validRights.includes(rightEntity)) {
-            setRightEntity(validRights[0] || '');
-          }
-        }}
-      />
+      <Box
+        p={2}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        gap={3}
+      >
+        <TopNav
+          onSelectLeft={(key) => {
+            setLeftEntity(key);
+            const validRights = validAssignments[key] || [];
+            if (!validRights.includes(rightEntity)) {
+              setRightEntity(validRights[0] || '');
+            }
+          }}
+        />
 
-      <Typography variant="h5" gutterBottom>
-        Assign {entityMap[leftEntity].label} → {entityMap[rightEntity]?.label}
-      </Typography>
+        <Typography variant="h5" gutterBottom textAlign="center">
+          Assign {entityMap[leftEntity].label} → {entityMap[rightEntity]?.label}
+        </Typography>
+      </Box>
 
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={6}>
+      {/* <Grid container spacing={2} sx={{ mb: 2 }}>
+     <Grid item xs={6}>
           <Select fullWidth value={leftEntity} disabled>
             <MenuItem value={leftEntity}>
               {entityMap[leftEntity].label}
@@ -217,13 +290,14 @@ const RelationBuilder = () => {
             ))}
           </Select>
         </Grid>
-      </Grid>
+      </Grid>}
+       */}
 
       <DndContext onDragEnd={handleDragEnd}>
         <Grid container spacing={3}>
           {/* Left list */}
           <Grid item xs={6}>
-            <Paper sx={{ p: 2, minHeight: 400 }}>
+            <Paper sx={{ p: 2, minHeight: 400, backgroundColor: '#e0e0e0' }}>
               <Typography variant="subtitle1" mb={1}>
                 {entityMap[leftEntity].label}
               </Typography>
@@ -242,7 +316,7 @@ const RelationBuilder = () => {
 
           {/* Right droppables */}
           <Grid item xs={6}>
-            <Paper sx={{ p: 2, minHeight: 400 }}>
+            <Paper sx={{ p: 2, minHeight: 400, backgroundColor: '#e0e0e0' }}>
               <Typography variant="subtitle1" mb={1}>
                 {entityMap[rightEntity]?.label}
               </Typography>
