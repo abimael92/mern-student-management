@@ -199,6 +199,9 @@ const RelationBuilder = () => {
       if (leftEntity === 'students' && rightEntity === 'classes') {
         actionName = 'assign student to class';
         response = await api.assignStudentToClass(leftItemId, rightItemId);
+      } else if (leftEntity === 'teachers' && rightEntity === 'classes') {
+        actionName = 'assign teacher to class';
+        response = await api.assignTeacherToClass(leftItemId, rightItemId);
       } else if (leftEntity === 'classes' && rightEntity === 'rooms') {
         actionName = 'assign class to room';
         response = await api.assignRoomToClass(leftItemId, rightItemId);
