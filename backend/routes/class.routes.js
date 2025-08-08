@@ -3,6 +3,8 @@ import {
     getAllClasses,
     createClass,
     updateClass,
+    assignRoomToClass,
+    assignCourseToClass,
     deleteClass,
 } from "../controllers/classes/classes.controller.js";
 
@@ -16,6 +18,8 @@ router.post("/", createClass);
 
 // ----- UPDATE -----
 router.put("/:id", updateClass);
+router.put("/:id/assign-room", assignRoomToClass);
+router.put("/:id/assign-course", assignCourseToClass);
 
 // ----- DELETE -----
 router.delete("/:id", deleteClass);
