@@ -108,8 +108,8 @@ export const updateTeacher = async (req, res) => {
 // GET /teachers
 export const assignTeacherToClass = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { targetType, targetId } = req.body;
+        const { id: teacherId } = req.params;
+        const { targetType, targetId: classId } = req.body;
 
         if (targetType !== 'classes') {
             return res.status(400).json({ error: 'Teachers can only be assigned to classes' });
@@ -120,14 +120,14 @@ export const assignTeacherToClass = async (req, res) => {
         }
 
         // Validate IDs
-        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(targetId)) {
+        if (!mongoose.Types.ObjectId.isValid(teacherId) || !mongoose.Types.ObjectId.isValid(classId)) {
             return res.status(400).json({ error: 'Invalid ID format' });
         }
 
         // Verify both teacher and class exist
         const [teacherExists, classExists] = await Promise.all([
-            Teacher.exists({ _id: id }),
-            Class.exists({ _id: targetId })
+            Teacher.exists({ _id: teacherId }),
+            Class.exists({ _id: classId })
         ]);
 
         if (!teacherExists) return res.status(404).json({ error: 'Teacher not found' });
@@ -144,7 +144,7 @@ export const assignTeacherToClass = async (req, res) => {
             const currentTeacherId = currentClass?.teacher;
 
             // Remove this class from the current teacher's classes array
-            if (currentTeacherId) {
+            if (currentTeacherId && currentTeacherId.toString() !== teacherId) {
                 await Teacher.findByIdAndUpdate(
                     currentTeacherId,
                     { $pull: { classes: classId } },
@@ -163,8 +163,7 @@ export const assignTeacherToClass = async (req, res) => {
             await Teacher.findByIdAndUpdate(
                 teacherId,
                 {
-                    $addToSet: { classes: classId }, // Add to classes array
-                    $pull: { classes: currentTeacherId } // Remove any reference to previous class if needed
+                    $addToSet: { classes: classId },
                 },
                 { new: true, session }
             );
