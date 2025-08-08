@@ -1,4 +1,4 @@
-import Class from "../../models/class.schema.js";
+import Class from '../../models/class.schema.js';
 import mongoose from "mongoose";
 
 export const getAllClasses = async (req, res) => {
