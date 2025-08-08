@@ -377,6 +377,19 @@ export const api = {
         return res.json();
     },
 
+    assignTeacherToClass: async (teacherId, classId) => {
+        const res = await fetch(`${BASE}/api/teachers/${teacherId}/assign`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetType: 'classes',
+                targetId: classId
+            }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
     assignRoomToClass: async (classId, roomId) => {
         const res = await fetch(`${BASE}/api/classes/${classId}/assign-room`, {
             method: 'PUT',
