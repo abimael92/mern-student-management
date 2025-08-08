@@ -47,3 +47,62 @@ export const deleteClass = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// In your classes.controller.js
+export const assignRoomToClass = async (req, res) => {
+    try {
+        const { roomId } = req.body;
+        const classId = req.params.id;
+
+        // Validate IDs
+        if (!mongoose.Types.ObjectId.isValid(classId)) {
+            return res.status(400).json({ error: "Invalid class ID" });
+        }
+        if (!mongoose.Types.ObjectId.isValid(roomId)) {
+            return res.status(400).json({ error: "Invalid room ID" });
+        }
+
+        const updatedClass = await Class.findByIdAndUpdate(
+            classId,
+            { room: roomId },
+            { new: true }
+        ).populate('room');
+
+        if (!updatedClass) {
+            return res.status(404).json({ error: "Class not found" });
+        }
+
+        res.json(updatedClass);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const assignCourseToClass = async (req, res) => {
+    try {
+        const { courseId } = req.body;
+        const classId = req.params.id;
+
+        // Validate IDs
+        if (!mongoose.Types.ObjectId.isValid(classId)) {
+            return res.status(400).json({ error: "Invalid class ID" });
+        }
+        if (!mongoose.Types.ObjectId.isValid(courseId)) {
+            return res.status(400).json({ error: "Invalid course ID" });
+        }
+
+        const updatedClass = await Class.findByIdAndUpdate(
+            classId,
+            { course: courseId },
+            { new: true }
+        ).populate('course');
+
+        if (!updatedClass) {
+            return res.status(404).json({ error: "Class not found" });
+        }
+
+        res.json(updatedClass);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

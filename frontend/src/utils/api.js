@@ -363,6 +363,80 @@ export const api = {
         return res.status === 204 ? null : res.json();
     },
 
+    // Add relationship management methods
+    assignRoomToClass: async (classId, roomId) => {
+        const res = await fetch(`${BASE}/api/classes/${classId}/assign-room`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    assignCourseToClass: async (classId, courseId) => {
+        const res = await fetch(`${BASE}/api/classes/${classId}/assign-course`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    assignSubjectToCourse: async (courseId, subjectId) => {
+        const res = await fetch(`${BASE}/api/courses/${courseId}/assign-subject`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subjectId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    getCourseWithSubjects: async (courseId) => {
+        const res = await fetch(`${BASE}/api/courses/${courseId}/with-subjects`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Add these methods to your api.js
+    assignSemesterToSubject: async (subjectId, semesterId) => {
+        const res = await fetch(`${BASE}/api/subjects/${subjectId}/assign-semester`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ semesterId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    getSubjectWithSemester: async (subjectId) => {
+        const res = await fetch(`${BASE}/api/subjects/${subjectId}/with-semester`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    assignRelationship: async (sourceType, sourceId, targetType, targetId) => {
+        const res = await fetch(`${BASE}/api/${sourceType}/${sourceId}/assign`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetType, targetId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    unassignRelationship: async (sourceType, sourceId, targetType, targetId) => {
+        const res = await fetch(`${BASE}/api/${sourceType}/${sourceId}/unassign`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetType, targetId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
 
     /** ==========book======= */
 

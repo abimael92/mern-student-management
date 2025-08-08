@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Box,
@@ -200,6 +200,65 @@ const RelationBuilder = () => {
   const [assignedMap, setAssignedMap] = useState({}); // rightItemId → [leftItems]
   const [openAccordions, setOpenAccordions] = useState({}); // rightItemId → bool
 
+  useEffect(() => {
+    const loadInitialRelationships = async () => {
+      const newAssignedMap = {};
+
+      // Classes ↔ Rooms
+      if (leftEntity === 'classes' && rightEntity === 'rooms') {
+        const classes = await api.fetchClasses();
+        classes.forEach((cls) => {
+          if (cls.room) {
+            newAssignedMap[cls.room] = [
+              ...(newAssignedMap[cls.room] || []),
+              { ...cls, _entityType: 'classes' },
+            ];
+          }
+        });
+      }
+      // Classes ↔ Courses
+      else if (leftEntity === 'classes' && rightEntity === 'courses') {
+        const classes = await api.fetchClasses();
+        classes.forEach((cls) => {
+          if (cls.course) {
+            newAssignedMap[cls.course] = [
+              ...(newAssignedMap[cls.course] || []),
+              { ...cls, _entityType: 'classes' },
+            ];
+          }
+        });
+      }
+      // Courses ↔ Subjects
+      else if (leftEntity === 'courses' && rightEntity === 'subjects') {
+        const courses = await api.fetchCourses();
+        courses.forEach((course) => {
+          if (course.subject) {
+            newAssignedMap[course.subject] = [
+              ...(newAssignedMap[course.subject] || []),
+              { ...course, _entityType: 'courses' },
+            ];
+          }
+        });
+      }
+      // Subjects ↔ Semesters
+      else if (leftEntity === 'subjects' && rightEntity === 'semesters') {
+        const subjects = await api.fetchSubjects();
+        subjects.forEach((subject) => {
+          if (subject.semester) {
+            newAssignedMap[subject.semester] = [
+              ...(newAssignedMap[subject.semester] || []),
+              { ...subject, _entityType: 'subjects' },
+            ];
+          }
+        });
+      }
+
+      setAssignedMap(newAssignedMap);
+    };
+
+    loadInitialRelationships();
+  }, [leftEntity, rightEntity]);
+
   const validRightOptions = validAssignments[leftEntity] || [];
 
   const handleRightEntityChange = (e) => {
@@ -212,37 +271,57 @@ const RelationBuilder = () => {
     const leftItemId = active.id;
     const rightItemId = over.id;
 
-    // Simulate fetch to backend
-    try {
-      await fetch(`/api/assign/${rightEntity}/${rightItemId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leftEntity,
-          leftItemId,
-        }),
-      });
-    } catch (err) {
-      console.error('PUT failed:', err);
-    }
-
-    // Find dropped item
+    // Find the dropped item
     const droppedItem = leftItems.find((item) => item._id === leftItemId);
     if (!droppedItem) return;
 
-    setAssignedMap((prev) => {
-      const existing = prev[rightItemId] || [];
-      if (existing.some((i) => i._id === droppedItem._id)) return prev; // avoid duplicates
-      return {
-        ...prev,
-        [rightItemId]: [
-          ...existing,
-          { ...droppedItem, _entityType: leftEntity },
-        ],
-      };
-    });
+    // Call the appropriate API based on the relationship
+    try {
+      // Handle class → room assignment
+      if (leftEntity === 'classes' && rightEntity === 'rooms') {
+        await api.assignRoomToClass(leftItemId, rightItemId);
+      }
+      // Handle class → course assignment
+      else if (leftEntity === 'classes' && rightEntity === 'courses') {
+        await api.assignCourseToClass(leftItemId, rightItemId);
+      }
+      // Handle course → subject assignment
+      else if (leftEntity === 'courses' && rightEntity === 'subjects') {
+        await api.assignSubjectToCourse(leftItemId, rightItemId);
+      }
+      // Handle course → subject assignment
+      else if (leftEntity === 'subjects' && rightEntity === 'semesters') {
+        await api.assignSemesterToSubject(leftItemId, rightItemId);
+      }
+      // Handle other cases...
+      else {
+        // Generic fallback
+        await api.assignRelationship(
+          leftEntity,
+          leftItemId,
+          rightEntity,
+          rightItemId
+        );
+      }
 
-    setOpenAccordions((prev) => ({ ...prev, [rightItemId]: true }));
+      // Update local state
+      setAssignedMap((prev) => {
+        const existing = prev[rightItemId] || [];
+        if (existing.some((i) => i._id === droppedItem._id)) return prev;
+        return {
+          ...prev,
+          [rightItemId]: [
+            ...existing,
+            { ...droppedItem, _entityType: leftEntity },
+          ],
+        };
+      });
+
+      setOpenAccordions((prev) => ({ ...prev, [rightItemId]: true }));
+    } catch (err) {
+      console.error('Update failed:', err);
+      // Optionally show error to user
+    }
   };
 
   return (
