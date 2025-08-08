@@ -11,8 +11,7 @@ import {
   TableSortLabel,
   Paper,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit, Delete } from '@mui/icons-material';
 
 const CourseList = ({ courses, onEdit, onDelete }) => {
   const teachers = useSelector((state) => state.teachers.teachers || []);
@@ -93,7 +92,7 @@ const CourseList = ({ courses, onEdit, onDelete }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedCourses.map((course) => {
+          {sortedCourses.map((course, index) => {
             const subjectId =
               course.subject && typeof course.subject === 'object'
                 ? course.subject._id
@@ -104,17 +103,25 @@ const CourseList = ({ courses, onEdit, onDelete }) => {
             const semesterName = course.semester?.name || '—';
 
             return (
-              <TableRow key={course._id}>
+              <TableRow
+                key={course._id}
+                sx={{
+                  backgroundColor: index % 2 === 0 ? '#f5f5f5' : '#e0e0e0',
+                }}
+              >
                 <TableCell>{course.courseCode}</TableCell>
                 <TableCell>{course.name}</TableCell>
                 <TableCell>{subjectName}</TableCell>
                 <TableCell>{semesterName}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => onEdit(course)}>
-                    <EditIcon />
+                  <IconButton onClick={() => onEdit(course)} color="primary">
+                    <Edit />
                   </IconButton>
-                  <IconButton onClick={() => onDelete(course._id)}>
-                    <DeleteIcon />
+                  <IconButton
+                    onClick={() => onDelete(course._id)}
+                    color="secondary"
+                  >
+                    <Delete />
                   </IconButton>
                 </TableCell>
               </TableRow>
