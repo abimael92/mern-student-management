@@ -4,6 +4,7 @@ import {
     getLastTeacherNumber,
     createTeacher,
     updateTeacher,
+    assignTeacherToClass,
     updateTeacherStatus,
     deleteTeacher
 } from "../controllers/teachers/teacher.controller.js";
@@ -23,6 +24,7 @@ router.post("/", createTeacher);
 
 // ----- UPDATE -----
 router.put("/:id", updateTeacher);
+router.put('/:id/assign', assignTeacherToClass);
 router.patch("/:id/status", updateTeacherStatus);
 
 // ----- DELETE -----
