@@ -69,7 +69,12 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
           {sorted.map((cls, i) => {
             console.log(cls);
             return (
-              <TableRow key={cls._id}>
+              <TableRow
+                key={cls._id}
+                sx={{
+                  backgroundColor: i % 2 === 0 ? '#f5f5f5' : '#e0e0e0',
+                }}
+              >
                 <TableCell>{cls.schedule}</TableCell>
                 <TableCell>{cls.course?.name || 'N/A'}</TableCell>
                 <TableCell>
