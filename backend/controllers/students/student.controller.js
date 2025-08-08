@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 import Student from '../../models/student.schema.js';
+import Class from '../../models/class.schema.js';
 import { generateStudentNumber } from '../../services/studentNumber.service.js';
 
 // ----- READ -----
@@ -102,6 +103,66 @@ export const updateStudent = async (req, res) => {
     } catch (err) {
         console.error('Error updating student:', err);
         res.status(500).json({ message: 'Error updating student' });
+    }
+};
+
+// PUT /students/:id/assign
+export const assignStudentToClass = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { targetType, targetId } = req.body;
+
+        // Validate input
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: "Invalid student ID" });
+        }
+        if (!mongoose.Types.ObjectId.isValid(targetId)) {
+            return res.status(400).json({ error: "Invalid class ID" });
+        }
+        if (targetType !== 'classes') {
+            return res.status(400).json({ error: 'Students can only be assigned to classes' });
+        }
+
+        // Verify both student and class exist
+        const [studentExists, classExists] = await Promise.all([
+            Student.exists({ _id: id }),
+            Class.exists({ _id: targetId })
+        ]);
+
+        if (!studentExists) return res.status(404).json({ error: 'Student not found' });
+        if (!classExists) return res.status(404).json({ error: 'Class not found' });
+
+        // Update both student and class in a transaction
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            const student = await Student.findByIdAndUpdate(
+                id,
+                { $addToSet: { enrolledClasses: targetId } },
+                { new: true, session }
+            ).populate('enrolledClasses');
+
+            await Class.findByIdAndUpdate(
+                targetId,
+                { $addToSet: { students: id } },
+                { new: true, session }
+            );
+
+            await session.commitTransaction();
+            res.json(student);
+        } catch (transactionError) {
+            await session.abortTransaction();
+            throw transactionError;
+        } finally {
+            session.endSession();
+        }
+    } catch (error) {
+        console.error('Assignment error:', error);
+        res.status(500).json({
+            error: error.message,
+            ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+        });
     }
 };
 

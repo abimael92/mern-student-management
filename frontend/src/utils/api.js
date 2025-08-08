@@ -364,6 +364,19 @@ export const api = {
     },
 
     // Add relationship management methods
+    assignStudentToClass: async (studentId, classId) => {
+        const res = await fetch(`${BASE}/api/students/${studentId}/assign`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetType: 'classes',
+                targetId: classId
+            }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
     assignRoomToClass: async (classId, roomId) => {
         const res = await fetch(`${BASE}/api/classes/${classId}/assign-room`, {
             method: 'PUT',

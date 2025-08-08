@@ -67,7 +67,6 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
         </TableHead>
         <TableBody>
           {sorted.map((cls, i) => {
-            console.log(cls);
             return (
               <TableRow
                 key={cls._id}
