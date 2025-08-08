@@ -29,8 +29,13 @@ const RoomList = ({ rooms = [], onEdit, onDelete }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rooms.map((room) => (
-            <TableRow key={room._id}>
+          {rooms.map((room, index) => (
+            <TableRow
+              key={room._id}
+              sx={{
+                backgroundColor: index % 2 === 0 ? '#f5f5f5' : '#e0e0e0',
+              }}
+            >
               <TableCell>{room.name}</TableCell>
               <TableCell>{room.capacity}</TableCell>
               <TableCell>
