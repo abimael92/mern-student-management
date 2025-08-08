@@ -34,6 +34,20 @@ export const getSubjectById = async (req, res) => {
     }
 };
 
+export const getSubjectWithSemester = async (req, res) => {
+    try {
+        const subject = await Subject.findById(req.params.id)
+            .populate('semester', 'name academicYear');
+
+        if (!subject) {
+            return res.status(404).json({ error: 'Subject not found' });
+        }
+
+        res.json(subject);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 // Subject controller
 export const updateSubject = async (req, res) => {
@@ -56,6 +70,40 @@ export const updateSubject = async (req, res) => {
         res.json(updatedSubject);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+export const assignSemesterToSubject = async (req, res) => {
+    try {
+        const { semesterId } = req.body;
+
+        // Validate IDs
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ error: "Invalid subject ID" });
+        }
+        if (!mongoose.Types.ObjectId.isValid(semesterId)) {
+            return res.status(400).json({ error: "Invalid semester ID" });
+        }
+
+        // Check if semester exists
+        const semester = await Semester.findById(semesterId);
+        if (!semester) {
+            return res.status(404).json({ error: "Semester not found" });
+        }
+
+        const subject = await Subject.findByIdAndUpdate(
+            req.params.id,
+            { semester: semesterId },
+            { new: true }
+        ).populate('semester', 'name academicYear');
+
+        if (!subject) {
+            return res.status(404).json({ error: "Subject not found" });
+        }
+
+        res.json(subject);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
 
