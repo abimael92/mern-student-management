@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 import { generateTeacherNumber } from '../../services/teacherNumber.service.js';
 import Teacher from '../../models/teacher.schema.js';
+import Class from '../../models/class.schema.js';
 
+// ----- CREATE -----
 export const getTeachers = async (req, res) => {
     try {
         const teachers = await Teacher.find().select('-__v').lean();
@@ -37,7 +39,6 @@ export const getLastTeacherNumber = async (req, res) => {
     }
 };
 
-// ----- CREATE -----
 // POST /teachers
 export const createTeacher = async (req, res) => {
     const errors = validationResult(req);
@@ -101,6 +102,87 @@ export const updateTeacher = async (req, res) => {
     } catch (err) {
         console.error('Error updating teacher:', err);
         res.status(500).json({ message: 'Error updating teacher' });
+    }
+};
+
+// GET /teachers
+export const assignTeacherToClass = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { targetType, targetId } = req.body;
+
+        if (targetType !== 'classes') {
+            return res.status(400).json({ error: 'Teachers can only be assigned to classes' });
+        }
+
+        if (!Class) {
+            throw new Error('Class model not initialized');
+        }
+
+        // Validate IDs
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(targetId)) {
+            return res.status(400).json({ error: 'Invalid ID format' });
+        }
+
+        // Verify both teacher and class exist
+        const [teacherExists, classExists] = await Promise.all([
+            Teacher.exists({ _id: id }),
+            Class.exists({ _id: targetId })
+        ]);
+
+        if (!teacherExists) return res.status(404).json({ error: 'Teacher not found' });
+        if (!classExists) return res.status(404).json({ error: 'Class not found' });
+
+        // Use transaction for atomic updates
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+
+        try {
+            // Find the current teacher of this class (if any)
+            const currentClass = await Class.findById(classId).session(session);
+            const currentTeacherId = currentClass?.teacher;
+
+            // Remove this class from the current teacher's classes array
+            if (currentTeacherId) {
+                await Teacher.findByIdAndUpdate(
+                    currentTeacherId,
+                    { $pull: { classes: classId } },
+                    { session }
+                );
+            }
+
+            //  Update the class with the new teacher
+            const updatedClass = await Class.findByIdAndUpdate(
+                classId,
+                { teacher: teacherId },
+                { new: true, session }
+            ).populate('teacher');
+
+            //  Update the new teacher's classes array
+            await Teacher.findByIdAndUpdate(
+                teacherId,
+                {
+                    $addToSet: { classes: classId }, // Add to classes array
+                    $pull: { classes: currentTeacherId } // Remove any reference to previous class if needed
+                },
+                { new: true, session }
+            );
+
+            await session.commitTransaction();
+            res.json(updatedClass);
+        } catch (transactionError) {
+            await session.abortTransaction();
+            throw transactionError;
+        } finally {
+            session.endSession();
+        }
+    } catch (error) {
+        console.error('Teacher assignment error:', error);
+        res.status(500).json({
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
