@@ -101,11 +101,31 @@ const Header = () => {
   ];
 
   const categories = [
-    { name: 'Insights & Reports', items: insightsReportsItems },
-    { name: 'People Management', items: peopleManagementItems },
-    { name: 'Academics & Attendance', items: academicsAttendanceItems },
-    { name: 'Financial & Logistics', items: financialLogisticsItems },
-    { name: 'Resources & Facilities', items: resourcesFacilitiesItems },
+    {
+      name: 'Insights & Reports',
+      icon: <AssessmentIcon />,
+      items: insightsReportsItems,
+    },
+    {
+      name: 'People Management',
+      icon: <PeopleIcon />,
+      items: peopleManagementItems,
+    },
+    {
+      name: 'Academics & Attendance',
+      icon: <SchoolOutlinedIcon />,
+      items: academicsAttendanceItems,
+    },
+    {
+      name: 'Financial & Logistics',
+      icon: <ReceiptIcon />,
+      items: financialLogisticsItems,
+    },
+    {
+      name: 'Resources & Facilities',
+      icon: <LibraryBooksIcon />,
+      items: resourcesFacilitiesItems,
+    },
   ];
 
   return (
@@ -208,6 +228,7 @@ const Header = () => {
                   key={category.name}
                   color="inherit"
                   onClick={(event) => handleMenuClick(event, category.name)}
+                  startIcon={category.icon}
                   sx={{
                     textTransform: 'none',
                     fontSize: '1rem',
@@ -256,8 +277,20 @@ const Header = () => {
                 component={Link}
                 to={item.path}
                 onClick={handleMenuClose}
+                sx={{ display: 'flex', alignItems: 'center' }}
               >
-                {item.icon} {item.name}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: 30,
+                    mr: 1.5, // margin right to create space
+                  }}
+                >
+                  {item.icon}
+                </Box>
+                <Typography noWrap>{item.name}</Typography>
               </MenuItem>
             ))
           : selectedCategory &&
@@ -272,8 +305,23 @@ const Header = () => {
                     item.comingSoon ? (
                       <Tooltip key={item.name} title="Coming Soon">
                         <span>
-                          <MenuItem disabled sx={{ opacity: 0.5 }}>
-                            {item.icon} {item.name}
+                          <MenuItem
+                            disabled
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 2,
+                              py: 1,
+                              px: 2,
+                              opacity: 0.6,
+                            }}
+                          >
+                            {React.cloneElement(item.icon, {
+                              sx: { fontSize: 20 },
+                            })}
+                            <Typography variant="body1" color="text.secondary">
+                              {item.name}
+                            </Typography>
                           </MenuItem>
                         </span>
                       </Tooltip>
@@ -283,8 +331,18 @@ const Header = () => {
                         component={Link}
                         to={item.path}
                         onClick={handleMenuClose}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          py: 1,
+                          px: 1,
+                        }}
                       >
-                        {item.icon} {item.name}
+                        {React.cloneElement(item.icon, {
+                          sx: { fontSize: 20 },
+                        })}
+                        <Typography variant="body1">{item.name}</Typography>
                       </MenuItem>
                     )
                   )}
