@@ -18,6 +18,10 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
@@ -59,6 +63,12 @@ const RelationBuilder = () => {
 
   const [assignedMap, setAssignedMap] = useState({});
   const [openAccordions, setOpenAccordions] = useState({});
+
+  const [confirmReplace, setConfirmReplace] = useState({
+    open: false,
+    teacherId: null,
+    classId: null,
+  });
 
   // Load initial relationships
   useEffect(() => {
@@ -149,6 +159,32 @@ const RelationBuilder = () => {
     loadInitialRelationships();
   }, [leftEntity, rightEntity]);
 
+  const performTeacherAssignment = async (teacherId, classId) => {
+    const previousState = assignedMap;
+    try {
+      setLoading(true);
+
+      // Optimistic update
+      setAssignedMap((prev) => ({
+        ...prev,
+        [classId]: [
+          {
+            ...leftItems.find((t) => t._id === teacherId),
+            _entityType: 'teachers',
+          },
+        ],
+      }));
+
+      const response = await api.assignTeacherToClass(teacherId, classId);
+      setSuccess('Teacher assigned to class');
+    } catch (err) {
+      setAssignedMap(previousState);
+      setError(err.message || 'Failed to assign teacher');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDragEnd = async ({ active, over }) => {
     if (!over) return;
 
@@ -200,6 +236,16 @@ const RelationBuilder = () => {
         actionName = 'assign student to class';
         response = await api.assignStudentToClass(leftItemId, rightItemId);
       } else if (leftEntity === 'teachers' && rightEntity === 'classes') {
+        const targetClass = rightItems.find((c) => c._id === rightItemId);
+        if (targetClass?.teacher) {
+          setConfirmReplace({
+            open: true,
+            teacherId: leftItemId,
+            classId: rightItemId,
+          });
+          return;
+        }
+
         actionName = 'assign teacher to class';
         response = await api.assignTeacherToClass(leftItemId, rightItemId);
       } else if (leftEntity === 'classes' && rightEntity === 'rooms') {
@@ -292,6 +338,43 @@ const RelationBuilder = () => {
           </div>
         </Alert>
       </Snackbar>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmReplace.open}
+        onClose={() => setConfirmReplace({ ...confirmReplace, open: false })}
+      >
+        <DialogTitle>Replace Teacher?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            This class already has a teacher. Do you want to replace them?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() =>
+              setConfirmReplace({ ...confirmReplace, open: false })
+            }
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              setConfirmReplace({ ...confirmReplace, open: false });
+              await performTeacherAssignment(
+                confirmReplace.teacherId,
+                confirmReplace.classId
+              );
+            }}
+          >
+            Replace
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Box
         p={2}
