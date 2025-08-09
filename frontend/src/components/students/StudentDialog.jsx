@@ -22,20 +22,26 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { api } from '../../utils/api';
 import { useDispatch } from 'react-redux';
 import { addStudent, updateStudent } from '../../redux/actions/studentActions';
+import { GradeEnum } from '../../constants/enums'; // Adjust path as needed
 
 const initialFormData = {
   firstName: '',
   lastName: '',
   profilePicture: '',
   age: '',
-  grade: '',
+  gradeLevel: '',
   tutor: '',
   tutorId: '',
   dob: null,
+  gender: '',
   nationality: '',
-  isEnrolled: false,
+  isEnrolled: true,
   emergencyContact: { name: '', relation: '', phone: '' },
-  contactInfo: { phone: '', email: '' },
+  contact: {
+    // Changed from contactInfo to contact
+    phone: '',
+    email: '',
+  },
   address: { street: '', city: '', state: '', zipCode: '' },
   classroomId: '',
   medicalInfo: {
@@ -115,16 +121,48 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
     setError(null);
 
     try {
-      console.log('Student ID:', student._id);
-
+      // Transform form data to match backend schema
       const studentData = {
-        ...formData,
-        medicalInfo: {
-          ...formData.medicalInfo,
-          allergies: hasAllergies
-            ? formData.medicalInfo.allergies.split(',').map((a) => a.trim())
-            : [],
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        profilePicture: formData.profilePicture || '',
+        gradeLevel: formData.gradeLevel || null,
+        dateOfBirth: formData.dob,
+        nationality: formData.nationality,
+        homeroom: formData.homeroom,
+        contact: {
+          email: formData.contact.email, // Must be provided
+          phone: formData.contact.phone, // Must be provided
+          address: {
+            street: formData.address?.street || '',
+            city: formData.address?.city || '',
+            state: formData.address?.state || '',
+            postalCode: formData.address?.zipCode || '',
+            country: 'USA', // Default or get from form
+          },
         },
+        emergencyContacts: formData.emergencyContact?.name
+          ? [
+              {
+                name: formData.emergencyContact.name,
+                relationship: formData.emergencyContact.relation,
+                phone: formData.emergencyContact.phone,
+                priority: 1,
+              },
+            ]
+          : [],
+        gender: formData.gender || 'prefer-not-to-say',
+        isEnrolled: formData.isEnrolled,
+        enrollmentDate: formData.enrollmentDate || new Date(),
+        medicalInfo: formData.medicalInfo.allergies
+          ? {
+              allergies: formData.medicalInfo.allergies
+                .split(',')
+                .map((a) => a.trim()),
+              nurseComments: formData.medicalInfo.nurseComments || null,
+            }
+          : null,
+        alerts: formData.alerts,
       };
 
       if (student?._id) {
@@ -189,21 +227,25 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
                 </Box>
               )}
             </Box>
-            <TextField
-              label="Age"
-              fullWidth
-              margin="normal"
-              type="number"
-              value={formData.age}
-              onChange={(e) => handleChange(null, 'age', e.target.value)}
-            />
-            <TextField
-              label="Grade"
-              fullWidth
-              margin="normal"
-              value={formData.grade}
-              onChange={(e) => handleChange(null, 'grade', e.target.value)}
-            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Grade Level</InputLabel>
+              <Select
+                value={formData.gradeLevel || ''}
+                label="Grade Level"
+                onChange={(e) =>
+                  handleChange(null, 'gradeLevel', e.target.value)
+                }
+                required
+              >
+                {GradeEnum.map((grade) => (
+                  <MenuItem key={grade} value={grade}>
+                    {grade}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <TextField
               label="Tutor"
               fullWidth
@@ -225,6 +267,15 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
       case 1:
         return (
           <Box>
+            <TextField
+              label="Age"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={formData.age}
+              onChange={(e) => handleChange(null, 'age', e.target.value)}
+            />
+
             <DatePicker
               label="Date of Birth"
               value={formData.dob}
@@ -233,6 +284,21 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
                 <TextField {...params} fullWidth margin="normal" />
               )}
             />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="gender-label">Gender</InputLabel>
+              <Select
+                value={formData.gender || 'prefer-not-to-say'}
+                label="Gender"
+                onChange={(e) => handleChange(null, 'gender', e.target.value)}
+              >
+                <MenuItem value="male">Male</MenuItem>
+                <MenuItem value="female">Female</MenuItem>
+                <MenuItem value="other">Other</MenuItem>
+                <MenuItem value="prefer-not-to-say">Prefer not to say</MenuItem>
+              </Select>
+            </FormControl>
+
             <TextField
               label="Nationality"
               fullWidth
@@ -242,6 +308,19 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
                 handleChange(null, 'nationality', e.target.value)
               }
             />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="homeroom-label">Room</InputLabel>
+              <Select
+                labelId="homeroom-label"
+                value={formData.homeroom || ''}
+                label="Homeroom"
+                onChange={(e) => handleChange(null, 'homeroom', e.target.value)}
+              >
+                {/* Replace with your actual homeroom options */}
+                <MenuItem value="classroom_id_1">Classroom 1</MenuItem>
+                <MenuItem value="classroom_id_2">Classroom 2</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         );
       case 2:
@@ -283,19 +362,15 @@ const StudentDialog = ({ open, onClose, student = {} }) => {
               label="Phone Number"
               fullWidth
               margin="normal"
-              value={formData.contactInfo.phone}
-              onChange={(e) =>
-                handleChange('contactInfo', 'phone', e.target.value)
-              }
+              value={formData.contact.phone}
+              onChange={(e) => handleChange('contact', 'phone', e.target.value)}
             />
             <TextField
               label="Email"
               fullWidth
               margin="normal"
-              value={formData.contactInfo.email}
-              onChange={(e) =>
-                handleChange('contactInfo', 'email', e.target.value)
-              }
+              value={formData.contact.email}
+              onChange={(e) => handleChange('contact', 'email', e.target.value)}
             />
             <TextField
               label="Street"
