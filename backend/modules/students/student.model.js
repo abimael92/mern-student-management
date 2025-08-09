@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { generateStudentNumber } from './student.services.js'; // Import added
+import { generateStudentNumber } from './student.services.js';
+import { GradeEnum } from '../../constants/enums.js';
 
 /**
  * STUDENT SCHEMA
@@ -26,75 +27,71 @@ const studentSchema = new mongoose.Schema({
     profilePicture: { type: String, default: '' },
 
     // ======================= 🔹 ACADEMIC STATUS =======================
-    isActive: { type: Boolean, default: true },
-    enrollmentDate: { type: Date, required: true },
+    isEnrolled: { type: Boolean, default: true },
+    enrollmentDate: { type: Date, },
     gradeLevel: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 12
+        type: String,
+        enum: [...GradeEnum],
     },
     homeroom: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Classroom',
-        required: true
     },
 
     // ======================= 🔹 CONTACT INFORMATION =======================
     contact: {
         email: {
             type: String,
-            required: true,
             lowercase: true
         },
-        phone: { type: String, required: true },
+        phone: { type: String },
         address: {
-            street: { type: String, required: true },
-            city: { type: String, required: true },
-            state: { type: String, required: true },
-            postalCode: { type: String, required: true },
-            country: { type: String, required: true }
+            street: { type: String, },
+            city: { type: String, },
+            state: { type: String, },
+            postalCode: { type: String, },
+            country: { type: String, }
         }
     },
     emergencyContacts: [{
-        name: { type: String, required: true },
-        relationship: { type: String, required: true },
-        phone: { type: String, required: true },
-        priority: { type: Number, required: true }
+        name: { type: String, },
+        relationship: { type: String, },
+        phone: { type: String, },
+        priority: { type: Number, }
     }],
 
     // ======================= 🔹 PERSONAL DETAILS =======================
-    dateOfBirth: { type: Date, required: true },
+    dateOfBirth: { type: Date, },
     gender: {
         type: String,
-        required: true,
+
         enum: ['male', 'female', 'other', 'prefer-not-to-say']
     },
-    nationality: { type: String, required: true },
+    nationality: { type: String, },
 
     // ======================= 🔹 SYSTEM REFERENCES =======================
     enrolledClasses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Class',
-        required: true
+
     }],
     advisor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Teacher',
-        required: true
+
     },
     extracurriculars: [{
         group: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'ExtraCurricular',
-            required: true
+
         },
-        role: { type: String, required: true }
+        role: { type: String, }
     }],
     noteIds: [{
         type: mongoose.Types.ObjectId,
         ref: 'StudentNote',
-        required: true
+
     }],
 
     // ======================= 🔹 META & TIMESTAMPS =======================
