@@ -24,185 +24,148 @@ export const createStudentSchema = Joi.object({
             'string.max': ValidationMessages.TOO_LONG('Last name', 50),
         }),
 
-    profilePicture: Joi.string()
-        .uri()
-        .max(500)
-        .optional()
-        .allow('', null)
-        .messages({
-            'string.uri': 'Profile picture must be a valid URL',
-        }),
-
-    isActive: Joi.boolean().optional(),
-
     enrollmentDate: Joi.date()
-        .required()
+        .allow(null)
+        .optional()
         .messages({
             'date.base': ValidationMessages.INVALID_DATE('Enrollment date'),
-            'any.required': ValidationMessages.REQUIRED('Enrollment date'),
         }),
 
     gradeLevel: Joi.string()
-        .valid(...GradeEnum)
-        .required()
+        .valid(...GradeEnum, null)
+        .allow(null)
+        .optional()
         .messages({
-            'any.only': `Grade level must be one of: ${GradeEnum.join(', ')}`,
-            'any.required': ValidationMessages.REQUIRED('Grade level'),
+            'any.only': `Grade level must be one of: ${GradeEnum.join(', ')} or null`,
         }),
 
     homeroom: Joi.string()
         .pattern(/^[a-f\d]{24}$/i)
-        .required()
+        .allow(null)
+        .optional()
         .messages({
             'string.pattern.base': ValidationMessages.INVALID_ID,
-            'any.required': ValidationMessages.REQUIRED('Homeroom'),
         }),
 
     contact: Joi.object({
         email: Joi.string()
             .email()
-            .required()
+            .allow('', null)
+            .optional()
             .messages({
                 'string.email': ValidationMessages.INVALID_EMAIL,
-                'any.required': ValidationMessages.REQUIRED('Email'),
             }),
         phone: Joi.string()
             .min(5)
             .max(20)
-            .required()
+            .allow('', null)
+            .optional()
             .messages({
                 'string.min': ValidationMessages.TOO_SHORT('Phone', 5),
                 'string.max': ValidationMessages.TOO_LONG('Phone', 20),
-                'any.required': ValidationMessages.REQUIRED('Phone'),
             }),
         address: Joi.object({
-            street: Joi.string().max(200).optional().allow(''),
-            city: Joi.string().max(100).optional().allow(''),
-            state: Joi.string().max(100).optional().allow(''),
-            postalCode: Joi.string().max(20).optional().allow(''),
-            country: Joi.string().max(100).optional().allow(''),
-        }).optional(),
-    }).required(),
-
-    emergencyContacts: Joi.array()
-        .items(
-            Joi.object({
-                name: Joi.string()
-                    .min(2)
-                    .max(100)
-                    .required()
-                    .messages({
-                        'string.empty': ValidationMessages.REQUIRED('Emergency contact name'),
-                    }),
-                relationship: Joi.string()
-                    .min(2)
-                    .max(50)
-                    .required()
-                    .messages({
-                        'string.empty': ValidationMessages.REQUIRED('Emergency contact relationship'),
-                    }),
-                phone: Joi.string()
-                    .min(5)
-                    .max(20)
-                    .required()
-                    .messages({
-                        'string.empty': ValidationMessages.REQUIRED('Emergency contact phone'),
-                    }),
-                priority: Joi.number()
-                    .integer()
-                    .required()
-                    .messages({
-                        'number.base': 'Priority must be a number',
-                        'any.required': ValidationMessages.REQUIRED('Priority'),
-                    }),
-            })
-        )
-        .min(1)
-        .optional(),
+            street: Joi.string().max(200).allow('', null).optional(),
+            city: Joi.string().max(100).allow('', null).optional(),
+            state: Joi.string().max(100).allow('', null).optional(),
+            postalCode: Joi.string().max(20).allow('', null).optional(),
+            country: Joi.string().max(100).allow('', null).optional(),
+        }).allow(null).optional(),
+    }).allow(null).optional(),
 
     dateOfBirth: Joi.date()
-        .required()
+        .allow(null)
+        .optional()
         .messages({
             'date.base': ValidationMessages.INVALID_DATE('Date of birth'),
-            'any.required': ValidationMessages.REQUIRED('Date of birth'),
         }),
 
     gender: Joi.string()
-        .valid(...GenderEnum)
-        .required()
+        .valid(...GenderEnum, null)
+        .allow(null)
+        .optional()
         .messages({
-            'any.only': `Gender must be one of: ${GenderEnum.join(', ')}`,
-            'any.required': ValidationMessages.REQUIRED('Gender'),
+            'any.only': `Gender must be one of: ${GenderEnum.join(', ')} or null`,
         }),
 
     nationality: Joi.string()
         .max(100)
-        .required()
+        .allow('', null)
+        .optional()
         .messages({
             'string.max': ValidationMessages.TOO_LONG('Nationality', 100),
-            'any.required': ValidationMessages.REQUIRED('Nationality'),
         }),
-
-    enrolledClasses: Joi.array()
-        .items(
-            Joi.string()
-                .pattern(/^[a-f\d]{24}$/i)
-                .messages({
-                    'string.pattern.base': ValidationMessages.INVALID_ID,
-                })
-        )
-        .optional(),
 
     advisor: Joi.string()
         .pattern(/^[a-f\d]{24}$/i)
-        .required()
+        .allow(null)
+        .optional()
         .messages({
             'string.pattern.base': ValidationMessages.INVALID_ID,
-            'any.required': ValidationMessages.REQUIRED('Advisor'),
         }),
 
+    profilePicture: Joi.string()
+        .uri()
+        .max(500)
+        .allow('', null)
+        .optional()
+        .messages({
+            'string.uri': 'Profile picture must be a valid URL',
+        }),
+
+    isEnrolled: Joi.boolean().allow(null).optional(),
+
+    medicalInfo: Joi.object({
+        allergies: Joi.string().allow('', null).optional(),
+        nurseComments: Joi.string().allow('', null).optional()
+    }).allow(null).optional(),
+
+    alerts: Joi.object({
+        behavior: Joi.string().allow('', null).optional(),
+        academic: Joi.string().allow('', null).optional(),
+        flag: Joi.string().valid('none', 'warning', 'success', null).optional()
+    }).allow(null).optional(),
+
+    enrolledClasses: Joi.array()
+        .items(Joi.string().pattern(/^[a-f\d]{24}$/i))
+        .allow(null)
+        .optional(),
+
+    emergencyContacts: Joi.array()
+        .items(Joi.object({
+            name: Joi.string().min(2).max(100).allow('', null).optional(),
+            relationship: Joi.string().min(2).max(50).allow('', null).optional(),
+            phone: Joi.string().min(5).max(20).allow('', null).optional(),
+            priority: Joi.number().integer().allow(null).optional(),
+        }))
+        .allow(null)
+        .optional(),
+
     extracurriculars: Joi.array()
-        .items(
-            Joi.object({
-                group: Joi.string()
-                    .pattern(/^[a-f\d]{24}$/i)
-                    .required()
-                    .messages({
-                        'string.pattern.base': ValidationMessages.INVALID_ID,
-                        'any.required': ValidationMessages.REQUIRED('Extracurricular group'),
-                    }),
-                role: Joi.string()
-                    .min(1)
-                    .required()
-                    .messages({
-                        'string.empty': ValidationMessages.REQUIRED('Extracurricular role'),
-                    }),
-            })
-        )
+        .items(Joi.object({
+            group: Joi.string().pattern(/^[a-f\d]{24}$/i).allow(null).optional(),
+            role: Joi.string().min(1).allow('', null).optional(),
+        }))
+        .allow(null)
         .optional(),
 
     noteIds: Joi.array()
-        .items(
-            Joi.string()
-                .pattern(/^[a-f\d]{24}$/i)
-                .optional()
-        )
-        .optional(),
+        .items(Joi.string().pattern(/^[a-f\d]{24}$/i))
+        .allow(null)
+        .optional()
 });
 
-// For updates: make all fields optional but validate format if provided
 export const updateStudentSchema = createStudentSchema.fork(
     Object.keys(createStudentSchema.describe().keys),
     (schema) => schema.optional()
 );
 
-// Generic middleware factory to validate any Joi schema
 export const validateRequest = (schema) => (req, res, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
     if (error) {
         return res.status(400).json({
             status: 'fail',
-            errors: error.details.map(e => ({
+            errors: error.details.map((e) => ({
                 field: e.path.join('.'),
                 message: e.message,
             })),
@@ -211,6 +174,5 @@ export const validateRequest = (schema) => (req, res, next) => {
     next();
 };
 
-// Specific middleware for your student routes
 export const validateCreateStudent = validateRequest(createStudentSchema);
 export const validateUpdateStudent = validateRequest(updateStudentSchema);

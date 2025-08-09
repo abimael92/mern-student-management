@@ -16,6 +16,7 @@ import {
 } from '../actionTypes';
 
 export const fetchStudents = () => async (dispatch) => {
+
     dispatch({ type: FETCH_STUDENTS_REQUEST });
     try {
         const data = await api.fetchStudents();
@@ -26,6 +27,7 @@ export const fetchStudents = () => async (dispatch) => {
 };
 
 export const addStudent = (studentData) => async (dispatch) => {
+    console.log('Redux action payload:', studentData)
     try {
         const response = await api.addStudent(studentData);
         dispatch({ type: ADD_STUDENT, payload: response.data });
@@ -38,6 +40,7 @@ export const addStudent = (studentData) => async (dispatch) => {
 };
 
 export const deleteStudent = (id) => async (dispatch) => {
+    console.log('Deleting student with ID:', id);
     try {
         await api.deleteStudent(id);
         dispatch({ type: DELETE_STUDENT, payload: id });
