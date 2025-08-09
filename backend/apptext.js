@@ -7,7 +7,7 @@ import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import studentRoutes from './routes/student.routes.js';
+import studentRoutes from './modules/students/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import globalErrorHandler from './middlewares/error.middleware.js';
