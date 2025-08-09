@@ -9,6 +9,11 @@ import {
     deleteStudent,           // DELETE: Remove student
 } from "./student.controller.js";
 
+import {
+    validateCreateStudent,
+    validateUpdateStudent,
+} from './student.validations.js';
+
 const router = express.Router();
 
 // ----- READ -----
@@ -16,12 +21,12 @@ router.get("/", getStudents);
 router.get("/lastStudentNumber", getLastStudentNumber);
 
 // ----- CREATE -----
-router.post("/", createStudent);
+router.post("/", validateCreateStudent, createStudent);
 
 // ----- UPDATE -----
-router.put("/:id", updateStudent);
-router.put('/:id/assign', assignStudentToClass);
-router.patch("/:id/status", updateStudentStatus);
+router.put("/:id", validateUpdateStudent, updateStudent);
+router.put('/:id/assign', assignStudentToClass);  // No validation here, add if needed
+router.patch("/:id/status", updateStudentStatus); // No validation here, add if needed
 
 // ----- DELETE -----
 router.delete("/:id", deleteStudent);
