@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
-import Student from '../../models/student.schema.js';
+import Student from './student.model.js';
 import Class from '../../models/class.schema.js';
-import { generateStudentNumber } from '../../services/studentNumber.service.js';
+import { generateStudentNumber } from './student.services.js';
 
 // ----- READ -----
 

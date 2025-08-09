@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { generateStudentNumber } from '../services/studentNumber.service.js'; // Import added
+import { generateStudentNumber } from './student.services.js'; // Import added
 
 /**
  * STUDENT SCHEMA

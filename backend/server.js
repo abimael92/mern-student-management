@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import booksRoutes from './routes/books.route.js';
-import studentRoutes from './routes/student.routes.js';
+import studentRoutes from './modules/students/student.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
 import subjectRoutes from './routes/subject.routes.js';
 import courseRoutes from './routes/course.routes.js';
