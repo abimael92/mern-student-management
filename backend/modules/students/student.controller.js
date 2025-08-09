@@ -197,13 +197,12 @@ export const updateStudentStatus = async (req, res) => {
 // ----- DELETE -----
 export const deleteStudent = async (req, res) => {
     const { id } = req.params;
+    console.log(`Request to delete student with ID: ${id}`);
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid student ID format' });
-    }
+
 
     try {
-        const deletedStudent = await Student.findByIdAndDelete(id);
+        const deletedStudent = await Student.findOneAndDelete({ studentNumber: id });
 
         if (!deletedStudent) {
             return res.status(404).json({ message: `Student with ID ${id} not found` });
