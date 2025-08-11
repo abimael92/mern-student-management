@@ -1,4 +1,4 @@
-import Teacher from '../models/teacher.schema.js';
+import Teacher from '../modules/teachers/teacher.schema.js';
 
 export const generateTeacherNumber = async () => {
     const currentYear = new Date().getFullYear();
