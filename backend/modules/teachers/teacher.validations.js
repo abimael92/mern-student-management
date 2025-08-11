@@ -1,179 +1,154 @@
-import { body, param, validationResult } from 'express-validator';
-import Teacher from '../models/Teacher';
+import Joi from 'joi';
+import { ValidationMessages } from '../../constants/messages.js';
 
-// Helper: reusable name validation
-const nameRule = (field) =>
-    body(field)
-        .trim()
-        .notEmpty().withMessage(`${field} is required`)
-        .isLength({ min: 2, max: 50 }).withMessage(`${field} must be between 2 and 50 characters`)
-        .escape();
+// Enums for fields
+const SubjectEnum = ['Math', 'Science', 'English', 'History', 'Art', 'Music', 'PE', 'Computers', 'Languages'];
+const QualificationEnum = ['Bachelors', 'Masters', 'PhD', 'Teaching Certificate', 'Diploma'];
+const StatusEnum = ['active', 'retired', 'on leave'];
 
-// Email validation with async uniqueness check
-const emailRule = () =>
-    body('email')
-        .trim()
-        .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email format')
-        .normalizeEmail()
-        .custom(async (email, { req }) => {
-            // For update, allow same email if unchanged
-            if (req.method === 'PUT' || req.method === 'PATCH') {
-                const teacher = await Teacher.findById(req.params.id);
-                if (teacher && teacher.email === email) return true;
-            }
-            const exists = await Teacher.exists({ email });
-            if (exists) throw new Error('Email already in use');
-            return true;
-        });
+export const createTeacherSchema = Joi.object({
+    firstName: Joi.string()
+        .min(2)
+        .max(50)
+        .required()
+        .messages({
+            'string.empty': ValidationMessages.REQUIRED('First name'),
+            'string.min': ValidationMessages.TOO_SHORT('First name', 2),
+            'string.max': ValidationMessages.TOO_LONG('First name', 50),
+        }),
 
-// Phone number validation, international-friendly regex
-const phoneRule = () =>
-    body('phone')
-        .trim()
-        .notEmpty().withMessage('Phone is required')
-        .matches(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/).withMessage('Invalid phone number');
+    lastName: Joi.string()
+        .min(2)
+        .max(50)
+        .required()
+        .messages({
+            'string.empty': ValidationMessages.REQUIRED('Last name'),
+            'string.min': ValidationMessages.TOO_SHORT('Last name', 2),
+            'string.max': ValidationMessages.TOO_LONG('Last name', 50),
+        }),
 
-// Subjects validation with allowed list
-const subjectRule = () =>
-    body('subjects')
-        .isArray({ min: 1 }).withMessage('At least one subject is required')
-        .custom((subjects) => {
-            const validSubjects = ['Math', 'Science', 'English', 'History', 'Art', 'Music', 'PE', 'Computers', 'Languages'];
-            if (!subjects.every(sub => validSubjects.includes(sub))) {
-                throw new Error('One or more invalid subjects provided');
-            }
-            return true;
-        });
+    teacherNumber: Joi.string()
+        .pattern(/^TC\d{4}-\d{3}$/)
+        .optional()
+        .messages({
+            'string.pattern.base': ValidationMessages.INVALID('Teacher number format'),
+        }),
 
-// Qualification validation with allowed degrees
-const qualificationRule = () =>
-    body('qualifications')
-        .isArray({ min: 1 }).withMessage('At least one qualification is required')
-        .custom((quals) => {
-            const validQuals = ['Bachelors', 'Masters', 'PhD', 'Teaching Certificate', 'Diploma'];
-            if (!quals.every(q => validQuals.includes(q))) {
-                throw new Error('One or more invalid qualifications provided');
-            }
-            return true;
-        });
+    status: Joi.string()
+        .valid(...StatusEnum)
+        .default('active')
+        .messages({
+            'any.only': `Status must be one of: ${StatusEnum.join(', ')}`,
+        }),
 
-// Address nested validation helper (optional fields, max length)
-const addressFields = ['street', 'city', 'state', 'zipCode', 'country'];
-const addressRules = addressFields.map(field =>
-    body(`address.${field}`).optional().trim().isLength({ max: field === 'street' ? 100 : 50 }).escape()
+    email: Joi.string()
+        .email()
+        .required()
+        .messages({
+            'string.email': ValidationMessages.INVALID_EMAIL,
+            'string.empty': ValidationMessages.REQUIRED('Email'),
+        }),
+
+    phone: Joi.string()
+        .pattern(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/)
+        .required()
+        .messages({
+            'string.pattern.base': ValidationMessages.INVALID('Phone number'),
+            'string.empty': ValidationMessages.REQUIRED('Phone'),
+        }),
+
+    hireDate: Joi.date()
+        .optional()
+        .messages({
+            'date.base': ValidationMessages.INVALID_DATE('Hire date'),
+        }),
+
+    qualifications: Joi.array()
+        .items(Joi.string().valid(...QualificationEnum))
+        .min(1)
+        .required()
+        .messages({
+            'array.min': ValidationMessages.REQUIRED('At least one qualification'),
+            'any.only': `Qualifications must be one of: ${QualificationEnum.join(', ')}`,
+        }),
+
+    subjects: Joi.array()
+        .items(Joi.string().valid(...SubjectEnum))
+        .min(1)
+        .required()
+        .messages({
+            'array.min': ValidationMessages.REQUIRED('At least one subject'),
+            'any.only': `Subjects must be one of: ${SubjectEnum.join(', ')}`,
+        }),
+
+    department: Joi.string()
+        .pattern(/^[a-f\d]{24}$/i)
+        .required()
+        .messages({
+            'string.pattern.base': ValidationMessages.INVALID_ID,
+            'string.empty': ValidationMessages.REQUIRED('Department'),
+        }),
+
+    classes: Joi.array()
+        .items(Joi.string().pattern(/^[a-f\d]{24}$/i))
+        .optional(),
+
+    notes: Joi.array()
+        .items(Joi.string().pattern(/^[a-f\d]{24}$/i))
+        .optional(),
+
+    extracurriculars: Joi.array()
+        .items(Joi.string().pattern(/^[a-f\d]{24}$/i))
+        .optional(),
+
+    // Nested optional address object
+    address: Joi.object({
+        street: Joi.string().max(100).allow('', null).optional(),
+        city: Joi.string().max(50).allow('', null).optional(),
+        state: Joi.string().max(50).allow('', null).optional(),
+        zipCode: Joi.string().max(20).allow('', null).optional(),
+        country: Joi.string().max(50).allow('', null).optional(),
+    }).optional(),
+
+    // Nested optional emergencyContact object
+    emergencyContact: Joi.object({
+        name: Joi.string().max(100).allow('', null).optional(),
+        relation: Joi.string().max(50).allow('', null).optional(),
+        phone: Joi.string()
+            .pattern(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/)
+            .allow('', null)
+            .optional()
+            .messages({ 'string.pattern.base': 'Invalid emergency contact phone number' }),
+    }).optional(),
+
+    profilePicture: Joi.string()
+        .uri()
+        .max(500)
+        .optional()
+        .messages({
+            'string.uri': ValidationMessages.INVALID('Profile picture URL'),
+        }),
+});
+
+export const updateTeacherSchema = createTeacherSchema.fork(
+    Object.keys(createTeacherSchema.describe().keys),
+    (schema) => schema.optional()
 );
 
-// Emergency contact validation (all optional)
-const emergencyContactRules = [
-    body('emergencyContact.name').optional().trim().isLength({ max: 100 }).escape(),
-    body('emergencyContact.relation').optional().trim().isLength({ max: 50 }).escape(),
-    body('emergencyContact.phone').optional().trim()
-        .matches(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/).withMessage('Invalid emergency contact phone number'),
-];
-
-// Validate date with ISO8601 and convert to Date object
-const dateRule = (field, required = true) => {
-    const rule = body(field)
-        .isISO8601().withMessage(`Invalid ${field} format`)
-        .toDate();
-    return required ? rule.notEmpty().withMessage(`${field} is required`) : rule.optional();
-};
-
-// Profile picture URL validation (optional)
-const profilePictureRule = body('profilePicture').optional().isURL().withMessage('Invalid profile picture URL');
-
-// ------------------
-// Create Teacher Validations
-// ------------------
-export const createTeacherValidations = [
-    nameRule('firstName'),
-    nameRule('lastName'),
-    emailRule(),
-    phoneRule(),
-    subjectRule(),
-    qualificationRule(),
-    dateRule('joiningDate'),
-    ...addressRules,
-    ...emergencyContactRules,
-    profilePictureRule,
-];
-
-// ------------------
-// Update Teacher Validations
-// ------------------
-export const updateTeacherValidations = [
-    param('id').isMongoId().withMessage('Invalid teacher ID format')
-        .custom(async (id) => {
-            if (!(await Teacher.exists({ _id: id }))) {
-                throw new Error('Teacher not found');
-            }
-            return true;
-        }),
-    // Optional fields but validated if present
-    nameRule('firstName').optional(),
-    nameRule('lastName').optional(),
-    phoneRule().optional(),
-    subjectRule().optional(),
-    qualificationRule().optional(),
-    ...addressRules.map(rule => rule.optional()),
-    ...emergencyContactRules.map(rule => rule.optional()),
-    profilePictureRule.optional(),
-
-    // Disallow email and joiningDate update for safety
-    body('email').not().exists().withMessage('Email cannot be updated'),
-    body('joiningDate').not().exists().withMessage('Joining date cannot be updated'),
-];
-
-// ------------------
-// Vacation Validations
-// ------------------
-export const vacationValidations = [
-    param('id').isMongoId().withMessage('Invalid teacher ID'),
-    dateRule('startDate'),
-    dateRule('endDate'),
-    body('endDate').custom((endDate, { req }) => {
-        if (endDate <= req.body.startDate) {
-            throw new Error('End date must be after start date');
-        }
-        return true;
-    }),
-    body('type').optional().isIn(['paid', 'unpaid', 'sick']).withMessage('Invalid vacation type'),
-];
-
-// ------------------
-// Performance Review Validations
-// ------------------
-export const performanceReviewValidations = [
-    param('id').isMongoId().withMessage('Invalid teacher ID'),
-    body('reviewer').notEmpty().withMessage('Reviewer is required').isMongoId().withMessage('Invalid reviewer ID'),
-    body('rating').notEmpty().withMessage('Rating is required').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
-    body('comments').optional().trim().isLength({ max: 500 }).escape(),
-];
-
-// ------------------
-// Attendance Validations
-// ------------------
-export const attendanceValidations = [
-    param('id').isMongoId().withMessage('Invalid teacher ID'),
-    body('status').notEmpty().withMessage('Status is required')
-        .isIn(['present', 'absent', 'late', 'on leave']).withMessage('Invalid attendance status'),
-    body('notes').optional().trim().isLength({ max: 200 }).escape(),
-];
-
-// ------------------
-// Middleware to send validation errors in clean format
-// ------------------
-export const validate = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+// Generic Joi validation middleware for Express
+export const validateRequest = (schema) => (req, res, next) => {
+    const { error } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
         return res.status(400).json({
             status: 'fail',
-            errors: errors.array().map(err => ({
-                field: err.param,
-                message: err.msg,
+            errors: error.details.map((e) => ({
+                field: e.path.join('.'),
+                message: e.message,
             })),
         });
     }
     next();
 };
+
+export const validateCreateTeacher = validateRequest(createTeacherSchema);
+export const validateUpdateTeacher = validateRequest(updateTeacherSchema);
