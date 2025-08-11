@@ -1,10 +1,6 @@
 import Joi from 'joi';
 import { ValidationMessages } from '../../constants/messages.js';
-
-// Enums for fields
-const SubjectEnum = ['Math', 'Science', 'English', 'History', 'Art', 'Music', 'PE', 'Computers', 'Languages'];
-const QualificationEnum = ['Bachelors', 'Masters', 'PhD', 'Teaching Certificate', 'Diploma'];
-const StatusEnum = ['active', 'retired', 'on leave'];
+import { AttendanceStatusEnum, QualificationEnum, StatusEnum } from '../../constants/enums.js';  // added StatusEnum import
 
 export const createTeacherSchema = Joi.object({
 
@@ -30,7 +26,7 @@ export const createTeacherSchema = Joi.object({
 
     teacherNumber: Joi.string()
         .pattern(/^TC\d{4}-\d{3}$/)
-        .optional()
+        .required()
         .messages({
             'string.pattern.base': ValidationMessages.INVALID('Teacher number format'),
         }),
@@ -38,7 +34,7 @@ export const createTeacherSchema = Joi.object({
     status: Joi.string()
         .valid(...StatusEnum)
         .default('active')
-        .optional()
+        .required()
         .messages({
             'any.only': `Status must be one of: ${StatusEnum.join(', ')}`,
         }),
@@ -73,12 +69,10 @@ export const createTeacherSchema = Joi.object({
         }),
 
     subjects: Joi.array()
-        .items(Joi.string().valid(...SubjectEnum))
         .min(1)
         .optional()
         .messages({
             'array.min': ValidationMessages.REQUIRED('At least one subject'),
-            'any.only': `Subjects must be one of: ${SubjectEnum.join(', ')}`,
         }),
 
     department: Joi.string()
@@ -100,7 +94,6 @@ export const createTeacherSchema = Joi.object({
         .items(Joi.string().pattern(/^[a-f\d]{24}$/i))
         .optional(),
 
-    // Nested optional address object
     address: Joi.object({
         street: Joi.string().max(100).allow('', null).optional(),
         city: Joi.string().max(50).allow('', null).optional(),
@@ -109,7 +102,6 @@ export const createTeacherSchema = Joi.object({
         country: Joi.string().max(50).allow('', null).optional(),
     }).optional(),
 
-    // Nested optional emergencyContact object
     emergencyContact: Joi.object({
         name: Joi.string().max(100).allow('', null).optional(),
         relation: Joi.string().max(50).allow('', null).optional(),
@@ -127,16 +119,20 @@ export const createTeacherSchema = Joi.object({
         .messages({
             'string.uri': ValidationMessages.INVALID('Profile picture URL'),
         }),
+
+    attendanceStatus: Joi.string()
+        .valid(...AttendanceStatusEnum)
+        .optional()
+        .messages({
+            'any.only': `Attendance status must be one of: ${AttendanceStatusEnum.join(', ')}`,
+        }),
 });
-
-
 
 export const updateTeacherSchema = createTeacherSchema.fork(
     Object.keys(createTeacherSchema.describe().keys),
     (schema) => schema.optional()
 );
 
-// Generic Joi validation middleware for Express
 export const validateRequest = (schema) => (req, res, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
     if (error) {
