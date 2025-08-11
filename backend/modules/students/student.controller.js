@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
-import Student from './student.model.js';
+import Student from './student.schema.js';
 import Class from '../../models/class.schema.js';
 import { generateStudentNumber } from './student.services.js';
 
