@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import booksRoutes from './routes/books.route.js';
 import studentRoutes from './modules/students/student.routes.js';
-import teacherRoutes from './routes/teacher.routes.js';
+import teacherRoutes from './modules/teachers/teacher.routes.js';
 import subjectRoutes from './routes/subject.routes.js';
 import courseRoutes from './routes/course.routes.js';
 import classRoutes from './routes/class.routes.js'

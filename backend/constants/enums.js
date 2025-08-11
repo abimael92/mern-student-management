@@ -9,3 +9,23 @@ export const GradeEnum = [
 
 // If you want numeric grades:
 export const GradeLevels = Array.from({ length: 12 }, (_, i) => i + 1);
+
+// export const SubjectEnum = [
+//     'Math', 'Science', 'English', 'History', 'Art',
+//     'Music', 'PE', 'Computers', 'Languages',
+// ];
+
+export const QualificationEnum = [
+    'Bachelors', 'Masters', 'PhD', 'Teaching Certificate', 'Diploma',
+];
+
+export const StatusEnum = [
+    'active', 'retired', 'on leave',
+];
+
+export const AttendanceStatusEnum = [
+    'present',
+    'absent',
+    'late',
+    'on leave',
+];

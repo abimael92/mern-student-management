@@ -7,7 +7,7 @@ import {
     assignTeacherToClass,
     updateTeacherStatus,
     deleteTeacher
-} from "../controllers/teachers/teacher.controller.js";
+} from "./teacher.controller.js";
 
 
 const router = express.Router();

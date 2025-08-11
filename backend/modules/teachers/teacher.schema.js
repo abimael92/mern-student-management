@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { generateTeacherNumber } from '../services/teacherNumber.service.js';
+import { generateTeacherNumber } from './teacher.service.js';
 
 /**
  * TEACHER SCHEMA
