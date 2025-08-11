@@ -1,4 +1,4 @@
-import Student from './student.model.js';
+import Student from './student.schema.js';
 
 export const generateStudentNumber = async () => {
     const currentYear = new Date().getFullYear();
