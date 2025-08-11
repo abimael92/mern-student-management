@@ -7,6 +7,7 @@ const QualificationEnum = ['Bachelors', 'Masters', 'PhD', 'Teaching Certificate'
 const StatusEnum = ['active', 'retired', 'on leave'];
 
 export const createTeacherSchema = Joi.object({
+
     firstName: Joi.string()
         .min(2)
         .max(50)
@@ -37,24 +38,23 @@ export const createTeacherSchema = Joi.object({
     status: Joi.string()
         .valid(...StatusEnum)
         .default('active')
+        .optional()
         .messages({
             'any.only': `Status must be one of: ${StatusEnum.join(', ')}`,
         }),
 
     email: Joi.string()
         .email()
-        .required()
+        .optional()
         .messages({
             'string.email': ValidationMessages.INVALID_EMAIL,
-            'string.empty': ValidationMessages.REQUIRED('Email'),
         }),
 
     phone: Joi.string()
         .pattern(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/)
-        .required()
+        .optional()
         .messages({
             'string.pattern.base': ValidationMessages.INVALID('Phone number'),
-            'string.empty': ValidationMessages.REQUIRED('Phone'),
         }),
 
     hireDate: Joi.date()
@@ -66,7 +66,7 @@ export const createTeacherSchema = Joi.object({
     qualifications: Joi.array()
         .items(Joi.string().valid(...QualificationEnum))
         .min(1)
-        .required()
+        .optional()
         .messages({
             'array.min': ValidationMessages.REQUIRED('At least one qualification'),
             'any.only': `Qualifications must be one of: ${QualificationEnum.join(', ')}`,
@@ -75,7 +75,7 @@ export const createTeacherSchema = Joi.object({
     subjects: Joi.array()
         .items(Joi.string().valid(...SubjectEnum))
         .min(1)
-        .required()
+        .optional()
         .messages({
             'array.min': ValidationMessages.REQUIRED('At least one subject'),
             'any.only': `Subjects must be one of: ${SubjectEnum.join(', ')}`,
@@ -83,10 +83,9 @@ export const createTeacherSchema = Joi.object({
 
     department: Joi.string()
         .pattern(/^[a-f\d]{24}$/i)
-        .required()
+        .optional()
         .messages({
             'string.pattern.base': ValidationMessages.INVALID_ID,
-            'string.empty': ValidationMessages.REQUIRED('Department'),
         }),
 
     classes: Joi.array()
@@ -129,6 +128,8 @@ export const createTeacherSchema = Joi.object({
             'string.uri': ValidationMessages.INVALID('Profile picture URL'),
         }),
 });
+
+
 
 export const updateTeacherSchema = createTeacherSchema.fork(
     Object.keys(createTeacherSchema.describe().keys),
