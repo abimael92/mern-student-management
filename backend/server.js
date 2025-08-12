@@ -6,10 +6,10 @@ import { fileURLToPath } from 'url';
 import booksRoutes from './routes/books.route.js';
 import studentRoutes from './modules/students/student.routes.js';
 import teacherRoutes from './modules/teachers/teacher.routes.js';
-import subjectRoutes from './routes/subject.routes.js';
+import subjectRoutes from './controllers/subject/subject.routes.js';
 import courseRoutes from './routes/course.routes.js';
 import classRoutes from './modules/classes/class.routes.js'
-import roomRoutes from './routes/room.routes.js';
+import roomRoutes from './modules/rooms/room.routes.js';
 import connectDB from './config/db.js';
 import uploadRoutes from './routes/upload.js';  // Use import for consistency
 
