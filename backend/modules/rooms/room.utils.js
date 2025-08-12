@@ -1,15 +1,19 @@
-export const checkRoomAvailability = async (roomId, periodId, day, timeRange) => {
-    const Room = mongoose.model('Room');
-    const existingBookings = await Room.getAvailability(roomId, periodId);
+export const detectConflicts = async (roomId, schedule) => {
+    if (!schedule?.day || !schedule?.startTime || !schedule?.endTime) {
+        return false; // or throw error
+    }
 
-    return !existingBookings.some(booking =>
-        booking.day === day &&
-        booking.startTime < timeRange.endTime &&
-        booking.endTime > timeRange.startTime
+    const room = await Room.findById(roomId);
+    if (!room?.currentOccupancy) return false;
+
+    return room.currentOccupancy.some(booking =>
+        booking?.schedule?.day === schedule.day &&
+        booking?.schedule?.active &&
+        (
+            (booking.schedule.startTime < schedule.endTime &&
+                booking.schedule.startTime >= schedule.startTime) ||
+            (booking.schedule.endTime > schedule.startTime &&
+                booking.schedule.endTime <= schedule.endTime)
+        )
     );
-};
-
-export const findAlternativeRooms = async (requirements) => {
-    const Room = mongoose.model('Room');
-    return await Room.findAvailableRooms(requirements);
 };
