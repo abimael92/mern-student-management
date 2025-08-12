@@ -281,46 +281,64 @@ export const api = {
     // === CLASS CRUD ===
     fetchClasses: async () => {
         const res = await fetch(`${BASE}/api/classes`);
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to fetch classes');
+        }
         return res.json();
     },
 
     addClass: async (data) => {
-        const sanitized = {
-            schedule: data.schedule || '',
-            course: typeof data.course === 'string' ? data.course : data.course?._id,
-            teacher: typeof data.teacher === 'string' ? data.teacher : data.teacher?._id,
-            room: typeof data.room === 'string' ? data.room : data.room?._id,
-            students: (data.students || []).map(s => typeof s === 'string' ? s : s._id)
-        };
-
         const res = await fetch(`${BASE}/api/classes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(sanitized),
+            body: JSON.stringify({
+                ...data,
+                createdBy: '000000000000000000000000' // Temporary fake ID
+            })
         });
-
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
 
     updateClass: async (cls) => {
         if (!cls._id) throw new Error('Invalid class ID');
+
+        const sanitized = {
+            ...cls,
+            course: typeof cls.course === 'string' ? cls.course : cls.course?._id,
+            teacher: typeof cls.teacher === 'string' ? cls.teacher : cls.teacher?._id,
+            room: typeof cls.room === 'string' ? cls.room : cls.room?._id,
+            enrolledStudents: (cls.enrolledStudents || []).map(s => ({
+                student: typeof s.student === 'string' ? s.student : s.student?._id,
+                status: s.status || 'active'
+            })),
+            lastModifiedBy: cls.lastModifiedBy // Include who's making the change
+        };
+
         const res = await fetch(`${BASE}/api/classes/${cls._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cls),
+            body: JSON.stringify(sanitized),
         });
-        if (!res.ok) throw new Error(await res.text());
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to update class');
+        }
         return res.json();
     },
 
     deleteClass: async (id) => {
-        const res = await fetch(`${BASE}/api/classes/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${BASE}/api/classes/${id}`, {
+            method: 'DELETE'
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to delete class');
+        }
         return res.status === 204 ? null : res.json();
     },
-
     // === ROOM CRUD ===
     fetchRooms: async () => {
         const res = await fetch(`${BASE}/api/rooms`);

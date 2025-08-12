@@ -6,7 +6,11 @@ import {
     assignRoomToClass,
     assignCourseToClass,
     deleteClass,
-} from "../controllers/classes/classes.controller.js";
+} from "./classes.controller.js";
+import {
+    validateCreateClass,
+    validateUpdateClass,
+} from "./class.validations.js";
 
 const router = express.Router();
 
@@ -14,10 +18,10 @@ const router = express.Router();
 router.get("/", getAllClasses);
 
 // ----- CREATE -----
-router.post("/", createClass);
+router.post('/', validateCreateClass, createClass);
 
 // ----- UPDATE -----
-router.put("/:id", updateClass);
+router.put('/:id', validateUpdateClass, updateClass);
 router.put("/:id/assign-room", assignRoomToClass);
 router.put("/:id/assign-course", assignCourseToClass);
 

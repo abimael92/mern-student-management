@@ -15,7 +15,6 @@ const teacherSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true,
-        // Note: `default` can't be async; set via pre-validate hook below
         validate: {
             validator: (value) => /^TC\d{4}-\d{3}$/.test(value),
             message: props => `${props.value} is not a valid teacher number!`
@@ -23,55 +22,92 @@ const teacherSchema = new mongoose.Schema({
     },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    profilePicture: { type: String, default: '' },
+
+
 
     // ======================= 🔹 ACADEMIC STATUS =======================
+    isActive: {
+        type: Boolean,
+        default: true,
+        required: true,
+    },
+
+
     status: {
         type: String,
-        enum: ['active', 'retired', 'on leave'],
-        default: 'active',
-        required: true
+        enum: ['available', 'busy', 'on leave', 'inactive'],
+        default: 'available',
     },
 
     // ======================= 🔹 CONTACT INFORMATION =======================
     email: {
         type: String,
-        required: true,
-        unique: true
+        required: false,
+        unique: true,
+        sparse: true,
     },
-    phone: { type: String, required: true },
+    phone: { type: String, required: false },
+
+    emergencyContact: {
+        name: { type: String, default: '' },
+        relation: { type: String, default: '' },
+        phone: { type: String, default: '' },
+    },
+
+    salary: {
+        base: { type: Number, default: 0 },
+        paymentSchedule: {
+            type: String,
+            enum: ['monthly', 'bi-weekly', 'hourly', ''],
+            default: '',
+        },
+    },
 
     // ======================= 🔹 PROFESSIONAL DETAILS =======================
+    qualifications: [{
+        degree: { type: String, required: false },
+        institution: { type: String, required: false },
+        year: { type: Number, required: false }
+    }],
+
+    certificates: [{ type: String }],
+
+    yearsOfExperience: { type: Number, default: 0 },
+
     hireDate: {
         type: Date,
         default: Date.now,
         required: true
     },
-    qualifications: [{
-        degree: { type: String, required: true },
-        institution: { type: String, required: true },
-        year: { type: Number, required: true }
-    }],
+
+    tutoredStudents: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Student',
+        },
+    ],
 
     // ======================= 🔹 SYSTEM REFERENCES =======================
     department: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Department',
-        required: true
+        required: false
     },
     classes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Class',
-        required: true
+        required: false
     }],
     notes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Note',
-        required: true
+        required: false
     }],
     extracurriculars: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Extracurricular',
-        required: true
+        required: false
     }],
 
     // ======================= 🔹 META & TIMESTAMPS =======================
@@ -97,6 +133,15 @@ teacherSchema.virtual('yearsAtSchool').get(function () {
 teacherSchema.pre('validate', async function (next) {
     if (!this.teacherNumber) {
         this.teacherNumber = await generateTeacherNumber();
+    }
+    next();
+});
+
+teacherSchema.pre('save', function (next) {
+    if (!this.status || this.status === 'inactive') {
+        this.status = this.isActive ? 'available' : 'inactive';
+    } else if (!this.isActive) {
+        this.status = 'inactive';
     }
     next();
 });

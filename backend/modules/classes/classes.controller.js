@@ -1,5 +1,6 @@
-import Class from '../../models/class.schema.js';
+import Class from './class.schema.js';
 import mongoose from "mongoose";
+import { generateClassCode } from './class.services.js';
 
 export const getAllClasses = async (req, res) => {
     try {
@@ -17,9 +18,22 @@ export const getAllClasses = async (req, res) => {
 
 export const createClass = async (req, res) => {
     try {
-        const newClass = await Class.create(req.body);
+        // Generate class code if not provided
+        const classData = {
+            ...req.body,
+            code: req.body.code || await generateClassCode(req.body.name),
+            schedule: req.body.schedule || undefined
+        };
+
+        const newClass = await Class.create(classData);
         res.status(201).json(newClass);
     } catch (error) {
+        // Handle duplicate class code error specifically
+        if (error.code === 11000 && error.keyPattern?.classCode) {
+            return res.status(400).json({
+                error: "Class code already exists. Try again or provide a different code."
+            });
+        }
         res.status(400).json({ error: error.message });
     }
 };

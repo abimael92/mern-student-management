@@ -19,11 +19,14 @@ import defaultProfile from '../../assets/profile-default.png';
 const TeacherCard = ({ teacher, onEdit, onDelete }) => {
   if (!teacher) return null;
 
-  const fullName = `${teacher.firstName} ${teacher.lastName}`;
-  const statusColor = teacher.isActive ? 'success' : 'error';
-  const statusText = teacher.isActive ? 'Active' : 'Inactive';
+  const fullName =
+    teacher.fullName || `${teacher.firstName} ${teacher.lastName}`;
+  const statusColor = teacher.status === 'active' ? 'success' : 'error';
+  const statusText = teacher.status === 'active' ? 'Active' : 'Inactive';
   const profileImage = teacher.profilePicture || defaultProfile;
   const studentCount = teacher.tutoredStudents?.length || 0;
+
+  console.log(' Teacher profileImage:', profileImage);
 
   return (
     <Card sx={{ maxWidth: 345, m: 2 }}>

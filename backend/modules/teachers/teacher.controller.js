@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 import { generateTeacherNumber } from './teacher.service.js';
 import Teacher from './teacher.schema.js';
-import Class from '../../models/class.schema.js';
+import Class from '../classes/class.schema.js';
 
 // ----- CREATE -----
 export const getTeachers = async (req, res) => {
