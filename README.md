@@ -52,35 +52,6 @@ graph TD
     B -->|External APIs| G[SMTP Service]
 ```
 
-## Key Architectural Decisions:
-Single Source of Truth:
-
-All occupancy data lives in Room.currentOccupancy
-
-Class.temporaryBookings is just a logical reference (not duplicated data)
-
-Temporary Occupancy Flow:
-
-```mermaid
-graph TD
-A[Class] -->|baseRoom| B(Room)
-A -->|temporaryBooking| C(Another Room)
-C -->|exceptionDetails.originalRoom| B
-```
-
-
-```mermaid
-sequenceDiagram
-Controller->>Class: Add temporary booking
-Class->>Room: Verify availability
-Room-->>Class: Conflict status
-Class->>Room: Push to currentOccupancy
-```
-
-
-
-This approach eliminates redundancy while maintaining all your requirements. The originalRoom in exceptionDetails provides full auditability without duplicating the base room reference.
-
 ### 🧩 Component Diagram
 
 ![ER Diagram](frontend/public/assets/ER-Diagram.svg)

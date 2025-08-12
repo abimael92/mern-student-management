@@ -13,7 +13,6 @@ const subjectSchema = new mongoose.Schema({
     subjectCode: {
         type: String,
         unique: true,
-        sparse: true,
         required: true,
     },
     name: { type: String, required: true },
@@ -39,17 +38,6 @@ const subjectSchema = new mongoose.Schema({
 // ======================= 🔹 VIRTUALS =======================
 subjectSchema.virtual('id').get(function () {
     return this._id.toHexString();
-});
-
-subjectSchema.pre('save', async function (next) {
-    if (this.isNew && !this.subjectCode.startsWith('TEMP_CODE')) {
-        try {
-            this.subjectCode = await generateSubjectCode(this.name);
-        } catch (err) {
-            return next(err);
-        }
-    }
-    next();
 });
 
 const Subject = mongoose.model('Subject', subjectSchema);
