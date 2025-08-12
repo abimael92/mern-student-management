@@ -23,6 +23,9 @@ export const StatusEnum = [
     'active', 'retired', 'on leave',
 ];
 
+export const DaysOfWeekEnum = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+export const ClassStatusEnum = ['active', 'waitlisted', 'withdrawn', 'completed'];
+
 export const AttendanceStatusEnum = [
     'present',
     'absent',
