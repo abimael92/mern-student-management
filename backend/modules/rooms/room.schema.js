@@ -8,7 +8,7 @@ const roomSchema = new mongoose.Schema({
         unique: true,
         uppercase: true,
         default: function () {
-            return `ROOM${Math.floor(100 + Math.random() * 900)}` // Temporary until auto-generator runs
+            return `ROOM${Math.floor(100 + Math.random() * 900)}`;
         }
     },
     displayName: {
@@ -26,6 +26,7 @@ const roomSchema = new mongoose.Schema({
             day: String, // "Monday", "Tuesday", etc.
             startTime: String, // "09:00"
             endTime: String, // "10:30"
+            active: { type: Boolean, default: true }
         },
         class: {
             type: mongoose.Schema.Types.ObjectId,
@@ -72,12 +73,12 @@ const roomSchema = new mongoose.Schema({
     examCapacity: {
         type: Number,
         default: function () {
-            return Math.floor(this.seatingCapacity * 0.7) // 30% spacing for exams
+            return Math.floor(this.seatingCapacity * 0.7);
         }
     },
     hasProjector: { type: Boolean, default: false },
     hasSmartBoard: { type: Boolean, default: false },
-    labEquipment: [String], // For lab rooms only
+    labEquipment: [String],
     isWheelchairAccessible: { type: Boolean, default: true },
 
     // ======================= 🔹 AVAILABILITY =======================
@@ -114,7 +115,37 @@ roomSchema.virtual('fullLocation').get(function () {
     return `${this.building}-${this.floor}${this.displayName}`;
 });
 
-// Indexes for faster querying
+// ======================= 🔹 STATIC METHODS =======================
+roomSchema.statics.getAvailability = async function (roomId, periodId) {
+    return this.aggregate([
+        { $match: { _id: mongoose.Types.ObjectId(roomId) } },
+        { $unwind: "$currentOccupancy" },
+        { $match: { "currentOccupancy.period": mongoose.Types.ObjectId(periodId) } },
+        { $project: { bookedSlots: "$currentOccupancy.schedule" } }
+    ]);
+};
+
+roomSchema.statics.findAvailableRooms = async function ({ day, startTime, endTime, capacity, roomType }) {
+    return this.find({
+        seatingCapacity: { $gte: capacity || 1 },
+        roomType: roomType || { $exists: true },
+        isActive: true,
+        $nor: [{
+            currentOccupancy: {
+                $elemMatch: {
+                    'schedule.day': day,
+                    'schedule.active': true,
+                    $or: [
+                        { 'schedule.startTime': { $lt: endTime, $gte: startTime } },
+                        { 'schedule.endTime': { $gt: startTime, $lte: endTime } }
+                    ]
+                }
+            }
+        }]
+    });
+};
+
+// ======================= 🔹 INDEXES =======================
 roomSchema.index({ building: 1, floor: 1 });
 roomSchema.index({ roomType: 1 });
 roomSchema.index({ seatingCapacity: 1 });
