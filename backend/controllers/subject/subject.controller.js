@@ -4,32 +4,11 @@ import { generateSubjectCode } from '../../services/codeGenerator.service.js';
 // Create a new subject
 export const createSubject = async (req, res) => {
     try {
-        const subjectCode = await generateSubjectCode(req.body.name);
-
-        const subject = new Subject({
-            ...req.body,
-            subjectCode
-        });
-
+        const subjectCode = await generateSubjectCode(req.body.name); // Generate the subject code
+        const subject = new Subject({ ...req.body, subjectCode }); // Add the generated code to the subject
         await subject.save();
         res.status(201).json(subject);
     } catch (err) {
-        if (err.code === 11000) {
-            try {
-                const newCode = await generateSubjectCode(req.body.name);
-                const subject = new Subject({
-                    ...req.body,
-                    subjectCode: newCode
-                });
-                await subject.save();
-                return res.status(201).json(subject);
-            } catch (retryError) {
-                return res.status(400).json({
-                    error: 'Failed to create subject',
-                    details: 'Please try again with a different name'
-                });
-            }
-        }
         res.status(400).json({ error: err.message });
     }
 };

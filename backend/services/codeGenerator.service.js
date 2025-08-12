@@ -27,23 +27,32 @@ const generateSubjectAbbr = (name) => {
     return abbrParts.join('');
 };
 
-
 export const generateSubjectCode = async (subjectName) => {
-    const abbr = generateSubjectAbbr(subjectName) || 'GEN';
-    const year = new Date().getFullYear().toString().slice(-2);
+    const abbr = generateSubjectAbbr(subjectName);
+    const yearPrefix = new Date().getFullYear();
 
-    // Find the highest existing number for this abbreviation/year
-    const regex = new RegExp(`^${abbr}${year}(\\d{3})$`);
-    const lastSubject = await Subject.findOne({
-        subjectCode: { $regex: regex }
-    }).sort({ subjectCode: -1 });
+    try {
+        // Regex to match codes starting with abbreviation + year + 3 digits
+        const regex = new RegExp(`^${abbr}${yearPrefix}\\d{3}$`);
 
-    // Calculate next number
-    const lastNumber = lastSubject ?
-        parseInt(lastSubject.subjectCode.match(regex)[1], 10) : 0;
-    const nextNumber = (lastNumber + 1).toString().padStart(3, '0');
+        // Find last subject by code descending order
+        const lastSubject = await Subject.findOne({
+            subjectCode: { $regex: regex },
+        }).sort({ subjectCode: -1 });
 
-    return `${abbr}${year}${nextNumber}`;
+        if (!lastSubject) {
+            return `${abbr}${yearPrefix}001`;
+        }
+
+        // Parse last 3 digits and increment
+        const lastIndex = parseInt(lastSubject.subjectCode.slice(-3), 10);
+        const newNumber = (lastIndex + 1).toString().padStart(3, '0');
+
+        return `${abbr}${yearPrefix}${newNumber}`;
+    } catch (error) {
+        console.error('Error generating subject code:', error);
+        throw new Error('Failed to generate subject code');
+    }
 };
 
 

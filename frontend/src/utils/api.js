@@ -281,8 +281,6 @@ export const api = {
     // === CLASS CRUD ===
     fetchClasses: async () => {
         const res = await fetch(`${BASE}/api/classes`);
-        console.log('****Classes fetched successfully', res);
-
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
             throw new Error(errorData.message || 'Failed to fetch classes');

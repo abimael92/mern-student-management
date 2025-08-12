@@ -11,10 +11,8 @@ import RoomList from './RoomList';
 import RoomForm from './RoomForm';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
-import InteractiveBlueprintBuilder from './InteractiveBlueprintBuilder';
 
-import { Typography, Grid, Box, Button } from '@mui/material';
-import { Map as MapIcon } from '@mui/icons-material';
+import { Typography, Grid, Box } from '@mui/material';
 
 const RoomManagement = () => {
   const dispatch = useDispatch();
@@ -25,14 +23,9 @@ const RoomManagement = () => {
   } = useSelector((state) => state.rooms || {});
 
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [blueprintModalOpen, setBlueprintModalOpen] = useState(false);
-  const [savedBlueprints, setSavedBlueprints] = useState([]);
 
   useEffect(() => {
     dispatch(fetchRooms());
-    // Load saved blueprints
-    const saved = JSON.parse(localStorage.getItem('schoolBlueprints')) || [];
-    setSavedBlueprints(saved);
   }, [dispatch]);
 
   const handleEditClick = (room) => setSelectedRoom(room);
@@ -53,30 +46,11 @@ const RoomManagement = () => {
     });
   };
 
-  const handleSaveBlueprint = (blueprint) => {
-    const updatedBlueprints = [...savedBlueprints, blueprint];
-    setSavedBlueprints(updatedBlueprints);
-    localStorage.setItem('schoolBlueprints', JSON.stringify(updatedBlueprints));
-  };
-
   return (
     <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h4">Room Management</Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<MapIcon />}
-          onClick={() => setBlueprintModalOpen(true)}
-        >
-          Interactive Blueprint Builder
-        </Button>
-      </Box>
+      <Typography variant="h4" gutterBottom>
+        Room Management
+      </Typography>
 
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
@@ -104,12 +78,6 @@ const RoomManagement = () => {
           </Box>
         </Grid>
       </Grid>
-
-      <InteractiveBlueprintBuilder
-        open={blueprintModalOpen}
-        onClose={() => setBlueprintModalOpen(false)}
-        onSave={handleSaveBlueprint}
-      />
     </Box>
   );
 };

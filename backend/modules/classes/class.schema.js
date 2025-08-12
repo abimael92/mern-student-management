@@ -45,25 +45,21 @@ const classSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room'
     },
-    enrolledStudents: {
-        type: [{
-            student: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Student'
-            },
-            enrollmentDate: {
-                type: Date,
-                default: Date.now
-            },
-            status: {
-                type: String,
-                default: 'active'
-            },
-            _id: false
-        }],
-        default: []
-    },
-
+    enrolledStudents: [{
+        student: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Student'
+        },
+        enrollmentDate: {
+            type: Date,
+            default: Date.now
+        },
+        status: {
+            type: String,
+            default: 'active'
+        },
+        _id: false
+    }],
 
     // ======================= 🔹 CAPACITY MANAGEMENT =======================
     maxCapacity: Number,
@@ -105,11 +101,10 @@ const classSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+// Keep virtual properties if needed
 classSchema.virtual('currentEnrollment').get(function () {
-    if (!this.enrolledStudents || !Array.isArray(this.enrolledStudents)) return 0;
     return this.enrolledStudents.filter(s => s.status === 'active').length;
 });
-
 
 // Keep indexes if needed
 classSchema.index({ course: 1 });
