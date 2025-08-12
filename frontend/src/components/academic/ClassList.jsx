@@ -9,11 +9,14 @@ import {
   TableSortLabel,
   IconButton,
   Paper,
+  Tooltip,
+  Chip,
+  Box,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const ClassList = ({ classes = [], onEdit, onDelete }) => {
-  const [orderBy, setOrderBy] = useState('schedule');
+  const [orderBy, setOrderBy] = useState('name');
   const [order, setOrder] = useState('asc');
 
   const handleSort = (field) => {
@@ -24,9 +27,13 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
 
   const sorted = [...classes].sort((a, b) => {
     const getValue = (item) => {
-      if (orderBy === 'teacher') return item.teacher?.name || '';
+      if (orderBy === 'teacher') return item.teacher?.firstName || '';
       if (orderBy === 'course') return item.course?.name || '';
       if (orderBy === 'room') return item.room?.name || '';
+      if (orderBy === 'schedule') {
+        // Sort by first schedule day if exists
+        return item.schedule?.[0]?.day || '';
+      }
       return item[orderBy] || '';
     };
 
@@ -38,12 +45,53 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
       : bVal.localeCompare(aVal);
   });
 
+  // Format schedule for display
+  const formatSchedule = (schedule) => {
+    if (!schedule) return 'No schedule';
+
+    // Handle array format (from your schema)
+    if (Array.isArray(schedule)) {
+      return schedule.map((slot) => (
+        <Chip
+          key={`${slot.day}-${slot.startTime}`}
+          label={`${slot.day} ${slot.startTime}-${slot.endTime}`}
+          size="small"
+          sx={{ m: 0.5 }}
+        />
+      ));
+    }
+
+    // Handle object format (fallback)
+    if (typeof schedule === 'object') {
+      return Object.entries(schedule)
+        .filter(([key]) => !['_id', 'active'].includes(key))
+        .map(([day, time]) => (
+          <Chip
+            key={day}
+            label={`${day}: ${time}`}
+            size="small"
+            sx={{ m: 0.5 }}
+          />
+        ));
+    }
+
+    return 'Invalid schedule format';
+  };
+
   return (
-    <TableContainer component={Paper} sx={{ width: '100%' }}>
+    <TableContainer component={Paper} sx={{ width: '100%', mt: 2 }}>
       <Table>
         <TableHead sx={{ backgroundColor: '#1976d2' }}>
           <TableRow>
-            {['schedule', 'course', 'teacher', 'room', 'students'].map((f) => (
+            {[
+              'name',
+              'code',
+              'course',
+              'teacher',
+              'room',
+              'schedule',
+              'students',
+            ].map((f) => (
               <TableCell key={f} sx={{ color: 'white', fontWeight: 'bold' }}>
                 <TableSortLabel
                   active={orderBy === f}
@@ -55,7 +103,7 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
                   }}
                 >
                   {f === 'students'
-                    ? 'Student Count'
+                    ? 'Students'
                     : f.charAt(0).toUpperCase() + f.slice(1)}
                 </TableSortLabel>
               </TableCell>
@@ -66,39 +114,41 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sorted.map((cls, i) => {
-            return (
-              <TableRow
-                key={cls._id}
-                sx={{
-                  backgroundColor: i % 2 === 0 ? '#f5f5f5' : '#e0e0e0',
-                }}
-              >
-                <TableCell>{cls.schedule}</TableCell>
-                <TableCell>{cls.course?.name || 'N/A'}</TableCell>
-                <TableCell>
-                  {cls.teacher
-                    ? `${cls.teacher.firstName} ${cls.teacher.lastName}`
-                    : 'N/A'}
-                </TableCell>
-                <TableCell>{cls.room?.name || 'N/A'}</TableCell>
-                <TableCell>
-                  {Array.isArray(cls.students) ? cls.students.length : 0}
-                </TableCell>
-                <TableCell>
-                  <IconButton onClick={() => onEdit(cls)} color="primary">
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => onDelete(cls._id)}
-                    color="secondary"
-                  >
-                    <Delete />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {sorted.map((cls) => (
+            <TableRow key={cls._id}>
+              <TableCell>{cls.name || 'N/A'}</TableCell>
+              <TableCell>{cls.code || 'N/A'}</TableCell>
+              <TableCell>{cls.course?.name || 'N/A'}</TableCell>
+              <TableCell>
+                {cls.teacher
+                  ? `${cls.teacher.firstName} ${cls.teacher.lastName}`
+                  : 'N/A'}
+              </TableCell>
+              <TableCell>{cls.room?.name || 'N/A'}</TableCell>
+              <TableCell>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                  {formatSchedule(cls.schedule)}
+                </Box>
+              </TableCell>
+              <TableCell>{cls.enrolledStudents?.length || 0}</TableCell>
+              <TableCell>
+                <IconButton
+                  onClick={() => onEdit(cls)}
+                  color="primary"
+                  size="small"
+                >
+                  <Edit fontSize="small" />
+                </IconButton>
+                <IconButton
+                  onClick={() => onDelete(cls._id)}
+                  color="secondary"
+                  size="small"
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>
