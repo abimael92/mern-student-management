@@ -2,19 +2,11 @@ import Class from './class.schema.js';
 import mongoose from "mongoose";
 import { generateClassCode } from './class.services.js';
 
-export const getAllClasses = async (req, res) => {
-    try {
-        const classes = await Class.find()
-            .populate('course', 'name')
-            .populate('teacher', 'firstName lastName')
-            .populate('room', 'name');
-
-        // console.log("Sample class data:", JSON.stringify(classes[0], null, 2));
-        res.json(classes);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+export const getClasses = async (req, res) => {
+    const classes = await Class.find().lean(); // Remove all populates/formatting
+    res.json(classes || []); // Force array return
 };
+
 
 export const createClass = async (req, res) => {
     try {
@@ -118,5 +110,59 @@ export const assignCourseToClass = async (req, res) => {
         res.json(updatedClass);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+export const addTemporaryBooking = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const { roomId, day, startTime, endTime, reason } = req.body;
+
+        // 1. Get the class and its DEFAULT room
+        const classObj = await Class.findById(classId);
+        if (!classObj) throw new Error("Class not found");
+
+        // 2. Check target room availability
+        const Room = mongoose.model('Room');
+        const conflicts = await Room.find({
+            _id: roomId,
+            currentOccupancy: {
+                $elemMatch: {
+                    'schedule.day': day,
+                    'schedule.active': true,
+                    $or: [
+                        { 'schedule.startTime': { $lt: endTime, $gte: startTime } },
+                        { 'schedule.endTime': { $gt: startTime, $lte: endTime } }
+                    ]
+                }
+            }
+        });
+
+        if (conflicts.length > 0) {
+            throw new Error("Room already booked for this time");
+        }
+
+        // 3. Add to room's occupancy
+        await Room.findByIdAndUpdate(roomId, {
+            $push: {
+                currentOccupancy: {
+                    period: classObj.academicPeriod,
+                    schedule: { day, startTime, endTime, active: true },
+                    class: classId,
+                    isTemporary: true,
+                    exceptionDetails: {
+                        reason,
+                        originalRoom: classObj.room  // Track original location
+                    }
+                }
+            }
+        });
+
+        res.json({
+            success: true,
+            message: `Temporarily booked ${roomId} for ${reason}`
+        });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
     }
 };
