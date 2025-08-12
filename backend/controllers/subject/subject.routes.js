@@ -6,7 +6,7 @@ import {
     updateSubject,
     assignSemesterToSubject,
     deleteSubject
-} from "../controllers/subject/subject.controller.js";
+} from "./subject.controller.js";
 
 const router = express.Router();
 

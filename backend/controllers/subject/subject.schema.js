@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { generateSubjectCode } from '../services/codeGenerator.service.js';
+import { generateSubjectCode } from '../../services/codeGenerator.service.js';
 
 /**
  * SUBJECT SCHEMA

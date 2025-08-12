@@ -6,14 +6,12 @@ const generateClassAbbr = (name) => {
     const words = name.trim().split(/\s+/).filter(Boolean);
     let abbrParts = [];
 
-    // Get first 3 chars of first two qualifying words
     for (const word of words) {
         if (word.length >= 3 && abbrParts.length < 2) {
             abbrParts.push(word.slice(0, 3).toUpperCase());
         }
     }
 
-    // Fallback to shorter words if needed
     if (abbrParts.length < 2) {
         for (const word of words) {
             if (word.length < 3 && abbrParts.length < 2) {
@@ -22,13 +20,12 @@ const generateClassAbbr = (name) => {
         }
     }
 
-    // Ensure we always have 6 characters
     return (abbrParts.join('') + 'XXX').slice(0, 6);
 };
 
 export const generateClassCode = async (className) => {
     const abbr = generateClassAbbr(className);
-    const yearPrefix = new Date().getFullYear().toString().slice(-2); // Use last 2 digits of year
+    const yearPrefix = new Date().getFullYear().toString().slice(-2);
 
     try {
         const regex = new RegExp(`^${abbr}${yearPrefix}\\d{3}$`);
@@ -41,7 +38,6 @@ export const generateClassCode = async (className) => {
             ? parseInt(lastClass.classCode.slice(-3), 10)
             : 0;
 
-        // Ensure we don't exceed 999
         const newNumber = Math.min(lastNumber + 1, 999)
             .toString()
             .padStart(3, '0');
