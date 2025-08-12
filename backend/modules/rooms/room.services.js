@@ -23,3 +23,26 @@ export const generateRoomId = async () => {
         throw new Error('Failed to generate room ID');
     }
 };
+
+export const checkRoomAvailability = async (roomId, timeSlot) => {
+
+    if (!timeSlot || !timeSlot.day || !timeSlot.startTime || !timeSlot.endTime) {
+        throw new Error('Invalid timeSlot provided');
+    }
+
+    return Room.findOne({
+        _id: roomId,
+        $nor: [{
+            currentOccupancy: {
+                $elemMatch: {
+                    'schedule.day': timeSlot.day,
+                    'schedule.active': true,
+                    $or: [
+                        { 'schedule.startTime': { $lt: timeSlot.endTime, $gte: timeSlot.startTime } },
+                        { 'schedule.endTime': { $gt: timeSlot.startTime, $lte: timeSlot.endTime } }
+                    ]
+                }
+            }
+        }]
+    });
+};
