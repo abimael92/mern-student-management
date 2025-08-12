@@ -13,5 +13,12 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: [
+      '@mui/x-date-pickers',
+      '@mui/x-date-pickers/AdapterDateFns',
+      '@mui/x-date-pickers/LocalizationProvider'
+    ],
+  },
 
 });
