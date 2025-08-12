@@ -141,8 +141,10 @@ const classSchema = new mongoose.Schema({
 
 // ======================= 🔹 VIRTUAL PROPERTIES =======================
 classSchema.virtual('currentEnrollment').get(function () {
+    if (!this.enrolledStudents || !Array.isArray(this.enrolledStudents)) return 0;
     return this.enrolledStudents.filter(s => s.status === 'active').length;
 });
+
 
 classSchema.virtual('availableSeats').get(function () {
     return this.maxCapacity - this.currentEnrollment;
