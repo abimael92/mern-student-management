@@ -144,3 +144,20 @@ export const validateRequest = (schema) => (req, res, next) => {
 
 export const validateCreateClass = validateRequest(createClassSchema);
 export const validateUpdateClass = validateRequest(updateClassSchema);
+
+export const addTemporaryBookingSchema = {
+    roomId: Joi.string().pattern(/^[A-Z0-9]+$/).required(),
+    schedule: Joi.object({
+        day: Joi.string().valid(
+            'Monday', 'Tuesday', 'Wednesday',
+            'Thursday', 'Friday', 'Saturday'
+        ).required(),
+        startTime: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).required(),
+        endTime: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).required()
+    }).required(),
+    reason: Joi.string().valid(
+        'Assembly', 'Lab Work', 'Library',
+        'Computer Lab', 'Fire Drill',
+        'Performance Practice', 'Outdoor Activity'
+    ).required()
+};
