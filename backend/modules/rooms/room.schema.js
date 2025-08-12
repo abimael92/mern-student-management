@@ -17,6 +17,22 @@ const roomSchema = new mongoose.Schema({
         trim: true
     },
 
+    currentOccupancy: [{
+        period: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'AcademicPeriod'
+        },
+        schedule: {
+            day: String, // "Monday", "Tuesday", etc.
+            startTime: String, // "09:00"
+            endTime: String, // "10:30"
+        },
+        class: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Class'
+        }
+    }],
+
     // ======================= 🔹 LOCATION & TYPE =======================
     building: {
         type: String,
