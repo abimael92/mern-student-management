@@ -7,7 +7,7 @@ import booksRoutes from './routes/books.route.js';
 import studentRoutes from './modules/students/student.routes.js';
 import teacherRoutes from './modules/teachers/teacher.routes.js';
 import subjectRoutes from './controllers/subject/subject.routes.js';
-import courseRoutes from './routes/course.routes.js';
+import courseRoutes from './modules/course/course.routes.js';
 import classRoutes from './modules/classes/class.routes.js'
 import roomRoutes from './modules/rooms/room.routes.js';
 import connectDB from './config/db.js';
@@ -32,8 +32,6 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/upload', uploadRoutes);
-
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
