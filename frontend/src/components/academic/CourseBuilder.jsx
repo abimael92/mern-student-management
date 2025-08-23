@@ -82,6 +82,8 @@ const RelationBuilder = () => {
           const classes = await api.fetchClasses();
           const students = await api.fetchStudents();
 
+          console.log('Loaded classes:', classes);
+
           for (const cls of classes) {
             for (const studentId of cls.students || []) {
               const student = students.find((s) => s._id === studentId);
