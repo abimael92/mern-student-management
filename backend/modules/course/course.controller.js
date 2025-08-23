@@ -1,5 +1,7 @@
-import Course from "../../models/course.schema.js";
-import { generateCourseCode } from '../../services/codeGenerator.service.js';
+import mongoose from 'mongoose';
+import Subject from '../../controllers/subject/subject.schema.js';
+import Course from "./course.schema.js";
+import { generateCourseCode } from './course.services.js';
 
 
 // ----- READ -----
@@ -30,7 +32,7 @@ export const getCourseWithSubjects = async (req, res) => {
 // ----- CREATE -----
 export const createCourse = async (req, res) => {
     try {
-        if (!req.body.name || !req.body.credits || !req.body.description || !req.body.subject || !req.body.semester || !req.body.prerequisites) {
+        if (!req.body.name || !req.body.description) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
@@ -98,8 +100,10 @@ export const assignSubjectToCourse = async (req, res) => {
 // ----- DELETE -----
 export const deleteCourse = async (req, res) => {
     try {
-        await Course.findByIdAndDelete(req.params.id);
+        const course = await Course.findByIdAndDelete(req.params.id);
+        if (!course) return res.status(404).json({ message: "Course not found" });
         res.status(204).send();
+
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

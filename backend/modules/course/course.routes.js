@@ -6,7 +6,7 @@ import {
     updateCourse,
     assignSubjectToCourse,
     deleteCourse,
-} from '../controllers/course/course.controller.js';
+} from './course.controller.js';
 
 const router = express.Router();
 

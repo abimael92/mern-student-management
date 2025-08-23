@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { generateCourseCode } from '../services/codeGenerator.service.js';
+import { generateCourseCode } from './course.services.js';
 
 /**
  * COURSE SCHEMA

@@ -1,8 +1,7 @@
-import Subject from '../controllers/subject/subject.schema.js';
-import Course from '../modules/course/course.schema.js';
+import Course from './course.schema.js';
 
-
-const generateSubjectAbbr = (name) => {
+// Generate course abbreviation from course name
+const generateCourseAbbr = (name) => {
     if (!name) return '';
 
     const words = name.trim().split(' ').filter(Boolean);
@@ -27,32 +26,13 @@ const generateSubjectAbbr = (name) => {
     return abbrParts.join('');
 };
 
-
-export const generateSubjectCode = async (subjectName) => {
-    const abbr = generateSubjectAbbr(subjectName) || 'GEN';
-    const year = new Date().getFullYear().toString().slice(-2);
-
-    // Find the highest existing number for this abbreviation/year
-    const regex = new RegExp(`^${abbr}${year}(\\d{3})$`);
-    const lastSubject = await Subject.findOne({
-        subjectCode: { $regex: regex }
-    }).sort({ subjectCode: -1 });
-
-    // Calculate next number
-    const lastNumber = lastSubject ?
-        parseInt(lastSubject.subjectCode.match(regex)[1], 10) : 0;
-    const nextNumber = (lastNumber + 1).toString().padStart(3, '0');
-
-    return `${abbr}${year}${nextNumber}`;
-};
-
-
 export const generateCourseCode = async (courseName) => {
     if (!courseName || typeof courseName !== 'string') {
         throw new Error('Invalid course name provided');
     }
 
-    const abbr = courseName.trim().slice(0, 4).toUpperCase();
+    // Use the smart abbreviation
+    const abbr = generateCourseAbbr(courseName);
     const yearPrefix = new Date().getFullYear();
 
     try {
