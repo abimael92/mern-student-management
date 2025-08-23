@@ -108,63 +108,119 @@ export const updateStudent = async (req, res) => {
 
 // PUT /students/:id/assign
 export const assignStudentToClass = async (req, res) => {
+    const { id } = req.params;
+    const { targetType, targetId } = req.body;
+
+    // Validate input
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid student ID" });
+    if (!mongoose.Types.ObjectId.isValid(targetId)) return res.status(400).json({ error: "Invalid class ID" });
+    if (targetType !== 'classes') return res.status(400).json({ error: 'Students can only be assigned to classes' });
+
+    // Check existence
+    const [studentExists, classExists] = await Promise.all([
+        Student.exists({ _id: id }),
+        Class.exists({ _id: targetId })
+    ]);
+    if (!studentExists) return res.status(404).json({ error: 'Student not found' });
+    if (!classExists) return res.status(404).json({ error: 'Class not found' });
+
+    const session = await mongoose.startSession();
+
     try {
-        const { id } = req.params;
-        const { targetType, targetId } = req.body;
-
-        // Validate input
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: "Invalid student ID" });
-        }
-        if (!mongoose.Types.ObjectId.isValid(targetId)) {
-            return res.status(400).json({ error: "Invalid class ID" });
-        }
-        if (targetType !== 'classes') {
-            return res.status(400).json({ error: 'Students can only be assigned to classes' });
-        }
-
-        // Verify both student and class exist
-        const [studentExists, classExists] = await Promise.all([
-            Student.exists({ _id: id }),
-            Class.exists({ _id: targetId })
-        ]);
-
-        if (!studentExists) return res.status(404).json({ error: 'Student not found' });
-        if (!classExists) return res.status(404).json({ error: 'Class not found' });
-
-        // Update both student and class in a transaction
-        const session = await mongoose.startSession();
         session.startTransaction();
 
+        const student = await Student.findByIdAndUpdate(
+            id,
+            { $addToSet: { enrolledClasses: targetId } },
+            { new: true, session }
+        ).populate('enrolledClasses');
+
+        await Class.findByIdAndUpdate(
+            targetId,
+            { $addToSet: { students: { student: id, enrollmentDate: new Date(), status: 'active' } } },
+            { new: true, session }
+        );
+
+        await session.commitTransaction(); // ✅ commit only once
+        res.json(student);
+
+    } catch (err) {
+        // Only abort if transaction has not been committed
         try {
-            const student = await Student.findByIdAndUpdate(
-                id,
-                { $addToSet: { enrolledClasses: targetId } },
-                { new: true, session }
-            ).populate('enrolledClasses');
-
-            await Class.findByIdAndUpdate(
-                targetId,
-                { $addToSet: { students: id } },
-                { new: true, session }
-            );
-
-            await session.commitTransaction();
-            res.json(student);
-        } catch (transactionError) {
             await session.abortTransaction();
-            throw transactionError;
-        } finally {
-            session.endSession();
+        } catch (abortErr) {
+            console.error("Abort failed (maybe already committed):", abortErr);
         }
-    } catch (error) {
-        console.error('Assignment error:', error);
-        res.status(500).json({
-            error: error.message,
-            ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-        });
+        console.error('Assignment error:', err);
+        res.status(500).json({ error: err.message });
+    } finally {
+        session.endSession();
     }
 };
+
+// export const assignStudentToClass = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { targetType, targetId } = req.body;
+
+//         // Validate input
+//         if (!mongoose.Types.ObjectId.isValid(id)) {
+//             return res.status(400).json({ error: "Invalid student ID" });
+//         }
+//         if (!mongoose.Types.ObjectId.isValid(targetId)) {
+//             return res.status(400).json({ error: "Invalid class ID" });
+//         }
+//         if (targetType !== 'classes') {
+//             return res.status(400).json({ error: 'Students can only be assigned to classes' });
+//         }
+
+//         // Verify both student and class exist
+//         const [studentExists, classExists] = await Promise.all([
+//             Student.exists({ _id: id }),
+//             Class.exists({ _id: targetId })
+//         ]);
+
+//         if (!studentExists) return res.status(404).json({ error: 'Student not found' });
+//         if (!classExists) return res.status(404).json({ error: 'Class not found' });
+
+//         // Update both student and class in a transaction
+//         const session = await mongoose.startSession();
+//         session.startTransaction();
+
+//         try {
+//             const student = await Student.findByIdAndUpdate(
+//                 id,
+//                 { $addToSet: { enrolledClasses: targetId } },
+//                 { new: true, session }
+//             ).populate('enrolledClasses');
+
+//             await Class.findByIdAndUpdate(
+//                 targetId,
+//                 {
+//                     $addToSet: {
+//                         students: { student: id, enrollmentDate: new Date(), status: 'active' }
+//                     }
+//                 },
+//                 { new: true, session }
+//             );
+
+//             await session.commitTransaction();
+//             res.json(student);
+//         } catch (transactionError) {
+//             await session.abortTransaction();
+//             throw transactionError;
+//         } finally {
+//             session.endSession();
+//         }
+//     } catch (error) {
+//         console.error('Assignment error:', error);
+//         res.status(500).json({ error: error.message });
+//         // res.status(500).json({
+//         //     error: error.message,
+//         //     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+//         // });
+//     }
+// };
 
 
 // PATCH /students/:id/status
