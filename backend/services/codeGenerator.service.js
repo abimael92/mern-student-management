@@ -1,5 +1,5 @@
 import Subject from '../controllers/subject/subject.schema.js';
-import Course from '../models/course.schema.js';
+import Course from '../modules/course/course.schema.js';
 
 
 const generateSubjectAbbr = (name) => {
