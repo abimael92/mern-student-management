@@ -78,6 +78,8 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
     return 'Invalid schedule format';
   };
 
+  console.log('Classes:', classes);
+
   return (
     <TableContainer component={Paper} sx={{ width: '100%', mt: 2 }}>
       <Table>
@@ -130,7 +132,9 @@ const ClassList = ({ classes = [], onEdit, onDelete }) => {
                   {formatSchedule(cls.schedule)}
                 </Box>
               </TableCell>
-              <TableCell>{cls.enrolledStudents?.length || 0}</TableCell>
+              <TableCell>
+                {cls.students?.filter((s) => s.status === 'active').length || 0}
+              </TableCell>
               <TableCell>
                 <IconButton
                   onClick={() => onEdit(cls)}
