@@ -45,7 +45,7 @@ const classSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room'
     },
-    enrolledStudents: [{
+    students: [{
         student: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Student'
@@ -103,8 +103,10 @@ const classSchema = new mongoose.Schema({
 
 // Keep virtual properties if needed
 classSchema.virtual('currentEnrollment').get(function () {
-    return this.enrolledStudents.filter(s => s.status === 'active').length;
+    if (!this.students) return 0;
+    return this.students.filter(s => s.status === 'active').length;
 });
+
 
 // Keep indexes if needed
 classSchema.index({ course: 1 });

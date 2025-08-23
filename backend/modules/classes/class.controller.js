@@ -3,7 +3,12 @@ import mongoose from "mongoose";
 import { generateClassCode } from './class.services.js';
 
 export const getClasses = async (req, res) => {
-    const classes = await Class.find().lean(); // Remove all populates/formatting
+    const classes = await Class.find()
+        .populate('course')
+        .populate('teacher')
+        .populate('room')
+        .populate('students.student')
+        .lean({ virtuals: true }); // include virtuals
     res.json(classes || []); // Force array return
 };
 
