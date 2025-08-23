@@ -56,6 +56,7 @@ const ClassForm = ({ selectedClass, onSave, onCancel }) => {
     teacher: '',
     room: '',
     enrolledStudents: [],
+    students: [],
     maxCapacity: 30,
     waitlistCapacity: 5,
     isActive: true,
@@ -79,6 +80,12 @@ const ClassForm = ({ selectedClass, onSave, onCancel }) => {
             student:
               typeof es.student === 'object' ? es.student._id : es.student,
             status: es.status || 'active',
+          })) || [],
+        students:
+          selectedClass.students?.map((s) => ({
+            student: typeof s.student === 'object' ? s.student._id : s.student,
+            status: s.status || 'active',
+            enrollmentDate: s.enrollmentDate || new Date(),
           })) || [],
         maxCapacity: selectedClass.maxCapacity || 30,
         waitlistCapacity: selectedClass.waitlistCapacity || 5,
@@ -370,38 +377,52 @@ const ClassForm = ({ selectedClass, onSave, onCancel }) => {
               <InputLabel>Enroll Students</InputLabel>
               <Select
                 multiple
-                value={form.enrolledStudents
-                  .filter((es) => es.status === 'active')
-                  .map((es) => es.student)}
+                value={(form.students || []).map((s) => s.student)}
                 onChange={(e) => {
                   const selectedStudentIds = e.target.value;
                   setForm((prev) => {
-                    const activeStudents = prev.enrolledStudents
-                      .filter((es) => es.status === 'active')
-                      .map((es) => es.student);
-
-                    const toAdd = selectedStudentIds.filter(
-                      (id) => !activeStudents.includes(id)
-                    );
-                    const toRemove = activeStudents.filter(
-                      (id) => !selectedStudentIds.includes(id)
-                    );
-
-                    let updated = prev.enrolledStudents.filter(
-                      (es) =>
-                        !toRemove.includes(es.student) || es.status !== 'active'
-                    );
-
-                    toAdd.forEach((studentId) => {
-                      updated.push({
-                        student: studentId,
-                        status: 'active',
-                        enrollmentDate: new Date(),
-                      });
+                    const currentStudents = prev.students || [];
+                    const updated = selectedIds.map((id) => {
+                      const existing = currentStudents.find(
+                        (s) => s.student === id
+                      );
+                      return existing
+                        ? existing
+                        : {
+                            student: id,
+                            status: 'active',
+                            enrollmentDate: new Date(),
+                          };
                     });
-
-                    return { ...prev, enrolledStudents: updated };
+                    return { ...prev, students: updated };
                   });
+                  // setForm((prev) => {
+                  //   const activeStudents = prev.enrolledStudents
+                  //     .filter((es) => es.status === 'active')
+                  //     .map((es) => es.student);
+
+                  //   const toAdd = selectedStudentIds.filter(
+                  //     (id) => !activeStudents.includes(id)
+                  //   );
+                  //   const toRemove = activeStudents.filter(
+                  //     (id) => !selectedStudentIds.includes(id)
+                  //   );
+
+                  //   let updated = prev.enrolledStudents.filter(
+                  //     (es) =>
+                  //       !toRemove.includes(es.student) || es.status !== 'active'
+                  //   );
+
+                  //   toAdd.forEach((studentId) => {
+                  //     updated.push({
+                  //       student: studentId,
+                  //       status: 'active',
+                  //       enrollmentDate: new Date(),
+                  //     });
+                  //   });
+
+                  //   return { ...prev, enrolledStudents: updated };
+                  // });
                 }}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
