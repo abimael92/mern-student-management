@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -9,6 +9,8 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Collapse,
+  Button,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -24,49 +26,37 @@ import { fetchClasses } from '../../redux/actions/classesActions';
 const TeacherCard = ({ teacher, onEdit, onDelete }) => {
   const dispatch = useDispatch();
   const { classes = [], loading } = useSelector((state) => state.classes || {});
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     dispatch(fetchClasses());
   }, [dispatch]);
 
   if (!teacher) return null;
+  if (loading) return <Typography>Loading classes...</Typography>;
 
   const statusMap = {
     available: 'success',
     busy: 'warning',
-    'on leave': 'secondary', // purple
+    'on leave': 'secondary',
     inactive: 'default',
   };
 
-  if (!teacher) return null;
-  if (loading) return <Typography>Loading classes...</Typography>;
-
   const fullName =
     teacher.fullName || `${teacher.firstName} ${teacher.lastName}`;
-  const status = statusMap[teacher.status] || 'default';
+  const status = teacher.status || 'Unknown';
   const statusColor = statusMap[teacher.status] || 'default';
-  const statusText = teacher.status || 'Unknown';
   const isActive = teacher.isActive;
-  const cardBg = teacher.isActive ? '#e8f5e9' : '#ffebee';
-  const detailsBg = teacher.status ? '#c8e6c9' : '#ffcdd2';
+  const cardBg = isActive ? '#e8f5e9' : '#ffebee';
   const profileImage = teacher.profilePicture || defaultProfile;
   const studentCount = teacher.tutoredStudents?.length || 0;
   const capitalize = (str) =>
     str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 
-  // console.log(' Teacher teacher:', teacher);
-  // console.log(' Teacher classes:', classes);
-
-  console.log(' status:', status);
-  console.log('Redux classes:', classes);
-  console.log('Teacher :', teacher);
-  console.log('Teacher classes:', teacher.classes);
-
   return (
     <Card
       sx={{
         maxWidth: 345,
-        Height: 450,
         m: 2,
         bgcolor: cardBg,
         borderRadius: 3,
@@ -86,7 +76,7 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
         <Typography gutterBottom variant="h5" component="div">
           {fullName}
           <Chip
-            label={capitalize(statusText)}
+            label={capitalize(status)}
             color={statusColor}
             size="small"
             sx={{ ml: 1 }}
@@ -102,70 +92,71 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
           {teacher.email}
         </Typography>
 
-        {/* Classes */}
-        {teacher.classes?.length > 0 ? (
-          teacher.classes.map((clsId) => {
-            console.log(`Processing class ID: ${clsId}`);
+        {/* Show More Button */}
+        <Button size="small" onClick={() => setExpanded(!expanded)}>
+          {expanded ? 'Show Less' : 'Show More'}
+        </Button>
 
-            const classObj = classes.find((c) => {
-              console.log('Checking class:', c);
-              let foundClass = c._id === clsId;
-              console.log(`Class ${c._id} matches ${clsId}:`, foundClass);
-              return foundClass;
-            });
+        <Collapse in={expanded}>
+          <Box sx={{ mt: 1 }}>
+            {/* Classes */}
+            {teacher.classes?.length > 0 ? (
+              teacher.classes.map((clsId) => {
+                const classObj = classes.find((c) => c._id === clsId);
+                return (
+                  <Chip
+                    key={clsId}
+                    label={classObj ? classObj.name : 'Unknown Class'}
+                    size="small"
+                    sx={{ mr: 0.5, mb: 0.5 }}
+                  />
+                );
+              })
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No classes assigned
+              </Typography>
+            )}
 
-            console.log('Found class object:', classObj);
-            console.log(`Class ID: ${clsId}, Class Object:`, classObj);
-            return (
-              <Chip
-                key={clsId}
-                label={classObj ? classObj.name : 'Unknown Class'}
-                size="small"
-              />
-            );
-          })
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            No classes assigned
-          </Typography>
-        )}
+            {/* Meta Info */}
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <PersonIcon fontSize="small" />
+                <Typography variant="body2" sx={{ ml: 1 }}>
+                  {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
+                </Typography>
+              </Box>
 
-        {/* Meta Info */}
-        <Box sx={{ mt: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-            <PersonIcon fontSize="small" />
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
-            </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <WorkIcon fontSize="small" />
+                <Typography variant="body2" sx={{ ml: 1 }}>
+                  {teacher.yearsOfExperience} yrs experience
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <PublicIcon fontSize="small" />
+                <Typography variant="body2" sx={{ ml: 1 }}>
+                  {teacher.address?.country || 'Unknown'}
+                </Typography>
+              </Box>
+
+              {/* Edit/Delete */}
+              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <Tooltip title="Edit Teacher">
+                  <IconButton onClick={() => onEdit(teacher)}>
+                    <EditIcon color="primary" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete Teacher">
+                  <IconButton onClick={() => onDelete(teacher._id)}>
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
           </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-            <WorkIcon fontSize="small" />
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              {teacher.yearsOfExperience} yrs experience
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-            <PublicIcon fontSize="small" />
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              {teacher.address?.country}
-            </Typography>
-          </Box>
-
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-            <Tooltip title="Edit Teacher">
-              <IconButton onClick={() => onEdit(teacher)}>
-                <EditIcon color="primary" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete Teacher">
-              <IconButton onClick={() => onDelete(teacher._id)}>
-                <DeleteIcon color="error" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
+        </Collapse>
       </CardContent>
     </Card>
   );
