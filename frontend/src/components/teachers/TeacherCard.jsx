@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -22,14 +22,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchClasses } from '../../redux/actions/classesActions';
 
 const TeacherCard = ({ teacher, onEdit, onDelete }) => {
-  if (!teacher) return null;
   const dispatch = useDispatch();
+  const { classes = [], loading } = useSelector((state) => state.classes || {});
 
   useEffect(() => {
     dispatch(fetchClasses());
   }, [dispatch]);
 
-  const { classes = [], loading } = useSelector((state) => state.classes || {});
+  if (!teacher) return null;
 
   const statusMap = {
     available: 'success',
@@ -47,6 +47,8 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
   const statusColor = statusMap[teacher.status] || 'default';
   const statusText = teacher.status || 'Unknown';
   const isActive = teacher.isActive;
+  const cardBg = teacher.isActive ? '#e8f5e9' : '#ffebee';
+  const detailsBg = teacher.status ? '#c8e6c9' : '#ffcdd2';
   const profileImage = teacher.profilePicture || defaultProfile;
   const studentCount = teacher.tutoredStudents?.length || 0;
   const capitalize = (str) =>
@@ -57,6 +59,7 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
 
   console.log(' status:', status);
   console.log('Redux classes:', classes);
+  console.log('Teacher :', teacher);
   console.log('Teacher classes:', teacher.classes);
 
   return (
@@ -65,6 +68,7 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
         maxWidth: 345,
         Height: 450,
         m: 2,
+        bgcolor: cardBg,
         borderRadius: 3,
         boxShadow: 3,
         overflow: 'hidden',
