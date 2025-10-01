@@ -118,7 +118,11 @@ const TeacherCard = ({ teacher, onEdit, onDelete, onStatusChange }) => {
         <Accordion
           expanded={expanded}
           onChange={() => setExpanded(!expanded)}
-          sx={{ mt: 2 }}
+          sx={{
+            mt: 2,
+            bgcolor: teacher.isActive ? '#c8e6c9' : '#ffcdd2',
+            borderRadius: '0 0 16px 16px',
+          }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle2">
