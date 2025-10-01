@@ -52,7 +52,7 @@ export const createTeacher = async (req, res) => {
         profilePicture,
         subjects,
         email,
-        isEmployed,
+        isActive,
     } = req.body;
 
     try {
@@ -65,7 +65,7 @@ export const createTeacher = async (req, res) => {
             profilePicture,
             subjects,
             email,
-            isEmployed,
+            isActive,
             employmentDate: new Date(),
         });
 
@@ -188,7 +188,7 @@ export const assignTeacherToClass = async (req, res) => {
 // PATCH /teachers/:id/status
 export const updateTeacherStatus = async (req, res) => {
     const { id } = req.params;
-    const { isEmployed } = req.body;
+    const { isActive } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid teacher ID format' });
@@ -197,7 +197,7 @@ export const updateTeacherStatus = async (req, res) => {
     try {
         const updatedTeacher = await Teacher.findByIdAndUpdate(
             id,
-            { isEmployed },
+            { isActive },
             { new: true }
         );
 

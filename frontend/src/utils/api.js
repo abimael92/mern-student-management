@@ -83,6 +83,16 @@ export const api = {
         return res.json();
     },
 
+    updateTeacherStatus: async (teacherId, isActive) => {
+        const res = await fetch(`${BASE}/api/teachers/${teacherId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json(); // Important: return the parsed JSON
+    },
+
     deleteTeacher: async (id) => {
         const res = await fetch(`${BASE}/api/teachers/${id}`, {
             method: 'DELETE',
