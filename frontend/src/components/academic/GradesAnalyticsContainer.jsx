@@ -1,106 +1,132 @@
-import React from 'react';
-import { Box, Typography, Grid, Paper, Button } from '@mui/material';
-
-import SubjectManagement from '../../components/academic/SubjectManagement';
-import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview';
-import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
+import React, { useState } from 'react';
+import { Box, Typography, Paper, Button, Tabs, Tab } from '@mui/material';
 
 import GpaSummaryCards from '../../components/academic/GpaSummaryCards';
 import GPAManager from '../../components/academic/GPAManager';
-
-import CourseList from '../../components/academic/CourseList';
-import CourseForm from '../../components/academic/CourseForm'; // inside
-
+import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview';
+import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
 import GradeHistory from '../../components/academic/GradeHistory';
 
-import { courses, gradeHistory } from '../../utils/mock/AcademicsPage';
+import { gradeHistory } from '../../utils/mock/AcademicsPage';
 
-const GradesAnalyticsContainer = () => {
+const AcademicsPage = () => {
+  const [tab, setTab] = useState(0);
+
+  const handleChange = (e, newValue) => setTab(newValue);
+
   return (
     <Box sx={{ p: 4 }}>
-      {/* Page Title */}
+      {/* === Page Header === */}
       <Typography variant="h4" gutterBottom>
-        Grades Analytics
+        Academics Dashboard
       </Typography>
-
-      {/* Intro Text */}
       <Typography variant="body1" sx={{ mb: 3, color: 'gray' }}>
-        This dashboard provides academic performance insights for school
-        administrators. All components below will support filtering, CRUD
-        operations, and reporting.
+        Academic performance insights for administrators. Includes GPA,
+        performance charts, at-risk students, and export features.
       </Typography>
 
-      {/* Section: GPA Summary Cards */}
-      {/* Section: GPA Summary Cards */}
-      <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
-        GPA Summary Cards
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Key indicators like average GPA, most improved student, and difficult
-        subjects. These provide high-level insights at a glance.
-      </Typography>
-      <GpaSummaryCards />
+      {/* === Tabs Navigation === */}
+      <Tabs
+        value={tab}
+        onChange={handleChange}
+        textColor="primary"
+        indicatorColor="primary"
+      >
+        <Tab label="GPA Summary" />
+        <Tab label="Grades Table" />
+        <Tab label="Performance Charts" />
+        <Tab label="At-Risk Students" />
+        <Tab label="Export Data" />
+        <Tab label="Overview" />
+      </Tabs>
 
-      {/* Section: Filters */}
-      <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
-        Grades Table
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Table showing all student grades. Supports editing or deleting grade
-        entries.
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Allows filtering by class, subject, student name, and date range.
-        Adjusts the data shown in the table and charts below.
-      </Typography>
-      <Paper sx={{ p: 2 }}>
-        <GPAManager />
-      </Paper>
+      {/* === Tab Panels === */}
+      <TabPanel value={tab} index={0}>
+        <Section
+          title="GPA Summary Cards"
+          desc="High-level indicators of GPA and student progress."
+        >
+          <GpaSummaryCards />
+        </Section>
+      </TabPanel>
 
-      {/* Section: Charts */}
-      <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
-        Performance Charts
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Visual representation of GPA trends and subject performance comparisons.
-      </Typography>
-      <SubjectsPerformanceOverview />
+      <TabPanel value={tab} index={1}>
+        <Section
+          title="Grades Table"
+          desc="Filter, edit, and manage grade records."
+        >
+          <Paper sx={{ p: 2 }}>
+            <GPAManager />
+          </Paper>
+        </Section>
+      </TabPanel>
 
-      {/* Section: At-Risk Students */}
-      <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
-        At-Risk Students
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        List of students with GPA below acceptable level. Useful for
-        intervention planning.
-      </Typography>
-      <Paper sx={{ p: 2, minHeight: 100 }}>At-Risk Students Placeholder</Paper>
+      <TabPanel value={tab} index={2}>
+        <Section
+          title="Performance Charts"
+          desc="Trends and subject performance comparisons."
+        >
+          <SubjectsPerformanceOverview />
+        </Section>
+      </TabPanel>
 
-      {/* Section: Export Data */}
-      <Typography variant="h6" sx={{ mt: 5, mb: 1 }}>
-        Export
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Export filtered data to PDF or Excel for reporting.
-      </Typography>
-      <Button variant="contained">Export as PDF</Button>
+      <TabPanel value={tab} index={3}>
+        <Section
+          title="At-Risk Students"
+          desc="Students with low GPA for intervention planning."
+        >
+          <Paper sx={{ p: 2, minHeight: 100 }}>
+            At-Risk Students Placeholder
+          </Paper>
+        </Section>
+      </TabPanel>
 
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Academics Overview
-        </Typography>
+      <TabPanel value={tab} index={4}>
+        <Section
+          title="Export Data"
+          desc="Download filtered data to PDF or Excel."
+        >
+          <Button variant="contained">Export as PDF</Button>
+        </Section>
+      </TabPanel>
 
-        {/* Subjects & Performance Overview */}
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <SubjectsStatusView />
-        </Paper>
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <Typography variant="h6">Grades</Typography>
-          <GradeHistory history={gradeHistory} />
-        </Paper>
-      </Box>
+      <TabPanel value={tab} index={5}>
+        <Section title="Academics Overview">
+          <Paper sx={{ p: 2, mt: 2 }}>
+            <SubjectsStatusView />
+          </Paper>
+          <Paper sx={{ p: 2, mt: 2 }}>
+            <Typography variant="h6">Grades</Typography>
+            <GradeHistory history={gradeHistory} />
+          </Paper>
+        </Section>
+      </TabPanel>
     </Box>
   );
 };
 
-export default GradesAnalyticsContainer;
+/* === Small reusable wrapper for sections === */
+const Section = ({ title, desc, children }) => (
+  <Box sx={{ mt: 3 }}>
+    <Typography variant="h6" sx={{ mb: 1 }}>
+      {title}
+    </Typography>
+    {desc && (
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {desc}
+      </Typography>
+    )}
+    {children}
+  </Box>
+);
+
+/* === TabPanel Component === */
+const TabPanel = ({ children, value, index }) => {
+  return (
+    <Box role="tabpanel" hidden={value !== index} sx={{ mt: 3 }}>
+      {value === index && children}
+    </Box>
+  );
+};
+
+export default AcademicsPage;
