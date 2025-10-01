@@ -3,27 +3,30 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Chip,
-  Divider,
   Typography,
   Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   IconButton,
   Tooltip,
-  Collapse,
-  Button,
+  Chip,
 } from '@mui/material';
 import {
+  ExpandMore as ExpandMoreIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Person as PersonIcon,
   Work as WorkIcon,
   Public as PublicIcon,
+  Cancel as CancelIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import defaultProfile from '../../assets/profile-default.png';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchClasses } from '../../redux/actions/classesActions';
 
-const TeacherCard = ({ teacher, onEdit, onDelete }) => {
+const TeacherCard = ({ teacher, onEdit, onDelete, onStatusChange }) => {
   const dispatch = useDispatch();
   const { classes = [], loading } = useSelector((state) => state.classes || {});
   const [expanded, setExpanded] = useState(false);
@@ -35,19 +38,17 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
   if (!teacher) return null;
   if (loading) return <Typography>Loading classes...</Typography>;
 
+  const fullName =
+    teacher.fullName || `${teacher.firstName} ${teacher.lastName}`;
   const statusMap = {
     available: 'success',
     busy: 'warning',
     'on leave': 'secondary',
     inactive: 'default',
   };
-
-  const fullName =
-    teacher.fullName || `${teacher.firstName} ${teacher.lastName}`;
   const status = teacher.status || 'Unknown';
   const statusColor = statusMap[teacher.status] || 'default';
-  const isActive = teacher.isActive;
-  const cardBg = isActive ? '#e8f5e9' : '#ffebee';
+  const cardBg = teacher.isActive ? '#e8f5e9' : '#ffebee';
   const profileImage = teacher.profilePicture || defaultProfile;
   const studentCount = teacher.tutoredStudents?.length || 0;
   const capitalize = (str) =>
@@ -56,13 +57,13 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
   return (
     <Card
       sx={{
-        maxWidth: 345,
+        maxWidth: 360,
         m: 2,
         bgcolor: cardBg,
         borderRadius: 3,
         boxShadow: 3,
         overflow: 'hidden',
-        opacity: !isActive ? 0.5 : 1,
+        opacity: !teacher.isActive ? 0.5 : 1,
       }}
     >
       <CardMedia
@@ -72,7 +73,6 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
         alt={fullName}
       />
       <CardContent>
-        {/* Name + Status */}
         <Typography gutterBottom variant="h5" component="div">
           {fullName}
           <Chip
@@ -82,9 +82,7 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
             sx={{ ml: 1 }}
           />
         </Typography>
-        <Divider sx={{ my: 1 }} />
 
-        {/* Teacher Number & Email */}
         <Typography variant="body2" color="text.secondary">
           {teacher.teacherNumber}
         </Typography>
@@ -92,71 +90,85 @@ const TeacherCard = ({ teacher, onEdit, onDelete }) => {
           {teacher.email}
         </Typography>
 
-        {/* Show More Button */}
-        <Button size="small" onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'Show Less' : 'Show More'}
-        </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+          <PersonIcon fontSize="small" />
+          <Typography variant="body2" sx={{ ml: 1 }}>
+            {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
+          </Typography>
+        </Box>
 
-        <Collapse in={expanded}>
-          <Box sx={{ mt: 1 }}>
-            {/* Classes */}
-            {teacher.classes?.length > 0 ? (
-              teacher.classes.map((clsId) => {
-                const classObj = classes.find((c) => c._id === clsId);
-                return (
-                  <Chip
-                    key={clsId}
-                    label={classObj ? classObj.name : 'Unknown Class'}
-                    size="small"
-                    sx={{ mr: 0.5, mb: 0.5 }}
-                  />
-                );
-              })
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                No classes assigned
-              </Typography>
-            )}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+          <WorkIcon fontSize="small" />
+          <Typography variant="body2" sx={{ ml: 1 }}>
+            {teacher.yearsOfExperience} yrs experience
+          </Typography>
+        </Box>
 
-            {/* Meta Info */}
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                <PersonIcon fontSize="small" />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  {studentCount} {studentCount === 1 ? 'Student' : 'Students'}
-                </Typography>
-              </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+          <PublicIcon fontSize="small" />
+          <Typography variant="body2" sx={{ ml: 1 }}>
+            {teacher.address?.country || 'N/A'}
+          </Typography>
+        </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                <WorkIcon fontSize="small" />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  {teacher.yearsOfExperience} yrs experience
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                <PublicIcon fontSize="small" />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  {teacher.address?.country || 'Unknown'}
-                </Typography>
-              </Box>
-
-              {/* Edit/Delete */}
-              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                <Tooltip title="Edit Teacher">
-                  <IconButton onClick={() => onEdit(teacher)}>
-                    <EditIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete Teacher">
-                  <IconButton onClick={() => onDelete(teacher._id)}>
-                    <DeleteIcon color="error" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+        {/* Accordion for extra details */}
+        <Accordion
+          expanded={expanded}
+          onChange={() => setExpanded(!expanded)}
+          sx={{ mt: 2 }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle2">
+              {expanded ? 'Hide Details' : 'Show More'}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              {teacher.classes?.length > 0 ? (
+                teacher.classes.map((clsId) => {
+                  const classObj = classes.find((c) => c._id === clsId);
+                  return (
+                    <Chip
+                      key={clsId}
+                      label={classObj?.name || 'Unknown Class'}
+                      size="small"
+                      sx={{ mr: 0.5, mb: 0.5 }}
+                    />
+                  );
+                })
+              ) : (
+                <Typography variant="body2">No classes assigned</Typography>
+              )}
+              {/* Add any additional fields you want here */}
             </Box>
-          </Box>
-        </Collapse>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Actions */}
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-around' }}>
+          <Tooltip title="Edit Teacher" arrow>
+            <IconButton onClick={() => onEdit(teacher)}>
+              <EditIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Teacher" arrow>
+            <IconButton onClick={() => onDelete(teacher._id)}>
+              <DeleteIcon color="error" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={teacher.isActive ? 'Deactivate' : 'Activate'} arrow>
+            <IconButton
+              onClick={() => onStatusChange(teacher._id, teacher.isActive)} // or teacher.isActive
+              aria-label={`${teacher.isActive ? 'Deactivate' : 'Activate'} ${fullName}`}
+            >
+              {teacher.isActive ? (
+                <CancelIcon color="error" />
+              ) : (
+                <CheckCircleIcon color="success" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Box>
       </CardContent>
     </Card>
   );
