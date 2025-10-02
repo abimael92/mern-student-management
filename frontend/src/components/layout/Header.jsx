@@ -23,6 +23,9 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import ClassOutlinedIcon from '@mui/icons-material/ClassOutlined';
+import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 
@@ -63,10 +66,16 @@ const Header = () => {
     },
   ];
 
-  const academicsAttendanceItems = [
+  const academicsAttendanceItems2 = [
     {
       name: 'Academics',
       path: '/academics',
+      icon: <SchoolOutlinedIcon />,
+      // comingSoon: true,
+    },
+    {
+      name: 'School Manager',
+      path: '/academics-plan',
       icon: <SchoolOutlinedIcon />,
       // comingSoon: true,
     },
@@ -75,6 +84,24 @@ const Header = () => {
       path: '/attendance',
       icon: <PeopleIcon />,
       // comingSoon: true,
+    },
+  ];
+
+  const academicsAttendanceItems = [
+    {
+      name: 'Academics',
+      path: '/academics',
+      icon: <MenuBookOutlinedIcon />, // books, fits academics overview
+    },
+    {
+      name: 'School Manager',
+      path: '/academics-plan',
+      icon: <ClassOutlinedIcon />, // class/course management
+    },
+    {
+      name: 'Attendance',
+      path: '/attendance',
+      icon: <EventAvailableOutlinedIcon />, // calendar/attendance
     },
   ];
 
