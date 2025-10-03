@@ -95,15 +95,15 @@ export const drawBathroomIcon = (ctx, element) => {
   ctx.restore();
 };
 
-// Draw dimensions for elements
-export const drawDimensions = (ctx, element, type) => {
+// Draw dimensions for elements and clickable dimensions
+export const drawDimensions = (ctx, element, type, isEditing = false) => {
   const { x, y, width, height } = element;
   const absWidth = Math.abs(width);
   const absHeight = Math.abs(height);
 
   ctx.save();
-  ctx.strokeStyle = '#ff6b35';
-  ctx.fillStyle = '#ff6b35';
+  ctx.strokeStyle = isEditing ? '#ff4444' : '#ff6b35';
+  ctx.fillStyle = isEditing ? '#ff4444' : '#ff6b35';
   ctx.lineWidth = 1;
   ctx.setLineDash([5, 3]);
 
@@ -138,18 +138,24 @@ export const drawDimensions = (ctx, element, type) => {
   ctx.lineTo(x + width + 20, y + height);
   ctx.stroke();
 
-  // Draw dimension text
+  // Draw dimension text with background for clickability
   ctx.font = 'bold 12px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  // Width text
+  // Width text with background
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillRect(x + width / 2 - 25, y - 32, 50, 16);
+  ctx.fillStyle = isEditing ? '#ff4444' : '#ff6b35';
   ctx.fillText(`${absWidth}px`, x + width / 2, y - 25);
 
-  // Height text
+  // Height text with background
   ctx.save();
   ctx.translate(x + width + 25, y + height / 2);
   ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillRect(-25, -8, 50, 16);
+  ctx.fillStyle = isEditing ? '#ff4444' : '#ff6b35';
   ctx.fillText(`${absHeight}px`, 0, 0);
   ctx.restore();
 
