@@ -37,32 +37,16 @@ import {
 import { ELEMENT_TYPES } from './BlueprintElements';
 import { drawGrid, drawElement, drawDimensions } from './BlueprintRenderer';
 import { TOOLS } from './BlueprintTools';
-
-// Enhanced default styles
-const DEFAULT_STYLES = {
-  [ELEMENT_TYPES.BUILDING]: {
-    fillColor: '#d3e3fd',
-    strokeColor: '#3a7bd5',
-    strokeWidth: 2,
-    minWidth: 200,
-    minHeight: 150,
-  },
-  [ELEMENT_TYPES.ROOM]: {
-    fillColor: '#f5f5f5',
-    strokeColor: '#757575',
-    strokeWidth: 1,
-    minWidth: 100,
-    minHeight: 80,
-  },
-  [ELEMENT_TYPES.BATHROOM]: {
-    fillColor: '#e3f2fd',
-    strokeColor: '#2196f3',
-    strokeWidth: 1,
-    icon: '🚽',
-    minWidth: 80,
-    minHeight: 60,
-  },
-};
+import ZoomControls from './ZoomControls';
+import {
+  DEFAULT_STYLES,
+  SCHOOL_DESIGN_NOTES,
+} from '../../constants/blueprintConfig';
+import {
+  drawBathroomIcon,
+  validatePlacement,
+  createNewElement,
+} from '../../utils/blueprintHelpers';
 
 const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
   const [blueprint, setBlueprint] = useState({
@@ -161,13 +145,6 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
   }, [open, drawCanvas, zoom, pan]);
 
   // Helper functions
-  const createNewElement = (type, props) => ({
-    id: uuidv4(),
-    type,
-    name: '',
-    ...DEFAULT_STYLES[type],
-    ...props,
-  });
 
   const getSelectedBuilding = () =>
     blueprint.buildings.find((b) => b.id === blueprint.selectedBuildingId);
@@ -176,64 +153,6 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
     const building = getSelectedBuilding();
     if (!building || !building.elements) return null;
     return building.elements.find((e) => e.id === blueprint.selectedElementId);
-  };
-
-  // Enhanced validation functions
-  const validatePlacement = (element, building) => {
-    const errors = [];
-
-    // Check if bathroom is inside a building
-    if (element.type === ELEMENT_TYPES.BATHROOM && !building) {
-      errors.push('Bathrooms must be placed inside a building');
-    }
-
-    // Check if room is inside a building
-    if (element.type === ELEMENT_TYPES.ROOM && !building) {
-      errors.push('Rooms must be placed inside a building');
-    }
-
-    // Check minimum dimensions
-    if (element.width < element.minWidth) {
-      errors.push(`Minimum width for ${element.type} is ${element.minWidth}px`);
-    }
-    if (element.height < element.minHeight) {
-      errors.push(
-        `Minimum height for ${element.type} is ${element.minHeight}px`
-      );
-    }
-
-    // Check for building overlaps
-    if (element.type === ELEMENT_TYPES.BUILDING) {
-      const hasOverlap = blueprint.buildings.some((existingBuilding) => {
-        if (existingBuilding.id === element.id) return false; // Skip self
-
-        return (
-          element.x < existingBuilding.x + existingBuilding.width &&
-          element.x + Math.abs(element.width) > existingBuilding.x &&
-          element.y < existingBuilding.y + existingBuilding.height &&
-          element.y + Math.abs(element.height) > existingBuilding.y
-        );
-      });
-
-      if (hasOverlap) {
-        errors.push('Buildings cannot overlap with other buildings');
-      }
-    }
-
-    return errors;
-  };
-
-  // Draw bathroom icon function
-  const drawBathroomIcon = (ctx, element) => {
-    const centerX = element.x + element.width / 2;
-    const centerY = element.y + element.height / 2;
-
-    ctx.save();
-    ctx.font = '20px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🚽', centerX, centerY);
-    ctx.restore();
   };
 
   // Event handlers
@@ -247,6 +166,7 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
 
     // Handle panning with right click or spacebar
     if (e.button === 2 || e.ctrlKey) {
+      e.preventDefault();
       setIsPanning(true);
       startPos.current = { x, y };
       return;
@@ -372,14 +292,20 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
     }
 
     setIsDrawing(true);
-    const newElement = createNewElement(mode, {
-      x: (x - pan.x) / zoom, // Adjust for zoom and pan
-      y: (y - pan.y) / zoom,
-      width: 0,
-      height: 0,
-      buildingId:
-        mode !== ELEMENT_TYPES.BUILDING ? blueprint.selectedBuildingId : null,
-    });
+    // In handleMouseDown
+    const newElement = createNewElement(
+      mode,
+      {
+        x: (x - pan.x) / zoom,
+        y: (y - pan.y) / zoom,
+        width: 0,
+        height: 0,
+        buildingId:
+          mode !== ELEMENT_TYPES.BUILDING ? blueprint.selectedBuildingId : null,
+      },
+      DEFAULT_STYLES
+    );
+
     setCurrentElement(newElement);
   };
 
@@ -456,8 +382,10 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
       let updatedBuildings = [...prev.buildings];
 
       if (elementToSave.type === ELEMENT_TYPES.BUILDING) {
-        // Add new building
-        updatedBuildings = [...updatedBuildings, elementToSave];
+        updatedBuildings = [
+          ...updatedBuildings,
+          { ...elementToSave, elements: [] },
+        ];
         return {
           ...prev,
           buildings: updatedBuildings,
@@ -614,48 +542,7 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
                 </Typography>
 
                 {/* Zoom Controls */}
-                <Paper sx={{ p: 2, mb: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Zoom: {Math.round(zoom * 100)}%
-                  </Typography>
-                  <Box display="flex" gap={1} flexWrap="wrap">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() =>
-                        setZoom((prev) => Math.min(prev + 0.25, 3))
-                      }
-                    >
-                      Zoom In
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() =>
-                        setZoom((prev) => Math.max(prev - 0.25, 0.5))
-                      }
-                    >
-                      Zoom Out
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => {
-                        setZoom(1);
-                        setPan({ x: 0, y: 0 });
-                      }}
-                    >
-                      Reset View
-                    </Button>
-                  </Box>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    sx={{ mt: 1, display: 'block' }}
-                  >
-                    Hold Ctrl + drag to pan
-                  </Typography>
-                </Paper>
+                <ZoomControls zoom={zoom} setZoom={setZoom} setPan={setPan} />
 
                 <Button
                   variant={
@@ -673,7 +560,7 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
                   orientation="vertical"
                   value={mode}
                   exclusive
-                  onChange={(e, newMode) => setMode(newMode)}
+                  onChange={(e, newMode) => newMode && setMode(newMode)}
                   fullWidth
                 >
                   {TOOLS.map((tool) => (
@@ -841,10 +728,9 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
           {/* Canvas Area */}
           <Grid item xs={6}>
             <Box position="relative">
-              <Box
+              <canvas
                 ref={canvasRef}
-                component="canvas"
-                sx={{
+                style={{
                   width: '100%',
                   height: '600px',
                   border: '2px solid #ccc',
