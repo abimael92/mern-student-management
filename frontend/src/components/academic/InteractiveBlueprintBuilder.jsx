@@ -76,6 +76,8 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [showElementForm, setShowElementForm] = useState(false);
   const [elementName, setElementName] = useState('');
+  const [editingDimension, setEditingDimension] = useState(null);
+  const [dimensionValue, setDimensionValue] = useState('');
   const [dimensionInfo, setDimensionInfo] = useState(null);
   const [placementErrors, setPlacementErrors] = useState([]);
   const [zoom, setZoom] = useState(1);
@@ -115,7 +117,12 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
 
         // Draw dimensions for selected element
         if (isSelected) {
-          drawDimensions(ctx, element, element.type);
+          drawDimensions(
+            ctx,
+            element,
+            element.type,
+            editingDimension?.elementId === element.id
+          );
         }
 
         // Draw bathroom icon
@@ -195,6 +202,24 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
       );
     }
 
+    // Check for building overlaps
+    if (element.type === ELEMENT_TYPES.BUILDING) {
+      const hasOverlap = blueprint.buildings.some((existingBuilding) => {
+        if (existingBuilding.id === element.id) return false; // Skip self
+
+        return (
+          element.x < existingBuilding.x + existingBuilding.width &&
+          element.x + Math.abs(element.width) > existingBuilding.x &&
+          element.y < existingBuilding.y + existingBuilding.height &&
+          element.y + Math.abs(element.height) > existingBuilding.y
+        );
+      });
+
+      if (hasOverlap) {
+        errors.push('Buildings cannot overlap with other buildings');
+      }
+    }
+
     return errors;
   };
 
@@ -237,6 +262,82 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
       // Adjust coordinates for zoom and pan
       const adjustedX = (x - pan.x) / zoom;
       const adjustedY = (y - pan.y) / zoom;
+
+      // Check for dimension clicks on ALL buildings and elements
+      let dimensionElement = null;
+      let dimensionType = null;
+
+      // Check all buildings and their elements for dimension clicks
+      blueprint.buildings.forEach((building) => {
+        // Check building dimensions
+        const buildingWidthTextX = building.x + building.width / 2;
+        const buildingWidthTextY = building.y - 25;
+        const buildingHeightTextX = building.x + building.width + 25;
+        const buildingHeightTextY = building.y + building.height / 2;
+
+        if (
+          Math.abs(adjustedX - buildingWidthTextX) < 25 &&
+          Math.abs(adjustedY - buildingWidthTextY) < 8
+        ) {
+          dimensionElement = building;
+          dimensionType = 'width';
+          return;
+        }
+
+        if (
+          Math.abs(adjustedX - buildingHeightTextX) < 8 &&
+          Math.abs(adjustedY - buildingHeightTextY) < 25
+        ) {
+          dimensionElement = building;
+          dimensionType = 'height';
+          return;
+        }
+
+        // Check element dimensions
+        (building.elements || []).forEach((element) => {
+          const elementWidthTextX = element.x + element.width / 2;
+          const elementWidthTextY = element.y - 25;
+          const elementHeightTextX = element.x + element.width + 25;
+          const elementHeightTextY = element.y + element.height / 2;
+
+          if (
+            Math.abs(adjustedX - elementWidthTextX) < 25 &&
+            Math.abs(adjustedY - elementWidthTextY) < 8
+          ) {
+            dimensionElement = element;
+            dimensionType = 'width';
+            return;
+          }
+
+          if (
+            Math.abs(adjustedX - elementHeightTextX) < 8 &&
+            Math.abs(adjustedY - elementHeightTextY) < 25
+          ) {
+            dimensionElement = element;
+            dimensionType = 'height';
+            return;
+          }
+        });
+      });
+
+      // If dimension was clicked, handle it
+      if (dimensionElement && dimensionType) {
+        handleDimensionClick(e, dimensionElement, dimensionType);
+
+        // Also select the element that was clicked
+        setBlueprint((prev) => ({
+          ...prev,
+          selectedBuildingId:
+            dimensionElement.type === ELEMENT_TYPES.BUILDING
+              ? dimensionElement.id
+              : getSelectedBuilding()?.id,
+          selectedElementId:
+            dimensionElement.type !== ELEMENT_TYPES.BUILDING
+              ? dimensionElement.id
+              : null,
+        }));
+        return;
+      }
 
       // Check buildings first
       blueprint.buildings.forEach((building) => {
@@ -406,6 +507,68 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
     }));
   };
 
+  // Dimension editing handlers
+  const handleDimensionClick = (e, element, dimensionType) => {
+    e.stopPropagation();
+    setEditingDimension({ elementId: element.id, dimensionType });
+    setDimensionValue(
+      dimensionType === 'width'
+        ? Math.abs(element.width)
+        : Math.abs(element.height)
+    );
+  };
+
+  const handleDimensionChange = (e) => {
+    setDimensionValue(e.target.value);
+  };
+
+  const handleDimensionSave = () => {
+    if (!editingDimension || !dimensionValue) return;
+
+    const numericValue = parseInt(dimensionValue);
+    if (isNaN(numericValue) || numericValue < 50) return;
+
+    setBlueprint((prev) => ({
+      ...prev,
+      buildings: prev.buildings.map((building) => {
+        // Update building dimensions
+        if (building.id === editingDimension.elementId) {
+          return {
+            ...building,
+            [editingDimension.dimensionType]:
+              editingDimension.dimensionType === 'width'
+                ? Math.sign(building.width) * numericValue
+                : Math.sign(building.height) * numericValue,
+          };
+        }
+
+        // Update element dimensions within building
+        if (building.elements) {
+          return {
+            ...building,
+            elements: building.elements.map((element) => {
+              if (element.id === editingDimension.elementId) {
+                return {
+                  ...element,
+                  [editingDimension.dimensionType]:
+                    editingDimension.dimensionType === 'width'
+                      ? Math.sign(element.width) * numericValue
+                      : Math.sign(element.height) * numericValue,
+                };
+              }
+              return element;
+            }),
+          };
+        }
+
+        return building;
+      }),
+    }));
+
+    setEditingDimension(null);
+    setDimensionValue('');
+  };
+
   // School design considerations
   const schoolDesignNotes = [
     'Ensure ADA compliance with proper wheelchair accessibility',
@@ -564,6 +727,41 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
                       Building: {getSelectedBuilding()?.name}
                     </Typography>
                   )}
+                </Paper>
+              )}
+
+              {/* Dimension Editing */}
+              {editingDimension && (
+                <Paper sx={{ p: 2, mb: 2, bgcolor: 'success.light' }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Edit Dimension:
+                  </Typography>
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={dimensionValue}
+                    onChange={handleDimensionChange}
+                    onKeyPress={(e) =>
+                      e.key === 'Enter' && handleDimensionSave()
+                    }
+                    sx={{ mb: 1 }}
+                    fullWidth
+                  />
+                  <Box display="flex" gap={1}>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleDimensionSave}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => setEditingDimension(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
                 </Paper>
               )}
 
