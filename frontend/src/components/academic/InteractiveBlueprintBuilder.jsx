@@ -38,6 +38,8 @@ import { ELEMENT_TYPES } from './BlueprintElements';
 import { drawGrid, drawElement, drawDimensions } from './BlueprintRenderer';
 import { TOOLS } from './BlueprintTools';
 import ZoomControls from './ZoomControls';
+import DimensionEditor from './DimensionEditor';
+import { useDimensionEditing } from '../../hooks/useDimensionEditing';
 import {
   DEFAULT_STYLES,
   SCHOOL_DESIGN_NOTES,
@@ -60,8 +62,6 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [showElementForm, setShowElementForm] = useState(false);
   const [elementName, setElementName] = useState('');
-  const [editingDimension, setEditingDimension] = useState(null);
-  const [dimensionValue, setDimensionValue] = useState('');
   const [dimensionInfo, setDimensionInfo] = useState(null);
   const [placementErrors, setPlacementErrors] = useState([]);
   const [zoom, setZoom] = useState(1);
@@ -71,7 +71,17 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
   const canvasRef = useRef(null);
   const startPos = useRef({ x: 0, y: 0 });
 
-  // Enhanced drawing with dimensions - MOVE THIS BEFORE useEffect
+  // Dimension editing hook
+  const {
+    editingDimension,
+    dimensionValue,
+    handleDimensionClick,
+    handleDimensionChange,
+    handleDimensionSave,
+    cancelDimensionEditing,
+  } = useDimensionEditing();
+
+  // Enhanced drawing with dimensions
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -130,9 +140,9 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
     }
 
     ctx.restore(); // Restore transformation
-  }, [blueprint, isDrawing, currentElement, zoom, pan]);
+  }, [blueprint, isDrawing, currentElement, zoom, pan, editingDimension]);
 
-  // Canvas initialization - MOVE THIS AFTER drawCanvas
+  // Canvas initialization
   useEffect(() => {
     if (!open || !canvasRef.current) return;
 
@@ -145,7 +155,6 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
   }, [open, drawCanvas, zoom, pan]);
 
   // Helper functions
-
   const getSelectedBuilding = () =>
     blueprint.buildings.find((b) => b.id === blueprint.selectedBuildingId);
 
@@ -292,7 +301,6 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
     }
 
     setIsDrawing(true);
-    // In handleMouseDown
     const newElement = createNewElement(
       mode,
       {
@@ -356,7 +364,7 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
     if (!isDrawing || !currentElement) return;
 
     const building = getSelectedBuilding();
-    const errors = validatePlacement(currentElement, building);
+    const errors = validatePlacement(currentElement, building, blueprint);
 
     if (errors.length > 0) {
       setPlacementErrors(errors);
@@ -434,84 +442,6 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
       selectedElementId: null,
     }));
   };
-
-  // Dimension editing handlers
-  const handleDimensionClick = (e, element, dimensionType) => {
-    e.stopPropagation();
-    setEditingDimension({ elementId: element.id, dimensionType });
-    setDimensionValue(
-      dimensionType === 'width'
-        ? Math.abs(element.width)
-        : Math.abs(element.height)
-    );
-  };
-
-  const handleDimensionChange = (e) => {
-    setDimensionValue(e.target.value);
-  };
-
-  const handleDimensionSave = () => {
-    if (!editingDimension || !dimensionValue) return;
-
-    const numericValue = parseInt(dimensionValue);
-    if (isNaN(numericValue) || numericValue < 50) return;
-
-    setBlueprint((prev) => ({
-      ...prev,
-      buildings: prev.buildings.map((building) => {
-        // Update building dimensions
-        if (building.id === editingDimension.elementId) {
-          return {
-            ...building,
-            [editingDimension.dimensionType]:
-              editingDimension.dimensionType === 'width'
-                ? Math.sign(building.width) * numericValue
-                : Math.sign(building.height) * numericValue,
-          };
-        }
-
-        // Update element dimensions within building
-        if (building.elements) {
-          return {
-            ...building,
-            elements: building.elements.map((element) => {
-              if (element.id === editingDimension.elementId) {
-                return {
-                  ...element,
-                  [editingDimension.dimensionType]:
-                    editingDimension.dimensionType === 'width'
-                      ? Math.sign(element.width) * numericValue
-                      : Math.sign(element.height) * numericValue,
-                };
-              }
-              return element;
-            }),
-          };
-        }
-
-        return building;
-      }),
-    }));
-
-    setEditingDimension(null);
-    setDimensionValue('');
-  };
-
-  // School design considerations
-  const schoolDesignNotes = [
-    'Ensure ADA compliance with proper wheelchair accessibility',
-    'Include emergency exits and evacuation routes',
-    'Consider natural lighting and ventilation',
-    'Plan for technology infrastructure (wiring, networking)',
-    'Include storage spaces in classrooms',
-    'Plan for teacher work areas and break rooms',
-    'Consider acoustics and soundproofing between classrooms',
-    'Include multipurpose spaces (auditorium, cafeteria)',
-    'Plan for outdoor learning spaces and playgrounds',
-    'Ensure proper plumbing for science labs and art rooms',
-    'Include administrative offices and reception area',
-    'Plan for security features and controlled access points',
-  ];
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
@@ -618,39 +548,15 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
               )}
 
               {/* Dimension Editing */}
-              {editingDimension && (
-                <Paper sx={{ p: 2, mb: 2, bgcolor: 'success.light' }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Edit Dimension:
-                  </Typography>
-                  <TextField
-                    size="small"
-                    type="number"
-                    value={dimensionValue}
-                    onChange={handleDimensionChange}
-                    onKeyPress={(e) =>
-                      e.key === 'Enter' && handleDimensionSave()
-                    }
-                    sx={{ mb: 1 }}
-                    fullWidth
-                  />
-                  <Box display="flex" gap={1}>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={handleDimensionSave}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={() => setEditingDimension(null)}
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
-                </Paper>
-              )}
+              <DimensionEditor
+                editingDimension={editingDimension}
+                dimensionValue={dimensionValue}
+                onDimensionChange={handleDimensionChange}
+                onDimensionSave={() =>
+                  handleDimensionSave(blueprint, setBlueprint, drawCanvas)
+                }
+                onCancel={cancelDimensionEditing}
+              />
 
               {/* Buildings List */}
               <Paper sx={{ p: 2, mb: 2 }}>
@@ -712,7 +618,7 @@ const InteractiveBlueprintBuilder = ({ open, onClose, onSave }) => {
                   School Design Considerations
                 </Typography>
                 <List dense>
-                  {schoolDesignNotes.map((note, index) => (
+                  {SCHOOL_DESIGN_NOTES.map((note, index) => (
                     <ListItem key={index}>
                       <ListItemIcon>
                         <WarningIcon color="action" fontSize="small" />
