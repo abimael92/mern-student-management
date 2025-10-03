@@ -13,7 +13,7 @@ import { ELEMENT_TYPES } from './BlueprintElements';
 
 export const TOOLS = [
   { value: ELEMENT_TYPES.SELECT, label: 'Select/Move', icon: <SelectIcon /> },
-  { value: ELEMENT_TYPES.BUILDING, label: 'Building', icon: <BuildingIcon /> },
+  // { value: ELEMENT_TYPES.BUILDING, label: 'Building', icon: <BuildingIcon /> },
   { value: ELEMENT_TYPES.ROOM, label: 'Room', icon: <RoomIcon /> },
   { value: ELEMENT_TYPES.BATHROOM, label: 'Bathroom', icon: <BathroomIcon /> },
   { value: ELEMENT_TYPES.GREEN, label: 'Green Area', icon: <GreenIcon /> },
