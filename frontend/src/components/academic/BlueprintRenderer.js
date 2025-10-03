@@ -1,17 +1,48 @@
-import { ELEMENT_TYPES, DEFAULT_COLORS } from './BlueprintElements';
+// BlueprintRenderer.js
+import { ELEMENT_TYPES } from './BlueprintElements';
 
+// Default styles for different element types
+export const DEFAULT_STYLES = {
+  [ELEMENT_TYPES.BUILDING]: {
+    fillColor: '#d3e3fd',
+    strokeColor: '#3a7bd5',
+    strokeWidth: 2,
+    minWidth: 200,
+    minHeight: 150,
+  },
+  [ELEMENT_TYPES.ROOM]: {
+    fillColor: '#f5f5f5',
+    strokeColor: '#757575',
+    strokeWidth: 1,
+    minWidth: 100,
+    minHeight: 80,
+  },
+  [ELEMENT_TYPES.BATHROOM]: {
+    fillColor: '#e3f2fd',
+    strokeColor: '#2196f3',
+    strokeWidth: 1,
+    icon: '🚽',
+    minWidth: 80,
+    minHeight: 60,
+  },
+};
+
+// Draw grid background
 export const drawGrid = (ctx, width, height) => {
+  const gridSize = 20;
   ctx.strokeStyle = '#e0e0e0';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 0.5;
 
-  for (let x = 0; x <= width; x += 20) {
+  // Draw vertical lines
+  for (let x = 0; x <= width; x += gridSize) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.stroke();
   }
 
-  for (let y = 0; y <= height; y += 20) {
+  // Draw horizontal lines
+  for (let y = 0; y <= height; y += gridSize) {
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
@@ -19,178 +50,187 @@ export const drawGrid = (ctx, width, height) => {
   }
 };
 
-export const drawDoor = (ctx, element) => {
-  ctx.fillStyle = '#795548';
-  const doorSize = Math.min(element.width, element.height) * 0.2;
-
-  switch (element.doorPosition) {
-    case 'north':
-      ctx.fillRect(
-        element.x + element.width / 2 - doorSize / 2,
-        element.y,
-        doorSize,
-        doorSize / 2
-      );
-      break;
-    case 'south':
-      ctx.fillRect(
-        element.x + element.width / 2 - doorSize / 2,
-        element.y + element.height - doorSize / 2,
-        doorSize,
-        doorSize / 2
-      );
-      break;
-    case 'east':
-      ctx.fillRect(
-        element.x + element.width - doorSize / 2,
-        element.y + element.height / 2 - doorSize / 2,
-        doorSize / 2,
-        doorSize
-      );
-      break;
-    case 'west':
-      ctx.fillRect(
-        element.x,
-        element.y + element.height / 2 - doorSize / 2,
-        doorSize / 2,
-        doorSize
-      );
-      break;
-  }
-};
-
+// Draw individual elements (buildings, rooms, bathrooms, etc.)
 export const drawElement = (ctx, element, isSelected = false) => {
-  if (!element || !element.type) return;
-
-  const rawType = String(element.type || '');
-  const typeLower = rawType.toLowerCase();
-  const elementColor =
-    element.color ||
-    DEFAULT_COLORS[rawType.toUpperCase()] ||
-    DEFAULT_COLORS.DEFAULT;
+  const { x, y, width, height, type, fillColor, strokeColor, strokeWidth } = element;
 
   ctx.save();
-  const strokeColor = isSelected ? '#1976D2' : '#333';
 
-  switch (typeLower) {
-    case ELEMENT_TYPES.BUILDING.toLowerCase():
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = isSelected ? 3 : 2;
-      ctx.setLineDash([]);
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-      drawDoor(ctx, element);
-      break;
+  // Draw fill
+  ctx.fillStyle = fillColor || '#ffffff';
+  ctx.fillRect(x, y, width, height);
 
-    case ELEMENT_TYPES.ROOM.toLowerCase():
-      ctx.fillStyle = elementColor;
-      ctx.fillRect(element.x, element.y, element.width, element.height);
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-      break;
+  // Draw border
+  ctx.strokeStyle = isSelected ? '#ff6b35' : strokeColor || '#000000';
+  ctx.lineWidth = isSelected ? strokeWidth + 2 : strokeWidth || 1;
+  ctx.strokeRect(x, y, width, height);
 
-    case ELEMENT_TYPES.GREEN_AREA.toLowerCase():
-      ctx.fillStyle = elementColor;
-      ctx.fillRect(element.x, element.y, element.width, element.height);
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-      break;
+  // Draw element name if available
+  if (element.name) {
+    ctx.fillStyle = isSelected ? '#ff6b35' : '#333333';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(element.name, x + width / 2, y + height / 2);
+  }
 
-    case ELEMENT_TYPES.COURT.toLowerCase():
-      drawCourt(ctx, element, isSelected);
-      break;
-
-    case ELEMENT_TYPES.TEXT.toLowerCase():
-      ctx.fillStyle = elementColor;
-      ctx.font = element.font || '12px sans-serif';
-      ctx.fillText(element.text || '', element.x, element.y);
-      break;
-
-    default:
-      ctx.strokeStyle = strokeColor;
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-      break;
+  // Draw bathroom icon for bathroom elements
+  if (type === ELEMENT_TYPES.BATHROOM) {
+    drawBathroomIcon(ctx, element);
   }
 
   ctx.restore();
 };
 
-export const drawCourt = (ctx, element, isSelected = false) => {
-  const { x, y, width: w, height: h } = element;
-  const sport =
-    String(element.sport || element.courtType || element.subtype || 'generic').toLowerCase();
+// Draw bathroom icon
+export const drawBathroomIcon = (ctx, element) => {
+  const centerX = element.x + element.width / 2;
+  const centerY = element.y + element.height / 2;
 
-  const bg = element.color || DEFAULT_COLORS.COURT || DEFAULT_COLORS.DEFAULT;
+  ctx.save();
+  ctx.font = '20px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🚽', centerX, centerY);
+  ctx.restore();
+};
 
-  // background + border
-  ctx.fillStyle = bg;
-  ctx.fillRect(x, y, w, h);
-  ctx.strokeStyle = isSelected ? '#1976D2' : '#333';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, w, h);
+// Draw dimensions for elements
+export const drawDimensions = (ctx, element, type) => {
+  const { x, y, width, height } = element;
+  const absWidth = Math.abs(width);
+  const absHeight = Math.abs(height);
 
-  // white lines for courts
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = Math.max(1, Math.round(Math.min(w, h) * 0.006));
+  ctx.save();
+  ctx.strokeStyle = '#ff6b35';
+  ctx.fillStyle = '#ff6b35';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 3]);
 
-  if (sport === 'soccer') {
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y);
-    ctx.lineTo(x + w / 2, y + h);
-    ctx.stroke();
+  // Draw width dimension line (top)
+  ctx.beginPath();
+  ctx.moveTo(x, y - 15);
+  ctx.lineTo(x + width, y - 15);
+  ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(x + w / 2, y + h / 2, Math.min(w, h) * 0.12, 0, Math.PI * 2);
-    ctx.stroke();
+  // Draw width dimension arrows
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(x, y - 20);
+  ctx.lineTo(x, y - 10);
+  ctx.moveTo(x + width, y - 20);
+  ctx.lineTo(x + width, y - 10);
+  ctx.stroke();
 
-    ctx.strokeRect(x + w * 0.05, y + h * 0.2, w * 0.15, h * 0.6);
-    ctx.strokeRect(x + w * 0.8, y + h * 0.2, w * 0.15, h * 0.6);
-  } else if (sport === 'basketball' || sport === 'basket') {
-    ctx.beginPath();
-    ctx.rect(x + w * 0.06, y + h * 0.06, w * 0.88, h * 0.88);
-    ctx.stroke();
+  // Draw height dimension line (right)
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x + width + 15, y);
+  ctx.lineTo(x + width + 15, y + height);
+  ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(x + w / 2, y + h / 2, Math.min(w, h) * 0.12, 0, Math.PI * 2);
-    ctx.stroke();
+  // Draw height dimension arrows
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(x + width + 10, y);
+  ctx.lineTo(x + width + 20, y);
+  ctx.moveTo(x + width + 10, y + height);
+  ctx.lineTo(x + width + 20, y + height);
+  ctx.stroke();
 
-    ctx.strokeRect(x + w * 0.02, y + h * 0.38, w * 0.12, h * 0.24);
-    ctx.strokeRect(x + w * 0.86, y + h * 0.38, w * 0.12, h * 0.24);
-  } else if (sport === 'tennis') {
-    ctx.beginPath();
-    ctx.moveTo(x + w * 0.05, y + h * 0.05);
-    ctx.lineTo(x + w * 0.95, y + h * 0.05);
-    ctx.moveTo(x + w * 0.05, y + h * 0.95);
-    ctx.lineTo(x + w * 0.95, y + h * 0.95);
-    ctx.moveTo(x + w / 2, y + h * 0.05);
-    ctx.lineTo(x + w / 2, y + h * 0.95);
-    ctx.stroke();
-  } else if (sport === 'volleyball' || sport === 'volley') {
-    ctx.beginPath();
-    ctx.rect(x + w * 0.05, y + h * 0.05, w * 0.9, h * 0.9);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y + h * 0.05);
-    ctx.lineTo(x + w / 2, y + h * 0.95);
-    ctx.stroke();
-  } else if (sport === 'baseball' || sport === 'base') {
-    ctx.beginPath();
-    const cx = x + w / 2;
-    const cy = y + h * 0.6;
-    const s = Math.min(w, h) * 0.18;
-    ctx.moveTo(cx, cy - s);
-    ctx.lineTo(cx + s, cy);
-    ctx.lineTo(cx, cy + s);
-    ctx.lineTo(cx - s, cy);
-    ctx.closePath();
-    ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + w, y + h);
-    ctx.moveTo(x + w, y);
-    ctx.lineTo(x, y + h);
-    ctx.stroke();
+  // Draw dimension text
+  ctx.font = 'bold 12px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Width text
+  ctx.fillText(`${absWidth}px`, x + width / 2, y - 25);
+
+  // Height text
+  ctx.save();
+  ctx.translate(x + width + 25, y + height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(`${absHeight}px`, 0, 0);
+  ctx.restore();
+
+  ctx.restore();
+};
+
+// Check if point is inside element
+export const isPointInElement = (point, element) => {
+  const { x, y, width, height } = element;
+  return (
+    point.x >= x &&
+    point.x <= x + width &&
+    point.y >= y &&
+    point.y <= y + height
+  );
+};
+
+// Calculate distance between two points
+export const calculateDistance = (point1, point2) => {
+  return Math.sqrt(
+    Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
+  );
+};
+
+// Snap to grid
+export const snapToGrid = (value, gridSize = 20) => {
+  return Math.round(value / gridSize) * gridSize;
+};
+
+// Validate element placement
+export const validateElementPlacement = (element, buildings, existingElements = []) => {
+  const errors = [];
+
+  // Check minimum dimensions
+  if (element.width < (element.minWidth || 50)) {
+    errors.push(`Width too small. Minimum: ${element.minWidth || 50}px`);
   }
+
+  if (element.height < (element.minHeight || 50)) {
+    errors.push(`Height too small. Minimum: ${element.minHeight || 50}px`);
+  }
+
+  // Check if element is inside a building (for rooms and bathrooms)
+  if ([ELEMENT_TYPES.ROOM, ELEMENT_TYPES.BATHROOM].includes(element.type)) {
+    const isInsideBuilding = buildings.some(building =>
+      element.x >= building.x &&
+      element.x + element.width <= building.x + building.width &&
+      element.y >= building.y &&
+      element.y + element.height <= building.y + building.height
+    );
+
+    if (!isInsideBuilding) {
+      errors.push(`${element.type.charAt(0).toUpperCase() + element.type.slice(1)} must be placed inside a building`);
+    }
+  }
+
+  // Check for overlaps with existing elements
+  const hasOverlap = existingElements.some(existing => {
+    return (
+      element.x < existing.x + existing.width &&
+      element.x + element.width > existing.x &&
+      element.y < existing.y + existing.height &&
+      element.y + element.height > existing.y
+    );
+  });
+
+  if (hasOverlap && existingElements.length > 0) {
+    errors.push('Element overlaps with existing elements');
+  }
+
+  return errors;
+};
+
+export default {
+  drawGrid,
+  drawElement,
+  drawDimensions,
+  drawBathroomIcon,
+  isPointInElement,
+  calculateDistance,
+  snapToGrid,
+  validateElementPlacement,
+  DEFAULT_STYLES,
 };
