@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -11,31 +11,56 @@ import {
   MenuItem,
   Divider,
   Tooltip,
+  Chip,
+  Badge,
+  Avatar,
+  Fade,
+  Slide,
+  useScrollTrigger,
+  Container,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { useTheme } from '@mui/material/styles';
-import SchoolIcon from '@mui/icons-material/School';
-import HomeIcon from '@mui/icons-material/Home';
-import PeopleIcon from '@mui/icons-material/People';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
-import ClassOutlinedIcon from '@mui/icons-material/ClassOutlined';
-import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import { Link, useLocation } from 'react-router-dom';
+import { useTheme, alpha } from '@mui/material/styles';
+import {
+  School,
+  Home,
+  People,
+  Dashboard,
+  Menu as MenuIcon,
+  AccountCircle,
+  LibraryBooks,
+  LocalShipping,
+  SchoolOutlined,
+  MenuBookOutlined,
+  ClassOutlined,
+  EventAvailableOutlined,
+  Receipt,
+  Assessment,
+  Notifications,
+  Search,
+  ExpandMore,
+  RocketLaunch,
+  TrendingUp,
+  Lightbulb,
+} from '@mui/icons-material';
 
 const Header = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const [anchorEl, setAnchorEl] = useState(null); // Track Selected Category
+  const location = useLocation();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const openMenu = Boolean(anchorEl);
+  const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 50,
+  });
+
+  useEffect(() => {
+    setScrolled(trigger);
+  }, [trigger]);
 
   const handleMenuClick = (event, category) => {
     setAnchorEl(event.currentTarget);
@@ -47,43 +72,50 @@ const Header = () => {
     setSelectedCategory(null);
   };
 
+  const handleMobileMenuOpen = (event) => {
+    setMobileMenuAnchor(event.currentTarget);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuAnchor(null);
+  };
+
+  // Menu data with enhanced features
   const insightsReportsItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
     {
-      name: 'Reports',
-      path: '/reports',
-      icon: <AssessmentIcon />,
-      comingSoon: true,
+      name: 'Dashboard',
+      path: '/dashboard',
+      icon: <Dashboard />,
+      badge: '3',
+      color: 'primary',
+    },
+    {
+      name: 'Analytics',
+      path: '/analytics',
+      icon: <TrendingUp />,
+      badge: 'New',
+      color: 'secondary',
     },
   ];
 
   const peopleManagementItems = [
-    { name: 'Students', path: '/students', icon: <PeopleIcon /> },
+    {
+      name: 'Students',
+      path: '/students',
+      icon: <People />,
+      count: '245',
+    },
     {
       name: 'Teachers',
       path: '/teachers',
-      icon: <PeopleIcon />,
-    },
-  ];
-
-  const academicsAttendanceItems2 = [
-    {
-      name: 'Academics',
-      path: '/academics',
-      icon: <SchoolOutlinedIcon />,
-      // comingSoon: true,
+      icon: <People />,
+      count: '32',
     },
     {
-      name: 'School Manager',
-      path: '/academics-plan',
-      icon: <SchoolOutlinedIcon />,
-      // comingSoon: true,
-    },
-    {
-      name: 'Attendance',
-      path: '/attendance',
-      icon: <PeopleIcon />,
-      // comingSoon: true,
+      name: 'Staff',
+      path: '/staff',
+      icon: <People />,
+      comingSoon: true,
     },
   ];
 
@@ -91,26 +123,40 @@ const Header = () => {
     {
       name: 'Academics',
       path: '/academics',
-      icon: <MenuBookOutlinedIcon />, // books, fits academics overview
+      icon: <MenuBookOutlined />,
+      featured: true,
     },
     {
       name: 'School Manager',
       path: '/academics-plan',
-      icon: <ClassOutlinedIcon />, // class/course management
+      icon: <ClassOutlined />,
     },
     {
       name: 'Attendance',
       path: '/attendance',
-      icon: <EventAvailableOutlinedIcon />, // calendar/attendance
+      icon: <EventAvailableOutlined />,
+      badge: 'Live',
     },
   ];
 
   const financialLogisticsItems = [
-    { name: 'Fees', path: '/fees', icon: <ReceiptIcon /> },
+    {
+      name: 'Fees',
+      path: '/fees',
+      icon: <Receipt />,
+      badge: 'Due',
+      color: 'error',
+    },
     {
       name: 'Transport',
       path: '/transport',
-      icon: <LocalShippingIcon />,
+      icon: <LocalShipping />,
+    },
+    {
+      name: 'Inventory',
+      path: '/inventory',
+      icon: <LocalShipping />,
+      comingSoon: true,
     },
   ];
 
@@ -118,184 +164,323 @@ const Header = () => {
     {
       name: 'Library',
       path: '/library',
-      icon: <LibraryBooksIcon />,
+      icon: <LibraryBooks />,
+      count: '1.2k',
+    },
+    {
+      name: 'Labs',
+      path: '/labs',
+      icon: <SchoolOutlined />,
+      comingSoon: true,
     },
   ];
 
   const userMenuItems = [
-    { name: 'Profile', path: '/profile', icon: <AccountCircleIcon /> },
-    { name: 'Logout', path: '/logout', icon: <AccountCircleIcon /> },
+    { name: 'Profile', path: '/profile', icon: <AccountCircle /> },
+    { name: 'Settings', path: '/settings', icon: <Lightbulb /> },
+    { name: 'Logout', path: '/logout', icon: <RocketLaunch /> },
   ];
 
   const categories = [
     {
       name: 'Insights & Reports',
-      icon: <AssessmentIcon />,
+      icon: <Assessment />,
       items: insightsReportsItems,
+      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     },
     {
       name: 'People Management',
-      icon: <PeopleIcon />,
+      icon: <People />,
       items: peopleManagementItems,
+      color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
     {
       name: 'Academics & Attendance',
-      icon: <SchoolOutlinedIcon />,
+      icon: <SchoolOutlined />,
       items: academicsAttendanceItems,
+      color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     },
     {
       name: 'Financial & Logistics',
-      icon: <ReceiptIcon />,
+      icon: <Receipt />,
       items: financialLogisticsItems,
+      color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
     },
     {
       name: 'Resources & Facilities',
-      icon: <LibraryBooksIcon />,
+      icon: <LibraryBooks />,
       items: resourcesFacilitiesItems,
+      color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
     },
   ];
 
+  const isActiveRoute = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <>
+      {/* Main Header */}
       <AppBar
-        position="sticky"
+        position="fixed"
         sx={{
-          backgroundColor: theme.palette.primary.main,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          backgroundColor: scrolled
+            ? alpha(theme.palette.background.paper, 0.95)
+            : theme.palette.primary.main,
+          backdropFilter: scrolled ? 'blur(20px)' : 'none',
+          backgroundImage: scrolled
+            ? 'none'
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          boxShadow: scrolled ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
+          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          borderBottom: scrolled
+            ? `1px solid ${alpha(theme.palette.divider, 0.1)}`
+            : 'none',
         }}
       >
-        <Toolbar
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0 16px',
-          }}
-        >
-          {/* Logo */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="logo"
-              component={Link}
-              to="/"
-              sx={{
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease',
-                },
-              }}
-            >
-              <SchoolIcon sx={{ fontSize: '2rem' }} />
-            </IconButton>
-            <Typography
-              variant="h6"
-              sx={{
-                color: theme.palette.text.primary,
-                fontWeight: 'bold',
-                marginLeft: '8px',
-              }}
-            >
-              AcademiX
-            </Typography>
-          </Box>
-
-          {/* User Profile */}
-          <IconButton
-            color="inherit"
-            onClick={(event) => handleMenuClick(event, 'User')}
+        <Toolbar sx={{ minHeight: { xs: 70, md: 80 } }}>
+          <Container
+            maxWidth="xl"
             sx={{
-              '&:hover': {
-                transform: 'scale(1.1)',
-                transition: 'transform 0.3s ease',
-              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
           >
-            <AccountCircleIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
-      <AppBar
-        position="sticky"
-        sx={{
-          backgroundColor: theme.palette.background.paper,
-          boxShadow: 'none',
-        }}
-      >
-        <Toolbar
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '0 16px',
-          }}
-        >
-          {!isMobile && (
-            <Box sx={{ display: 'flex', gap: '16px' }}>
-              <Button
-                color="inherit"
-                component={Link}
-                to="/"
-                startIcon={<HomeIcon />}
-                sx={{
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  '&:hover': {
-                    backgroundColor: theme.palette.action.hover,
-                  },
-                }}
-              >
-                Home
-              </Button>
-              {/* Loop through categories and render buttons */}
-              {categories.map((category) => (
-                <Button
-                  key={category.name}
-                  color="inherit"
-                  onClick={(event) => handleMenuClick(event, category.name)}
-                  startIcon={category.icon}
+            {/* Logo Section */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Slide direction="right" in={true} timeout={800}>
+                <Box
+                  component={Link}
+                  to="/"
                   sx={{
-                    textTransform: 'none',
-                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    textDecoration: 'none',
                     '&:hover': {
-                      backgroundColor: theme.palette.action.hover,
+                      transform: 'translateY(-2px)',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src="/assets/academix.png"
+                    alt="AcademiX"
+                    sx={{
+                      height: { xs: 80, md: 70 },
+                      width: 'auto',
+                      borderRadius: 100,
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                      // filter: scrolled ? 'none' : 'brightness(0) invert(1)',
+                      // filter: scrolled ? 'brightness(0) invert(1)' : 'none',
+                      background: scrolled
+                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                        : 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+                      transition: 'all 0.3s ease',
+                    }}
+                  />
+                </Box>
+              </Slide>
+
+              <Fade in={true} timeout={1000}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    background: scrolled
+                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      : 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontSize: { xs: '1.5rem', md: '2rem' },
+                  }}
+                >
+                  AcademiX
+                </Typography>
+              </Fade>
+            </Box>
+
+            {/* Desktop Navigation */}
+            {!isMobile && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Button
+                  component={Link}
+                  to="/"
+                  startIcon={<Home />}
+                  sx={{
+                    color: scrolled ? 'text.primary' : 'white',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderRadius: 3,
+                    px: 3,
+                    py: 1,
+                    background: isActiveRoute('/')
+                      ? alpha(theme.palette.primary.main, 0.1)
+                      : 'transparent',
+                    '&:hover': {
+                      background: alpha(theme.palette.primary.main, 0.15),
+                      transform: 'translateY(-1px)',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Home
+                </Button>
+
+                {categories.map((category) => (
+                  <Tooltip key={category.name} title={category.name} arrow>
+                    <Button
+                      onClick={(event) => handleMenuClick(event, category.name)}
+                      startIcon={category.icon}
+                      endIcon={<ExpandMore />}
+                      sx={{
+                        color: scrolled ? 'text.primary' : 'white',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1,
+                        background:
+                          selectedCategory === category.name
+                            ? alpha(theme.palette.primary.main, 0.1)
+                            : 'transparent',
+                        '&:hover': {
+                          background: alpha(theme.palette.primary.main, 0.15),
+                          transform: 'translateY(-1px)',
+                        },
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      {category.name.split(' ')[0]}
+                    </Button>
+                  </Tooltip>
+                ))}
+              </Box>
+            )}
+
+            {/* Right Section */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {/* Search Icon */}
+              {!isMobile && (
+                <Tooltip title="Search" arrow>
+                  <IconButton
+                    sx={{
+                      color: scrolled ? 'text.primary' : 'white',
+                      background: alpha(theme.palette.primary.main, 0.1),
+                      '&:hover': {
+                        background: alpha(theme.palette.primary.main, 0.2),
+                        transform: 'scale(1.1)',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <Search />
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {/* Notifications */}
+              {!isMobile && (
+                <Tooltip title="Notifications" arrow>
+                  <IconButton
+                    sx={{
+                      color: scrolled ? 'text.primary' : 'white',
+                      background: alpha(theme.palette.primary.main, 0.1),
+                      '&:hover': {
+                        background: alpha(theme.palette.primary.main, 0.2),
+                        transform: 'scale(1.1)',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <Badge badgeContent={4} color="error">
+                      <Notifications />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {/* User Profile */}
+              <Tooltip title="Account" arrow>
+                <IconButton
+                  onClick={(event) => handleMenuClick(event, 'User')}
+                  sx={{
+                    color: scrolled ? 'text.primary' : 'white',
+                    background: alpha(theme.palette.primary.main, 0.1),
+                    '&:hover': {
+                      background: alpha(theme.palette.primary.main, 0.2),
+                      transform: 'scale(1.1)',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      background:
+                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    }}
+                  >
+                    <AccountCircle />
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+
+              {/* Mobile Menu Button */}
+              {isMobile && (
+                <IconButton
+                  onClick={handleMobileMenuOpen}
+                  sx={{
+                    color: scrolled ? 'text.primary' : 'white',
+                    background: alpha(theme.palette.primary.main, 0.1),
+                    '&:hover': {
+                      background: alpha(theme.palette.primary.main, 0.2),
                     },
                   }}
                 >
-                  {category.name}
-                </Button>
-              ))}
+                  <MenuIcon />
+                </IconButton>
+              )}
             </Box>
-          )}
-
-          {/* Mobile View Menu Icon */}
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              sx={{
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease',
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
+          </Container>
         </Toolbar>
       </AppBar>
 
-      {/* Menu for Grouped Items */}
+      {/* Spacer for fixed header */}
+      <Toolbar sx={{ minHeight: { xs: 70, md: 80 } }} />
+
+      {/* Enhanced Desktop Menu */}
       <Menu
         anchorEl={anchorEl}
-        open={openMenu}
+        open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
+        TransitionComponent={Fade}
+        PaperProps={{
+          sx: {
+            mt: 1.5,
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+            minWidth: 320,
+            overflow: 'visible',
+            '&:before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          },
         }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {selectedCategory === 'User'
           ? userMenuItems.map((item) => (
@@ -304,78 +489,182 @@ const Header = () => {
                 component={Link}
                 to={item.path}
                 onClick={handleMenuClose}
-                sx={{ display: 'flex', alignItems: 'center' }}
+                sx={{
+                  py: 2,
+                  px: 3,
+                  gap: 2,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    transform: 'translateX(4px)',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minWidth: 30,
-                    mr: 1.5, // margin right to create space
-                  }}
-                >
-                  {item.icon}
-                </Box>
-                <Typography noWrap>{item.name}</Typography>
+                {item.icon}
+                <Typography variant="body1" fontWeight={500}>
+                  {item.name}
+                </Typography>
               </MenuItem>
             ))
-          : selectedCategory &&
-            categories
+          : categories
               .filter((category) => category.name === selectedCategory)
               .map((category) => (
-                <Box key={category.name}>
-                  <Typography sx={{ padding: '8px 16px', fontWeight: 'bold' }}>
-                    {category.name}
-                  </Typography>
-                  {category.items.map((item) =>
-                    item.comingSoon ? (
-                      <Tooltip key={item.name} title="Coming Soon">
-                        <span>
-                          <MenuItem
-                            disabled
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 2,
-                              py: 1,
-                              px: 2,
-                              opacity: 0.6,
-                            }}
-                          >
-                            {React.cloneElement(item.icon, {
-                              sx: { fontSize: 20 },
-                            })}
-                            <Typography variant="body1" color="text.secondary">
-                              {item.name}
-                            </Typography>
-                          </MenuItem>
-                        </span>
-                      </Tooltip>
-                    ) : (
+                <Box key={category.name} sx={{ p: 2 }}>
+                  <Box
+                    sx={{
+                      background: category.color,
+                      borderRadius: 3,
+                      p: 3,
+                      mb: 2,
+                      color: 'white',
+                    }}
+                  >
+                    <Typography variant="h6" fontWeight={700} gutterBottom>
+                      {category.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      Manage your {category.name.toLowerCase()} efficiently
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+                  >
+                    {category.items.map((item) => (
                       <MenuItem
                         key={item.name}
-                        component={Link}
+                        component={item.comingSoon ? 'div' : Link}
                         to={item.path}
-                        onClick={handleMenuClose}
+                        onClick={item.comingSoon ? null : handleMenuClose}
+                        disabled={item.comingSoon}
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          py: 1,
-                          px: 1,
+                          py: 2,
+                          px: 2,
+                          borderRadius: 2,
+                          gap: 2,
+                          '&:hover': {
+                            backgroundColor: alpha(
+                              theme.palette.primary.main,
+                              0.08
+                            ),
+                            transform: 'translateX(4px)',
+                          },
+                          transition: 'all 0.2s ease',
+                          position: 'relative',
                         }}
                       >
-                        {React.cloneElement(item.icon, {
-                          sx: { fontSize: 20 },
-                        })}
-                        <Typography variant="body1">{item.name}</Typography>
+                        <Box
+                          sx={{
+                            background: alpha(theme.palette.primary.main, 0.1),
+                            borderRadius: 2,
+                            p: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {React.cloneElement(item.icon, {
+                            sx: {
+                              fontSize: 22,
+                              color: theme.palette.primary.main,
+                            },
+                          })}
+                        </Box>
+
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body1" fontWeight={500}>
+                            {item.name}
+                          </Typography>
+                          {item.count && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {item.count} records
+                            </Typography>
+                          )}
+                        </Box>
+
+                        {/* Badges */}
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {item.badge && (
+                            <Chip
+                              label={item.badge}
+                              size="small"
+                              color={item.color || 'primary'}
+                              variant="filled"
+                            />
+                          )}
+                          {item.featured && (
+                            <Chip
+                              label="Featured"
+                              size="small"
+                              color="secondary"
+                              variant="outlined"
+                            />
+                          )}
+                          {item.comingSoon && (
+                            <Chip
+                              label="Coming Soon"
+                              size="small"
+                              color="default"
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
                       </MenuItem>
-                    )
-                  )}
-                  <Divider />
+                    ))}
+                  </Box>
                 </Box>
               ))}
+      </Menu>
+
+      {/* Mobile Menu */}
+      <Menu
+        anchorEl={mobileMenuAnchor}
+        open={Boolean(mobileMenuAnchor)}
+        onClose={handleMobileMenuClose}
+        PaperProps={{
+          sx: {
+            width: '100vw',
+            maxWidth: '100%',
+            height: '100vh',
+            borderRadius: 0,
+            mt: 0,
+          },
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Navigation
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Button
+              component={Link}
+              to="/"
+              startIcon={<Home />}
+              onClick={handleMobileMenuClose}
+              fullWidth
+              sx={{ justifyContent: 'flex-start', py: 2 }}
+            >
+              Home
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.name}
+                startIcon={category.icon}
+                onClick={(event) => {
+                  handleMenuClick(event, category.name);
+                  handleMobileMenuClose();
+                }}
+                fullWidth
+                sx={{ justifyContent: 'flex-start', py: 2 }}
+              >
+                {category.name}
+              </Button>
+            ))}
+          </Box>
+        </Box>
       </Menu>
     </>
   );
