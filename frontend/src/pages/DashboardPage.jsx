@@ -1,15 +1,27 @@
 import React from 'react';
-import { Grid, Box, Typography } from '@mui/material';
+import { Grid, Box, Typography, useTheme, alpha } from '@mui/material';
+import { motion } from 'framer-motion';
+
+// Primary Metrics (Most Important - Top Level Overview)
 import StatsCard from '../components/dashboard/StatsCard';
-import UpcomingEvents from '../components/dashboard/UpcomingEvents';
-import QuickActions from '../components/dashboard/QuickActions';
-import NotificationsList from '../components/dashboard/NotificationsList';
-import DashboardCalendar from '../components/dashboard/DashboardCalendar';
 import PerfectAttendance from '../components/dashboard/PerfectAttendance';
-import HonorsLeaderboard from '../components/dashboard/HonorsLeaderboard';
 import TeacherPerformance from '../components/dashboard/TeacherPerformance';
 
+// Action & Engagement Components
+import QuickActions from '../components/dashboard/QuickActions';
+import HonorsLeaderboard from '../components/dashboard/HonorsLeaderboard';
+
+// Time-Sensitive Information
+import UpcomingEvents from '../components/dashboard/UpcomingEvents';
+import DashboardCalendar from '../components/dashboard/DashboardCalendar';
+
+// Notifications & Alerts
+import NotificationsList from '../components/dashboard/NotificationsList';
+
 const Dashboard = () => {
+  const theme = useTheme();
+
+  // Primary Metrics Data
   const studentsData = {
     title: 'Student Enrollment Growth',
     count: 1200,
@@ -19,6 +31,7 @@ const Dashboard = () => {
       { month: 'Mar', value: 1200 },
     ],
     change: 5,
+    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   };
 
   const teachersData = {
@@ -30,63 +43,150 @@ const Dashboard = () => {
       { month: 'Mar', value: 80 },
     ],
     change: 3,
+    color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
   };
 
+  // Time-Sensitive Data
   const events = [
-    { id: 1, title: 'Final Exams', category: 'Academics', date: '2025-03-15' },
+    {
+      id: 1,
+      title: 'Final Exams',
+      category: 'Academics',
+      date: '2025-03-15',
+      color: '#667eea',
+    },
     {
       id: 2,
       title: 'Parent-Teacher Meeting',
       category: 'Meeting',
       date: '2025-03-20',
+      color: '#f093fb',
     },
   ];
 
   const notifications = [
-    { message: '5 students absent today', time: '2 hours ago' },
-    { message: 'New course materials uploaded.', time: '1 day ago' },
+    {
+      message: '5 students absent today',
+      time: '2 hours ago',
+      type: 'warning',
+    },
+    {
+      message: 'New course materials uploaded',
+      time: '1 day ago',
+      type: 'info',
+    },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Dashboard Overview
-      </Typography>
+    <Box
+      sx={{
+        p: 3,
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        minHeight: '100vh',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 4,
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Dashboard Overview
+        </Typography>
+      </motion.div>
 
-      <Grid container spacing={3}>
-        {/* Student & Teacher Stats */}
-        <Grid item xs={12} md={4}>
-          <StatsCard {...studentsData} />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatsCard {...teachersData} />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <UpcomingEvents events={events} />
-        </Grid>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <Grid container spacing={3}>
+          {/* ROW 5: ALERTS & NOTIFICATIONS */}
+          <Grid item xs={12}>
+            <motion.div variants={itemVariants}>
+              <NotificationsList notifications={notifications} />
+            </motion.div>
+          </Grid>
 
-        {/* Attendance, Leaderboard, and Teacher Performance */}
-        <Grid item xs={12} md={4}>
-          <PerfectAttendance />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <HonorsLeaderboard />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <TeacherPerformance />
-        </Grid>
+          {/* ROW 4: TIME-SENSITIVE INFORMATION */}
+          <Grid item xs={12} md={6}>
+            <motion.div variants={itemVariants}>
+              <UpcomingEvents events={events} />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <motion.div variants={itemVariants}>
+              <DashboardCalendar events={events} />
+            </motion.div>
+          </Grid>
+          {/* ROW 1: CORE METRICS - Most Important Numbers */}
+          <Grid item xs={12} md={4}>
+            <motion.div variants={itemVariants}>
+              <StatsCard {...studentsData} />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <motion.div variants={itemVariants}>
+              <StatsCard {...teachersData} />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <motion.div variants={itemVariants}>
+              <PerfectAttendance />
+            </motion.div>
+          </Grid>
 
-        {/* Quick Actions, Notifications, Calendar */}
-        <Grid item xs={12} md={4}>
-          <QuickActions />
+          {/* ROW 2: PERFORMANCE & QUALITY METRICS */}
+          <Grid item xs={12} md={4}>
+            <motion.div variants={itemVariants}>
+              <TeacherPerformance />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <motion.div variants={itemVariants}>
+              <HonorsLeaderboard />
+            </motion.div>
+          </Grid>
+
+          {/* ROW 3: QUICK ACTIONS & ENGAGEMENT */}
+          <Grid item xs={12} md={4}>
+            <motion.div variants={itemVariants}>
+              <QuickActions />
+            </motion.div>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <NotificationsList notifications={notifications} />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <DashboardCalendar events={events} />
-        </Grid>
-      </Grid>
+      </motion.div>
     </Box>
   );
 };
