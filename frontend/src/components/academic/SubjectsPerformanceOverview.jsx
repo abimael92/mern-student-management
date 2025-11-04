@@ -420,7 +420,7 @@ const SubjectsPerformanceOverview = () => {
             transition={{ duration: 0.3 }}
           >
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={8}>
+              <Grid item xs={12} xl={9}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -431,8 +431,9 @@ const SubjectsPerformanceOverview = () => {
                       p: 3,
                       borderRadius: 3,
                       background:
-                        'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+                        'linear-gradient(135deg, #f5f5f5 0%, #f8f9fa 100%)',
                       boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                      height: '100%',
                     }}
                   >
                     <Typography variant="h6" gutterBottom fontWeight="bold">
@@ -443,7 +444,7 @@ const SubjectsPerformanceOverview = () => {
                 </motion.div>
               </Grid>
 
-              <Grid item xs={12} lg={4}>
+              <Grid item xs={12} xl={3}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -456,6 +457,7 @@ const SubjectsPerformanceOverview = () => {
                       background:
                         'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
                       boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                      height: '100%',
                     }}
                   >
                     <Typography variant="h6" gutterBottom fontWeight="bold">
