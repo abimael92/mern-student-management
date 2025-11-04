@@ -314,13 +314,11 @@ const RelationBuilder = () => {
         onClose={() => setError(null)}
       >
         <Alert severity="error" onClose={() => setError(null)}>
-          <div>
-            <strong>{error?.title || 'Error'}</strong>
-            <div>{error?.message}</div>
-            {error?.details && (
-              <div style={{ fontSize: '0.8rem' }}>{error.details}</div>
-            )}
-          </div>
+          <strong>{error?.title || 'Error'}</strong>
+          <div>{error?.message}</div>
+          {error?.details && (
+            <div style={{ fontSize: '0.8rem' }}>{error.details}</div>
+          )}
         </Alert>
       </Snackbar>
 
@@ -331,13 +329,11 @@ const RelationBuilder = () => {
         onClose={() => setSuccess(null)}
       >
         <Alert severity="success" onClose={() => setSuccess(null)}>
-          <div>
-            <strong>{success?.title || 'Success'}</strong>
-            <div>{success?.message}</div>
-            {success?.details && (
-              <div style={{ fontSize: '0.8rem' }}>{success.details}</div>
-            )}
-          </div>
+          <strong>{success?.title || 'Success'}</strong>
+          <div>{success?.message}</div>
+          {success?.details && (
+            <div style={{ fontSize: '0.8rem' }}>{success.details}</div>
+          )}
         </Alert>
       </Snackbar>
 
