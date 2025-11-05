@@ -1,32 +1,22 @@
+// ===== ./frontend/src/pages/Fees/EnhancedFeesPage.jsx =====
 import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Container } from '@mui/material';
+import EnhancedFeeDashboard from '../../components/fees/EnhancedFeeDashboard';
 
-import FeeSummary from '../../components/fees/FeeSummary';
-import FeeHistory from '../../components/fees/FeeHistory';
-import FeeStatusOverview from '../../components/fees/FeeStatusOverview';
-
-import { feeRecords } from '../../utils/mock/mockFeesData';
-
-const FeesPage = () => {
+const EnhancedFeesPage = () => {
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Fees Overview
-      </Typography>
-
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <FeeSummary records={feeRecords} />
-      </Paper>
-
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <FeeHistory records={feeRecords} />
-      </Paper>
-
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <FeeStatusOverview records={feeRecords} />
-      </Paper>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        py: 3,
+      }}
+    >
+      <Container maxWidth="xl">
+        <EnhancedFeeDashboard />
+      </Container>
     </Box>
   );
 };
 
-export default FeesPage;
+export default EnhancedFeesPage;
