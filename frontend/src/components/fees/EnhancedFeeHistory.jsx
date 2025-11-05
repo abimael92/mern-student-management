@@ -24,6 +24,11 @@ import {
   Delete,
   Send,
   Download as DownloadIcon,
+  CheckCircle,
+  Warning,
+  Autorenew,
+  Schedule,
+  Description,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
@@ -59,15 +64,15 @@ const EnhancedFeeHistory = ({ data }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'paid':
-        return '✅';
+        return <CheckCircle sx={{ fontSize: 18 }} />;
       case 'overdue':
-        return '⚠️';
+        return <Warning sx={{ fontSize: 18 }} />;
       case 'partial':
-        return '🔄';
+        return <Autorenew sx={{ fontSize: 18 }} />;
       case 'pending':
-        return '⏳';
+        return <Schedule sx={{ fontSize: 18 }} />;
       default:
-        return '📝';
+        return <Description sx={{ fontSize: 18 }} />;
     }
   };
 
@@ -171,7 +176,7 @@ const EnhancedFeeHistory = ({ data }) => {
               </TableCell>
               <TableCell>
                 <Chip
-                  icon={<span>{getStatusIcon(fee.status)}</span>}
+                  icon={getStatusIcon(fee.status)}
                   label={
                     fee.status.charAt(0).toUpperCase() + fee.status.slice(1)
                   }
