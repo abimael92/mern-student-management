@@ -565,9 +565,6 @@ const EnhancedFeeDashboard = () => {
                 <Typography variant="h4" fontWeight="bold" gutterBottom>
                   Fee Analytics
                 </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                  Track payments, manage invoices, and monitor fee collection
-                </Typography>
               </Box>
             </Box>
           </Paper>
@@ -585,13 +582,10 @@ const EnhancedFeeDashboard = () => {
             sx={{
               p: 3,
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+              background: 'linear-gradient(135deg, #e6e6e6 0%, #f8f9fa 100%)',
               boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <Typography variant="h6" gutterBottom fontWeight="bold">
-              Fee Analytics
-            </Typography>
             <FeeAnalyticsChart data={feeData} />
           </Paper>
         </motion.div>
