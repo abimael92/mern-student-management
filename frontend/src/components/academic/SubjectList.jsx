@@ -9,6 +9,7 @@ import {
   TableSortLabel,
   IconButton,
   Paper,
+  Tooltip,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
@@ -31,7 +32,15 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
   });
 
   return (
-    <TableContainer component={Paper} sx={{ width: '100%' }}>
+    <TableContainer
+      component={Paper}
+      sx={{
+        width: '100%',
+        borderRadius: 3,
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      }}
+    >
       <Table>
         <TableHead sx={{ backgroundColor: '#1976d2' }}>
           <TableRow>
@@ -52,9 +61,7 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
                     onClick={() => handleSort(field)}
                     sx={{
                       color: 'white',
-                      '&.Mui-active': {
-                        color: 'white',
-                      },
+                      '&.Mui-active': { color: 'white' },
                       '& .MuiTableSortLabel-icon': {
                         color: 'white !important',
                       },
@@ -68,33 +75,29 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
               )
             )}
             <TableCell
-              sx={{
-                color: 'white',
-                fontWeight: 'bold',
-                letterSpacing: '0.5px',
-                fontSize: '0.95rem',
-              }}
+              sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.95rem' }}
             >
               Department
             </TableCell>
             <TableCell
-              sx={{
-                color: 'white',
-                fontWeight: 'bold',
-                letterSpacing: '0.5px',
-                fontSize: '0.95rem',
-              }}
+              sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.95rem' }}
             >
               Actions
             </TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {sortedSubjects.map((subject, index) => (
             <TableRow
               key={subject._id}
               sx={{
-                backgroundColor: index % 2 === 0 ? '#f5f5f5' : '#e0e0e0',
+                backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#e8f0fe',
+                '&:hover': {
+                  backgroundColor: '#d1e0ff',
+                  transform: 'scale(1.01)',
+                  transition: 'all 0.2s ease',
+                },
               }}
             >
               <TableCell>{subject.subjectCode}</TableCell>
@@ -103,15 +106,19 @@ const SubjectList = ({ subjects = [], onEdit, onDelete }) => {
               <TableCell>{subject.creditValue}</TableCell>
               <TableCell>{subject.department?.name || '—'}</TableCell>
               <TableCell>
-                <IconButton color="primary" onClick={() => onEdit(subject)}>
-                  <Edit />
-                </IconButton>
-                <IconButton
-                  color="secondary"
-                  onClick={() => onDelete(subject._id)}
-                >
-                  <Delete />
-                </IconButton>
+                <Tooltip title="Edit Subject">
+                  <IconButton color="primary" onClick={() => onEdit(subject)}>
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete Subject">
+                  <IconButton
+                    color="error"
+                    onClick={() => onDelete(subject._id)}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}

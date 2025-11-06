@@ -12,7 +12,7 @@ import SubjectForm from './SubjectForm';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
 
-import { Typography, Grid, Box } from '@mui/material';
+import { Typography, Grid, Box, Paper } from '@mui/material';
 
 const SubjectManagement = () => {
   const dispatch = useDispatch();
@@ -41,43 +41,57 @@ const SubjectManagement = () => {
   };
 
   const handleDeleteClick = (id) => {
-    dispatch(deleteSubject(id)).then(() => {
-      dispatch(fetchSubjects());
-    });
+    dispatch(deleteSubject(id)).then(() => dispatch(fetchSubjects()));
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ p: 3 }}>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 'bold',
+          mb: 3,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        }}
+      >
         Subject Management
       </Typography>
 
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
 
-      <Grid container spacing={0}>
-        <Grid item xs={12}>
-          <Box style={{ padding: '20px' }}>
-            <SubjectList
-              subjects={subjects}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteClick}
-            />
-          </Box>
-        </Grid>
-      </Grid>
+      {/* Subjects List */}
+      <Paper
+        sx={{
+          mb: 4,
+          p: 3,
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        }}
+      >
+        <SubjectList
+          subjects={subjects}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+        />
+      </Paper>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Box style={{ padding: '2px' }}>
-            <SubjectForm
-              initialData={selectedSubject || {}}
-              onSubmit={handleSave}
-              onCancel={() => setSelectedSubject(null)}
-            />
-          </Box>
-        </Grid>
-      </Grid>
+      {/* Subject Form */}
+      <Paper
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        }}
+      >
+        <SubjectForm
+          initialData={selectedSubject || {}}
+          onSubmit={handleSave}
+          onCancel={() => setSelectedSubject(null)}
+        />
+      </Paper>
     </Box>
   );
 };
