@@ -36,9 +36,9 @@ import {
 } from '@mui/icons-material';
 
 import GpaSummaryCards from '../../components/academic/GpaSummaryCards';
-import GPAManager from '../../components/academic/GPAManager';
+import GPAManager from '../grading/GPAManager';
 import SubjectsPerformanceOverview from '../../components/subject/SubjectsPerformanceOverview';
-import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
+import SubjectsStatusView from '../../components/subject/SubjectsPerformanceOverview';
 import GradeHistory from '../../components/academic/GradeHistory';
 
 import { gradeHistory } from '../../utils/mock/AcademicsPage';

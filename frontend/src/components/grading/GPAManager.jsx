@@ -4,8 +4,8 @@ import { fetchStudents } from '../../redux/actions/studentActions';
 import { fetchSubjects } from '../../redux/actions/subjectsActions';
 import { fetchCourses } from '../../redux/actions/coursesActions';
 import { fetchTeachers } from '../../redux/actions/teacherActions';
-import GPAStudentFilter from './GPAStudentFilter';
-import GPAStudentList from './GPAStudentList';
+import GPAStudentFilter from '../grading/GPAStudentFilter';
+import GPAStudentList from '../grading/GPAStudentList';
 import { Typography, Box } from '@mui/material';
 import dayjs from 'dayjs';
 
