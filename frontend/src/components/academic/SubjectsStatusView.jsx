@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Box } from '@mui/material';
-import GPAOverviewCard from './GPAOverviewCard';
+import GPAOverviewCard from '../grading/GPAOverviewCard';
 import AssignmentCompletionChart from './AssignmentCompletionChart';
 import AttendanceHeatmap from './AttendanceHeatmap';
 
