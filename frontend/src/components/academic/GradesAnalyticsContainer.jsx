@@ -37,7 +37,7 @@ import {
 
 import GpaSummaryCards from '../../components/academic/GpaSummaryCards';
 import GPAManager from '../../components/academic/GPAManager';
-import SubjectsPerformanceOverview from '../../components/academic/SubjectsPerformanceOverview';
+import SubjectsPerformanceOverview from '../../components/subject/SubjectsPerformanceOverview';
 import SubjectsStatusView from '../../components/academic/SubjectsStatusView';
 import GradeHistory from '../../components/academic/GradeHistory';
 

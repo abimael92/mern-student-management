@@ -16,7 +16,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
 import { Typography, Paper, Grid, Box } from '@mui/material';
 
-import SubjectFilter from './SubjectFilter'; // <--- import
+import SubjectFilter from '../subject/SubjectFilter'; // <--- import
 
 const CoursesManager = () => {
   const dispatch = useDispatch();

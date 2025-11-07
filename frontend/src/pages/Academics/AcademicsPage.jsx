@@ -24,9 +24,9 @@ import {
 } from '@mui/icons-material';
 
 // Components
-import SubjectManagement from '../../components/academic/SubjectManagement';
+import SubjectManagement from '../../components/subject/SubjectManagement';
 import CoursesManager from '../../components/academic/CoursesManager';
-import ClassesManager from '../../components/academic/ClassesManager';
+import ClassesManager from '../../components/classes/ClassesManager';
 import RoomManagement from '../../components/academic/RoomManagement';
 import CourseBuilder from '../../components/academic/CourseBuilder';
 
