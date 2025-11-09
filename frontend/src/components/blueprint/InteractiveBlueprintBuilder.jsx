@@ -38,7 +38,7 @@ import { ELEMENT_TYPES } from './BlueprintElements';
 import { drawGrid, drawElement, drawDimensions } from './BlueprintRenderer';
 import { TOOLS } from './BlueprintTools';
 import ZoomControls from './ZoomControls';
-import DimensionEditor from './DimensionEditor';
+import DimensionEditor from '../academic/DimensionEditor';
 import { useDimensionEditing } from '../../hooks/useDimensionEditing';
 import {
   DEFAULT_STYLES,

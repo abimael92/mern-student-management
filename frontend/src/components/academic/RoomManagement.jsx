@@ -11,7 +11,7 @@ import RoomList from './RoomList';
 import RoomForm from './RoomForm';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
-import InteractiveBlueprintBuilder from './InteractiveBlueprintBuilder';
+import InteractiveBlueprintBuilder from '../blueprint/InteractiveBlueprintBuilder';
 
 import { Typography, Grid, Box, Button } from '@mui/material';
 import { Map as MapIcon } from '@mui/icons-material';
