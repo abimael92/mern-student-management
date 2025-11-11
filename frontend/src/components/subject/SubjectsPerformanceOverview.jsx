@@ -32,8 +32,8 @@ import {
   EmojiEvents,
   Warning,
 } from '@mui/icons-material';
-import SubjectTrendChart from '../academic/SubjectTrendChart';
-import PassFailChart from '../academic/PassFailChart';
+import SubjectTrendChart from '../academic/grading/SubjectTrendChart';
+import PassFailChart from '../academic/grading/PassFailChart';
 import { mockSubjects } from '../../utils/mock/mockSubjectsData';
 
 const SubjectsPerformanceOverview = () => {
