@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
-import { api } from '../../utils/api';
+import { api } from '../../../utils/api';
 
 // --- VALID ASSIGNMENT RULES ---
 const validAssignments = {

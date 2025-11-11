@@ -5,18 +5,18 @@ import {
   addCourse,
   updateCourse,
   deleteCourse,
-} from '../../redux/actions/coursesActions';
+} from '../../../redux/actions/coursesActions';
 
-import { fetchSubjects } from '../../redux/actions/subjectsActions';
+import { fetchSubjects } from '../../../redux/actions/subjectsActions';
 
 import CourseList from './CourseList';
 import CourseForm from './CourseForm';
 
-import LoadingSpinner from '../common/LoadingSpinner';
-import ErrorAlert from '../common/ErrorAlert';
+import LoadingSpinner from '../../common/LoadingSpinner';
+import ErrorAlert from '../../common/ErrorAlert';
 import { Typography, Paper, Grid, Box } from '@mui/material';
 
-import SubjectFilter from '../subject/SubjectFilter'; // <--- import
+import SubjectFilter from '../../subject/SubjectFilter'; // <--- import
 
 const CoursesManager = () => {
   const dispatch = useDispatch();
