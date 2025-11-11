@@ -25,10 +25,10 @@ import {
 
 // Components
 import SubjectManagement from '../../components/subject/SubjectManagement';
-import CoursesManager from '../../components/academic/CoursesManager';
+import CoursesManager from '../../components/academic/courses/CoursesManager';
 import ClassesManager from '../../components/classes/ClassesManager';
-import RoomManagement from '../../components/academic/RoomManagement';
-import CourseBuilder from '../../components/academic/CourseBuilder';
+import RoomManagement from '../../components/facilities/rooms/RoomManagement';
+import CourseBuilder from '../../components/academic/courses/CourseBuilder';
 
 const AcademicsPage = () => {
   const theme = useTheme();
