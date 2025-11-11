@@ -35,13 +35,13 @@ import {
   RocketLaunch,
 } from '@mui/icons-material';
 
-import GpaSummaryCards from '../../components/academic/GpaSummaryCards';
-import GPAManager from '../grading/GPAManager';
-import SubjectsPerformanceOverview from '../../components/subject/SubjectsPerformanceOverview';
-import SubjectsStatusView from '../../components/subject/SubjectsPerformanceOverview';
-import GradeHistory from '../../components/academic/GradeHistory';
+import GpaSummaryCards from './GpaSummaryCards';
+import GPAManager from '../../grading/GPAManager';
+import SubjectsPerformanceOverview from '../../subject/SubjectsPerformanceOverview';
+import SubjectsStatusView from '../../subject/SubjectsPerformanceOverview';
+import GradeHistory from '../../academic/grading/GradeHistory';
 
-import { gradeHistory } from '../../utils/mock/AcademicsPage';
+import { gradeHistory } from '../../../utils/mock/AcademicsPage';
 
 const AcademicsPage = () => {
   const theme = useTheme();
