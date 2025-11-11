@@ -34,11 +34,11 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import TransportOverview from '../../components/transport/TransportOverview';
-import TransportRouteList from '../../components/transport/TransportRouteList';
-import TransportVehicleList from '../../components/transport/TransportVehicleList';
-import DriverAssignment from '../../components/transport/DriverAssignment';
-import TransportSchedule from '../../components/transport/TransportSchedule';
+import TransportOverview from '../../components/facilities/transport/TransportOverview';
+import TransportRouteList from '../../components/facilities/transport/TransportRouteList';
+import TransportVehicleList from '../../components/facilities/transport/TransportVehicleList';
+import DriverAssignment from '../../components/facilities/transport/DriverAssignment';
+import TransportSchedule from '../../components/facilities/transport/TransportSchedule';
 import {
   routes,
   vehicles,
