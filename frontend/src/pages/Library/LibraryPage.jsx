@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '../../utils/api';
-import TextbookCard from '../../components/library/TextbookCard';
+import TextbookCard from '../../components/facilities/library/TextbookCard';
 import {
   Box,
   Typography,
