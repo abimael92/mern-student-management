@@ -88,37 +88,41 @@ cp .env.example .env
 npm run setup
 npm run db:seed
 npm run dev
+```
 
-##  Deployment
+## Deployment
 
-### 🐳 Docker Deployment
+### Docker Deployment
 ```bash
 docker-compose up -d --build
 ```
 
-### ☁️ Cloud Deployment Options
+### Cloud Deployment Options
 
 **AWS Elastic Beanstalk**
+
 ```bash
 eb init
 eb create --sample
 eb deploy
 ```
 
-**Heroku**
+** Heroku**
+
 ```bash
 heroku create
 git push heroku main
 ```
 
 **Azure App Service**
+
 ```bash
 az webapp up --sku F1 --name <app-name>
 ```
 
-## 🔧 Development Workflow
+## Development Workflow
 
-### 🛠️ Scripts Overview
+### Scripts Overview
 | Command | Description |
 | ------- | ----------- |
 | npm run dev | Start development servers |
@@ -128,7 +132,7 @@ az webapp up --sku F1 --name <app-name>
 | npm run format | Format with Prettier |
 | npm run storybook | Launch UI component library |
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 ```mermaid
 graph LR
@@ -142,9 +146,21 @@ graph LR
 ```
 
 
-## 🧪 Testing Strategy
 
-**🧩 Test Pyramid** 
+## Testing Strategy
+
+### Test Distribution
+- Unit Tests: 60%
+- Integration Tests: 30%
+- E2E Tests: 10%
+
+### Test Coverage
+- Frontend: Jest + React Testing Library (95%+ coverage)
+- Backend: Mocha + Chai (90%+ coverage)
+- E2E: Cypress (Critical paths only)
+
+
+** Test Pyramid** 
 
 ```mermaid
 pie
@@ -155,7 +171,7 @@ pie
 ```
 
 
-### 🛡️ Test Coverage
+###  Test Coverage
 - Frontend: Jest + React Testing Library (95%+ coverage)
 - Backend: Mocha + Chai (90%+ coverage)
 - E2E: Cypress (Critical paths only)
