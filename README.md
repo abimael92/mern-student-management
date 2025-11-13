@@ -1,46 +1,48 @@
-# 🚀 Ultimate School Management System (M.E.R.N) - Academix
+# Ultimate School Management System (M.E.R.N) - Academix
 
 ![Ultimate School Management System (M.E.R.N)](https://abimael-common-assets.s3.eu-west-1.amazonaws.com/myproject-resources/academix-preview.png)
 
 ![MERN Stack](https://img.shields.io/badge/MERN-Stack-blueviolet)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## 🌟 Next-Generation Academic Management Platform
+## Next-Generation Academic Management Platform
+
 A comprehensive, modular MERN stack solution revolutionizing school administration with cutting-edge features for academic scheduling, attendance tracking, payroll management, and student lifecycle management.
 
-## 📌 Table of Contents
-- ✨ Key Features
-- 🏗️ System Architecture
-- 📊 Data Models
-- 🛠️ Installation Guide
-- 🚀 Deployment
-- 🔧 Development Workflow
-- 🧪 Testing Strategy
-- 🔒 Security
-- 📈 Performance Optimization
-- 🤝 Contributing
-- 📜 License
-- 📞 Contact
+## Table of Contents
+- Key Features
+- System Architecture
+- Data Models
+- Installation Guide
+- Deployment
+- Development Workflow
+- Testing Strategy
+- Security
+- Performance Optimization
+- Contributing
+- License
+- Contact
 
-## ✨ Key Features
+## Key Features
 
-### 🎯 Core Functionalities
+### Core Functionalities
 - **Multi-Calendar System**: Support for Semesters, Trimesters, Quarters, and Custom Academic Periods
 - **Hierarchical Structure**: Subject → Course → Class with Intelligent Room/Teacher Assignment
 - **Advanced Role System**: Granular permissions for Teachers, Nurses, Admin, and Custom Roles
 - **Comprehensive Tracking**: Attendance, Behavioral Notes, Medical Records, and Academic Progress
 - **Automated Payroll**: Complex salary calculations with bonuses and deductions
 
-### 🚀 Premium Features
+### Premium Features
 - **AI-Powered Scheduling**: Conflict-free automatic timetable generation
 - **Real-time Analytics Dashboard**: Visualize key metrics and trends
 - **Mobile Responsive**: Fully functional on all devices
 - **API-First Design**: RESTful endpoints with Swagger documentation
 - **WebSocket Integration**: Real-time notifications and updates
 
-## 🏗️ System Architecture
+## System Architecture
 
-### 📐 High-Level Architecture
+### High-Level Architecture
+
 
 ```mermaid
 graph TD
