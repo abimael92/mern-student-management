@@ -112,7 +112,7 @@ Salaries: Base pay + extracurricular bonuses.
 
 --- Extracurriculars: Treated like courses but flagged is_extracurricular=True.
 
-# 🎨 Visual Examples
+# Visual Examples
 
 ## 1. Subject/Course Timeline
 
@@ -123,19 +123,19 @@ Mathematics (Grade 10, Year-long)
 │   └── Class B: Tue/Thu 1 PM (Room 3A)
 └── Semester 2: Geometry 102
     └── Class A: Mon/Fri 10 AM (Room 2B)
-     ```
+```
 
 ## 2. Room Booking Conflict Check
 
-     ```
+```
 Room	Time	Monday	Tuesday
 2B	9:00-10:30	Algebra 101	Available
 2B	11:00-12:30	Available	Physics 201
-     ```
+```
 
 
 
-     🗓️ School Year
+## 3. School Year
 
 year_id, start_date, end_date, is_active
 
@@ -149,60 +149,65 @@ Quarters (4)
 
 Terms (custom, e.g., "Summer Intensive")
 
-⏳ Periods
+## Periods
 
-period_id, year_id, name (e.g., "Semester 1"), start_date, end_date
+1. period_id, year_id, name (e.g., "Semester 1"), start_date, end_date
 
 2. Subject & Course Management
-📚 Subjects
+
+## Subjects
 
 subject_id, name (e.g., "Mathematics"), department (e.g., "STEM"), grade_level (e.g., "9-12"), is_extracurricular (T/F)
 
-🧮 Courses
+## Courses
 
 course_id, subject_id, name (e.g., "Algebra 101"), description, credit_hours, prerequisite_course_id, is_year_long (T/F)
 
 3. Class & Room Scheduling
-👥 Classes
+
+Classes
 
 class_id, course_id, period_id (links to Semester/Trimester), teacher_id, room_id, max_students (auto-pulled from room capacity), time_slot (e.g., "Mon/Wed 9:00-10:30")
 
-🏫 Rooms
+Rooms
 
 room_id, name (e.g., "Room 2B"), capacity, type (e.g., "Lab", "Lecture Hall"), department_restriction (optional)
 
-⏰ Time Slots
+Time Slots
 
 slot_id, start_time, end_time, day_of_week (for conflict checks)
 
 4. People & Roles
-👨🏫 Teachers
+
+Teachers
 
 teacher_id, department, is_extracurricular_supervisor (T/F), salary_id
 
-👩🎓 Students
+Students
 
 student_id, grade_level, extracurricular_activities (list)
 
-👩⚕️ Staff
+Staff
 
 staff_id, role (e.g., "Nurse", "Secretary"), department
 
 5. Attendance & Notes
-✅ Attendance
+ 
+ Attendance
 
 attendance_id, class_id, date, student_id, status (Present/Absent/Late), recorded_by (teacher/staff)
 
-📝 Notes
+ Notes
 
 note_id, student_id, author_id (teacher/principal/nurse), type (e.g., "Behavior", "Medical"), content, is_confidential
 
 6. Payroll & Extras
-💰 Payroll
+
+Payroll
 
 salary_id, employee_id (teacher/staff), base_salary, bonuses, deductions, payment_schedule
 
-🎨 Extracurriculars
+ Extracurriculars
 
 activity_id, name (e.g., "Chess Club"), supervisor_id, schedule, room_id
 
