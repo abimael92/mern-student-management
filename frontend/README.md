@@ -112,7 +112,7 @@ Salaries: Base pay + extracurricular bonuses.
 
 --- Extracurriculars: Treated like courses but flagged is_extracurricular=True.
 
-# 🎨 Visual Examples
+# Visual Examples
 
 ## 1. Subject/Course Timeline
 
@@ -123,120 +123,105 @@ Mathematics (Grade 10, Year-long)
 │   └── Class B: Tue/Thu 1 PM (Room 3A)
 └── Semester 2: Geometry 102
     └── Class A: Mon/Fri 10 AM (Room 2B)
-     ```
+```
 
 ## 2. Room Booking Conflict Check
 
-     ```
+```
 Room	Time	Monday	Tuesday
 2B	9:00-10:30	Algebra 101	Available
 2B	11:00-12:30	Available	Physics 201
-     ```
+```
 
 
 
-     🗓️ School Year
+## Database Schema
 
-year_id, start_date, end_date, is_active
+### 1. Academic Calendar
+**School Years**
+- `year_id`, `start_date`, `end_date`, `is_active`
 
-Settings: Toggle between:
+**Academic Periods** (Configurable)
+- `period_id`, `year_id`, `name`, `start_date`, `end_date`
+- Supports: Semesters (2), Trimesters (3), Quarters (4), Custom Terms
 
-Semesters (2)
+### 2. Curriculum Management
+**Subjects**
+- `subject_id`, `name`, `department`, `grade_level`, `is_extracurricular`
 
-Trimesters (3)
+**Courses**
+- `course_id`, `subject_id`, `name`, `description`, `credit_hours`, `prerequisite_course_id`, `is_year_long`
 
-Quarters (4)
+### 3. Scheduling System
+**Classes**
+- `class_id`, `course_id`, `period_id`, `teacher_id`, `room_id`, `max_students`, `time_slot`
 
-Terms (custom, e.g., "Summer Intensive")
+**Rooms**
+- `room_id`, `name`, `capacity`, `type`, `department_restriction`
 
-⏳ Periods
+**Time Slots**
+- `slot_id`, `start_time`, `end_time`, `day_of_week`
 
-period_id, year_id, name (e.g., "Semester 1"), start_date, end_date
+### 4. People Management
+**Teachers**
+- `teacher_id`, `department`, `is_extracurricular_supervisor`, `salary_id`
 
-2. Subject & Course Management
-📚 Subjects
+**Students**
+- `student_id`, `grade_level`, `extracurricular_activities`
 
-subject_id, name (e.g., "Mathematics"), department (e.g., "STEM"), grade_level (e.g., "9-12"), is_extracurricular (T/F)
+**Staff**
+- `staff_id`, `role`, `department`
 
-🧮 Courses
+### 5. Records & Documentation
+**Attendance**
+- `attendance_id`, `class_id`, `date`, `student_id`, `status`, `recorded_by`
 
-course_id, subject_id, name (e.g., "Algebra 101"), description, credit_hours, prerequisite_course_id, is_year_long (T/F)
+**Notes**
+- `note_id`, `student_id`, `author_id`, `type`, `content`, `is_confidential`
 
-3. Class & Room Scheduling
-👥 Classes
+### 6. Operations
+**Payroll**
+- `salary_id`, `employee_id`, `base_salary`, `bonuses`, `deductions`, `payment_schedule`
 
-class_id, course_id, period_id (links to Semester/Trimester), teacher_id, room_id, max_students (auto-pulled from room capacity), time_slot (e.g., "Mon/Wed 9:00-10:30")
+**Extracurriculars**
+- `activity_id`, `name`, `supervisor_id`, `schedule`, `room_id`
 
-🏫 Rooms
+## Workflow Example
 
-room_id, name (e.g., "Room 2B"), capacity, type (e.g., "Lab", "Lecture Hall"), department_restriction (optional)
+### Setup Phase (Admin)
+1. **Create School Year**: "2025-2026" with Trimester system
+2. **Define Subjects**: "Science" department
+3. **Add Courses**: "Biology 101" (Trimester 1), "Chemistry 101" (Trimester 2)
+4. **Configure Rooms**: "Lab 3A" (Capacity: 24 students)
 
-⏰ Time Slots
+### Teaching Phase
+1. **Schedule Classes**: "Biology 101 - Section A" (Mon/Wed 10 AM, Lab 3A)
+2. **Track Attendance**: Daily class attendance recording
+3. **Add Notes**: "Student A needs lab safety retraining"
 
-slot_id, start_time, end_time, day_of_week (for conflict checks)
+### Support Services
+1. **Medical Records**: Nurse adds confidential note "Student B: Allergy to latex"
+2. **Payroll Processing**: Automatic salary + extracurricular bonus calculations
 
-4. People & Roles
-👨🏫 Teachers
+## Key Features
 
-teacher_id, department, is_extracurricular_supervisor (T/F), salary_id
+- **🏫 Flexible Academic Calendar**: Switch between semester/trimester systems without data loss
+- ** Room-Driven Constraints**: Automatic capacity limits and conflict detection
+- ** Role-Based Access**: 
+  - Nurses: Medical notes access
+  - Teachers: Attendance and academic records
+  - Admins: Full system control
+- ** Extracurricular Integration**: Uses same room/teacher systems as academic courses
+- ** Automated Limits**: Class sizes automatically constrained by room capacities
+- ** Conflict Prevention**: Time-slot overlap detection for rooms and teachers
 
-👩🎓 Students
+## System Benefits
 
-student_id, grade_level, extracurricular_activities (list)
-
-👩⚕️ Staff
-
-staff_id, role (e.g., "Nurse", "Secretary"), department
-
-5. Attendance & Notes
-✅ Attendance
-
-attendance_id, class_id, date, student_id, status (Present/Absent/Late), recorded_by (teacher/staff)
-
-📝 Notes
-
-note_id, student_id, author_id (teacher/principal/nurse), type (e.g., "Behavior", "Medical"), content, is_confidential
-
-6. Payroll & Extras
-💰 Payroll
-
-salary_id, employee_id (teacher/staff), base_salary, bonuses, deductions, payment_schedule
-
-🎨 Extracurriculars
-
-activity_id, name (e.g., "Chess Club"), supervisor_id, schedule, room_id
-
-Visual Workflow Example
-Admin sets up:
-
-School Year: "2025-2026" → Trimesters.
-
-Subjects: "Science" → Courses: "Biology 101" (Trimester 1), "Chemistry 101" (Trimester 2).
-
-Room: "Lab 3A" (Capacity: 24 → auto-limits max_students in classes).
-
-Teacher assigns:
-
-Class: "Biology 101 - Section A" (Mon/Wed 10 AM, Lab 3A).
-
-Logs attendance daily; adds notes (e.g., "Student A needs lab safety retraining").
-
-Nurse adds:
-
-Confidential note: "Student B: Allergy to latex (in Science Lab)".
-
-Payroll auto-calculates:
-
-Teacher salary + bonus for extracurricular supervision.
-
-Key Features:
-Flexible Academic Calendar: Switch between semesters/trimesters without data loss.
-
-Room-Driven Constraints: Classes can’t exceed room capacity; time-slot conflicts flagged.
-
-Role-Specific Access: Nurses see medical notes; teachers see attendance.
-
-Extracurricular Tracking: Separate from academic courses but uses same room/teacher systems.
+- **Unified Platform**: Combines academic, extracurricular, and administrative functions
+- **Data Integrity**: Constraint-based scheduling prevents double-booking
+- **Security**: Confidential information accessible only to authorized roles
+- **Scalability**: Supports various academic calendar structures
+- **Automation**: Reduces manual scheduling and payroll calculations
 
 ## Initial Setup
 
