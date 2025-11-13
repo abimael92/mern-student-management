@@ -43,7 +43,6 @@ A comprehensive, modular MERN stack solution revolutionizing school administrati
 
 ### High-Level Architecture
 
-
 ```mermaid
 graph TD
     A[Frontend: React] -->|API Calls| B[Backend: Node/Express]
@@ -54,38 +53,34 @@ graph TD
     B -->|External APIs| G[SMTP Service]
 ```
 
-### 🧩 Component Diagram
+
+### Component Diagram
 
 ![ER Diagram](frontend/public/assets/ER-Diagram.svg)
 
+## Data Models
 
-## 📊 Data Models
+![Component Diagram](frontend/public/assets/componentDiagram.svg)
 
-![CComponent Diagram](frontend/public/assets/componentDiagram.svg)
+### School Structure
 
-
-
-
-### 🏫 School Structure
-*(Diagram Placeholder)*
-
-**🔑 Key Relationships:**
+**Key Relationships:**
 - 1:M SchoolYear → Periods
 - 1:M Subject → Courses
 - 1:M Course → Classes
 - M:N Students ↔ Classes (through Enrollment)
 - 1:1 Teacher ↔ Payroll
 
-## 🛠️ Installation Guide
+## Installation Guide
 
-### 🖥️ System Requirements
+### System Requirements
 - Node.js 16+
 - MongoDB 5.0+
 - Redis 6.0+ (for caching)
 - 4GB RAM minimum
 - 10GB Disk Space
 
-### 📥 Installation Steps
+### Installation Steps
 ```bash
 git clone https://github.com/your-repo/school-management-enterprise.git
 cd school-management-enterprise
@@ -93,9 +88,8 @@ cp .env.example .env
 npm run setup
 npm run db:seed
 npm run dev
-```
 
-## 🚀 Deployment
+##  Deployment
 
 ### 🐳 Docker Deployment
 ```bash
