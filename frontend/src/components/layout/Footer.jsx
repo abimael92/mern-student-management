@@ -50,7 +50,7 @@ const Footer = () => {
   ];
 
   const contactInfo = [
-    { icon: <Email sx={{ fontSize: 18 }} />, text: 'info@schooldemo.edu' },
+    { icon: <Email sx={{ fontSize: 18 }} />, text: 'info@academix.edu' },
     { icon: <Phone sx={{ fontSize: 18 }} />, text: '+1 (555) 123-4567' },
     {
       icon: <LocationOn sx={{ fontSize: 18 }} />,
@@ -82,7 +82,7 @@ const Footer = () => {
                   color: '#ffffff',
                 }}
               >
-                EduManage
+                Academix
               </Typography>
             </Box>
             <Typography
