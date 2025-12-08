@@ -78,31 +78,36 @@ const NotificationsList = ({ notifications }) => {
                   </Typography>
                 }
                 secondary={
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      mt: 0.5,
-                    }}
+                  // SOLUTION 1: Add component="div" to the Typography
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="div" // ← This fixes the issue!
                   >
                     <Box
                       sx={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background:
-                          notif.type === 'warning'
-                            ? '#ff6b6b'
-                            : notif.type === 'success'
-                              ? '#51cf66'
-                              : '#339af0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        mt: 0.5,
                       }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
+                    >
+                      <Box
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          background:
+                            notif.type === 'warning'
+                              ? '#ff6b6b'
+                              : notif.type === 'success'
+                                ? '#51cf66'
+                                : '#339af0',
+                        }}
+                      />
                       {notif.time}
-                    </Typography>
-                  </Box>
+                    </Box>
+                  </Typography>
                 }
               />
             </ListItem>
