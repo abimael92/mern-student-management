@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import AnalyticsPage from './pages/Analytics/AnalyticsPage';
 import FeesPage from './pages/Fees/FeesPage';
 import LibraryPage from './pages/Library/LibraryPage';
 import StudentPage from './pages/Students/StudentPage';
@@ -41,6 +42,7 @@ const App = () => {
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route path="/students" element={<StudentPage />} />
                   <Route path="/teachers" element={<TeacherPage />} />
                   <Route path="/add-student" element={<StudentForm />} />

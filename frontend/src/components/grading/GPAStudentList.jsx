@@ -131,8 +131,11 @@ const GPAStudentList = ({
 
                     if (!hasSubject) {
                       return (
-                        <Tooltip title="Not for this student">
-                          <TableCell key={subject.id}>-</TableCell>
+                        <Tooltip
+                          key={`${student.id}-${subject.id}-not`}
+                          title="Not for this student"
+                        >
+                          <TableCell>-</TableCell>
                         </Tooltip>
                       );
                     }
