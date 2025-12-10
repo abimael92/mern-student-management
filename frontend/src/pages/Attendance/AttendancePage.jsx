@@ -32,7 +32,7 @@ import QuickAttendanceActions from '../../components/attendance/QuickAttendanceA
 import AttendanceStudentList from '../../components/attendance/AttendanceStudentList';
 
 // API service
-import attendanceApi from '../../services/attendanceApi';
+import { api } from '../../utils/api'; //frontend/src/utils/api.js
 
 const AttendancePage = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -57,52 +57,102 @@ const AttendancePage = () => {
       setError(null);
 
       const formattedDate = date.toISOString().split('T')[0];
-      const response = await attendanceApi.getByDate(formattedDate);
+      console.log('🔄 Fetching attendance for date:', formattedDate); // ADD THIS
 
-      setAttendanceData(response.data);
+      const response = await api.fetchAttendanceByDate(formattedDate);
+      console.log('📊 API Response:', response); // ADD THIS
 
-      // If no attendance records exist, fetch students from classes
-      if (response.data.length === 0) {
+      // FIX: Add null check
+      if (!response || !Array.isArray(response)) {
+        console.log('⚠️ No data in response'); // ADD THIS
+        setAttendanceData([]);
+        setStudents([]);
+        return;
+      }
+
+      setAttendanceData(response);
+
+      // FIX: Add proper check for empty array
+      if (response.length === 0) {
+        console.log('📭 Attendance array is empty'); // ADD THIS
+        setStudents([]);
         // You might want to fetch students from a specific class
         // This is a placeholder - implement based on your needs
         // const classResponse = await classApi.getActiveClasses();
         // setStudents(classResponse.data.students || []);
       } else {
+        console.log('✅ Found attendance records:', response.length); // ADD THIS
         // Extract unique students from attendance records
-        const studentList = response.data.map((record) => ({
-          ...record.student,
-          attendanceStatus: record.status,
-          attendanceId: record._id,
-        }));
+        // FIX: Add optional chaining for safety
+        const studentList = response
+          .filter((record) => record && record.student) // Filter out invalid records
+          .map((record) => ({
+            ...record.student,
+            attendanceStatus: record.status,
+            attendanceId: record._id,
+          }));
+        console.log('👥 Students extracted:', studentList.length); // ADD THIS
         setStudents(studentList);
       }
     } catch (err) {
+      console.error('❌ Error fetching attendance:', err); // THIS EXISTS, KEEP IT
       setError('Failed to fetch attendance data');
-      console.error('Error fetching attendance:', err);
+      setAttendanceData([]);
+      setStudents([]);
     } finally {
       setLoading(false);
+      console.log('🏁 Finished fetching attendance'); // ADD THIS
     }
   }, []);
 
   // Fetch statistics
   const fetchStats = useCallback(async () => {
     try {
+      console.log('📈 Fetching attendance stats...'); // ADD THIS
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const response = await attendanceApi.getStats({
-        startDate: thirtyDaysAgo.toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0],
-      });
+      const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+      const endDate = new Date().toISOString().split('T')[0];
+      console.log('📅 Date range:', startDate, 'to', endDate); // ADD THIS
 
-      setStats(response.data);
+      const response = await api.fetchAttendanceStats(startDate, endDate);
+      console.log('📊 Stats API Response:', response); // ADD THIS
+      console.log('📊 Stats data:', response?.data); // ADD THIS
+
+      // FIX: Set default stats if response.data is undefined
+      const statsData = response?.data || {
+        total: 0,
+        present: 0,
+        absent: 0,
+        late: 0,
+        attendanceRate: 0,
+      };
+
+      console.log('📊 Final stats to set:', statsData); // ADD THIS
+      setStats(statsData);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+      console.error('❌ Error fetching stats:', err);
+      // FIX: Set default stats on error
+      setStats({
+        total: 0,
+        present: 0,
+        absent: 0,
+        late: 0,
+        attendanceRate: 0,
+      });
     }
   }, []);
 
+  console.log('🎬 AttendancePage rendering');
+  console.log('📊 Current stats:', stats); // ADD THIS
+  console.log('👥 Current students:', students.length); // ADD THIS
+  console.log('📅 Current attendance data:', attendanceData.length); // ADD THIS
+
   // Fetch data on component mount and when selectedDate changes
   useEffect(() => {
+    console.log('🚀 useEffect triggered, selectedDate:', selectedDate); // ADD THIS
     fetchAttendanceData(selectedDate);
     fetchStats();
   }, [selectedDate, fetchAttendanceData, fetchStats]);
@@ -128,7 +178,7 @@ const AttendancePage = () => {
       // You'll need to add classId here - get it from your context or state
       const classId = 'your-class-id-here'; // Replace with actual class ID
 
-      await attendanceApi.markAttendance({
+      await api.markAttendance({
         date: selectedDate.toISOString().split('T')[0],
         records: attendanceRecords,
         classId: classId,
@@ -151,10 +201,10 @@ const AttendancePage = () => {
 
   const handleExport = async () => {
     try {
-      const response = await attendanceApi.exportAttendance({
-        startDate: selectedDate,
-        endDate: selectedDate,
-        format: 'csv', // or 'excel', 'pdf'
+      const response = await api.exportAttendance({
+        startDate: selectedDate.toISOString().split('T')[0],
+        endDate: selectedDate.toISOString().split('T')[0],
+        format: 'csv',
       });
 
       // Create download link
