@@ -39,6 +39,14 @@ export const createStudentSchema = Joi.object({
             'any.only': `Grade level must be one of: ${GradeEnum.join(', ')} or null`,
         }),
 
+    gradeAlias: Joi.string()
+        .max(50)
+        .allow('', null)
+        .optional()
+        .messages({
+            'string.max': 'Grade alias cannot exceed 50 characters',
+        }),
+
     homeroom: Joi.string()
         .pattern(/^[a-f\d]{24}$/i)
         .allow(null)

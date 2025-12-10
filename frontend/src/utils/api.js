@@ -497,12 +497,12 @@ export const api = {
         const response = await fetch(`${BASE}/api/library`);
         const data = await response.json();
         return data;
-    }
+    },
 
-// === ATTENDANCE CRUD ===
+    // === ATTENDANCE CRUD ===
 
-// Get attendance by date
-fetchAttendanceByDate: async (date, classId = null, studentId = null) => {
+    // Get attendance by date
+    fetchAttendanceByDate: async (date, classId = null, studentId = null) => {
         let url = `${BASE}/api/attendance?date=${date}`;
         if (classId) url += `&classId=${classId}`;
         if (studentId) url += `&studentId=${studentId}`;
