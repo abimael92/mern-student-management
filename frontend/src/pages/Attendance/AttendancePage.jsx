@@ -1,18 +1,16 @@
 // ===== ./frontend/src/pages/Attendance/AttendancePage.jsx =====
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
   Paper,
   Grid,
-  Card,
-  CardContent,
-  Chip,
   Button,
   Tabs,
   Tab,
-  useTheme,
-  alpha,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
@@ -23,6 +21,7 @@ import {
   Download,
   FilterList,
   Add,
+  Refresh,
 } from '@mui/icons-material';
 
 // Enhanced Components
@@ -32,41 +31,81 @@ import AttendanceTrendChart from '../../components/attendance/AttendanceTrendCha
 import QuickAttendanceActions from '../../components/attendance/QuickAttendanceActions';
 import AttendanceStudentList from '../../components/attendance/AttendanceStudentList';
 
-// Mock data - replace with your actual data
-import {
-  attendanceRecords,
-  students,
-} from '../../utils/mock/mockAttendanceData';
+// API service
+import attendanceApi from '../../services/attendanceApi';
 
 const AttendancePage = () => {
-  const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [filters, setFilters] = useState({
-    class: '',
-    status: '',
-    dateRange: { start: null, end: null },
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    present: 0,
+    absent: 0,
+    late: 0,
+    attendanceRate: 0,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const total = attendanceRecords.length;
-    const present = attendanceRecords.filter(
-      (r) => r.status === 'Present'
-    ).length;
-    const absent = attendanceRecords.filter(
-      (r) => r.status === 'Absent'
-    ).length;
-    const late = attendanceRecords.filter((r) => r.status === 'Late').length;
+  // Fetch attendance data
+  const fetchAttendanceData = useCallback(async (date) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    return {
-      total,
-      present,
-      absent,
-      late,
-      attendanceRate: total > 0 ? ((present / total) * 100).toFixed(1) : 0,
-    };
+      const formattedDate = date.toISOString().split('T')[0];
+      const response = await attendanceApi.getByDate(formattedDate);
+
+      setAttendanceData(response.data);
+
+      // If no attendance records exist, fetch students from classes
+      if (response.data.length === 0) {
+        // You might want to fetch students from a specific class
+        // This is a placeholder - implement based on your needs
+        // const classResponse = await classApi.getActiveClasses();
+        // setStudents(classResponse.data.students || []);
+      } else {
+        // Extract unique students from attendance records
+        const studentList = response.data.map((record) => ({
+          ...record.student,
+          attendanceStatus: record.status,
+          attendanceId: record._id,
+        }));
+        setStudents(studentList);
+      }
+    } catch (err) {
+      setError('Failed to fetch attendance data');
+      console.error('Error fetching attendance:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Fetch statistics
+  const fetchStats = useCallback(async () => {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const response = await attendanceApi.getStats({
+        startDate: thirtyDaysAgo.toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
+      });
+
+      setStats(response.data);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  }, []);
+
+  // Fetch data on component mount and when selectedDate changes
+  useEffect(() => {
+    fetchAttendanceData(selectedDate);
+    fetchStats();
+  }, [selectedDate, fetchAttendanceData, fetchStats]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -74,16 +113,98 @@ const AttendancePage = () => {
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
-    // You can fetch attendance data for the selected date here
   };
 
-  const handleBulkAction = (action, studentIds) => {
-    console.log(`Performing ${action} for students:`, studentIds);
-    // Implement bulk attendance marking
+  const handleBulkAction = async (action, studentIds, status) => {
+    try {
+      setLoading(true);
+
+      const attendanceRecords = studentIds.map((studentId) => ({
+        studentId,
+        status: status || action.toLowerCase(),
+        date: selectedDate.toISOString().split('T')[0],
+      }));
+
+      // You'll need to add classId here - get it from your context or state
+      const classId = 'your-class-id-here'; // Replace with actual class ID
+
+      await attendanceApi.markAttendance({
+        date: selectedDate.toISOString().split('T')[0],
+        records: attendanceRecords,
+        classId: classId,
+        markedBy: 'current-user-id', // Get from auth context
+      });
+
+      setSuccess(
+        `Successfully marked ${studentIds.length} students as ${status || action}`
+      );
+
+      // Refresh data
+      fetchAttendanceData(selectedDate);
+      fetchStats();
+    } catch (err) {
+      setError(`Failed to mark attendance: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await attendanceApi.exportAttendance({
+        startDate: selectedDate,
+        endDate: selectedDate,
+        format: 'csv', // or 'excel', 'pdf'
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `attendance-${selectedDate.toISOString().split('T')[0]}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setError('Failed to export attendance data');
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchAttendanceData(selectedDate);
+    fetchStats();
+  };
+
+  const handleMarkAttendance = () => {
+    // Open attendance marking modal/dialog
+    // This would trigger your attendance marking interface
+    console.log('Open attendance marking interface');
   };
 
   return (
-    <Box sx={{ p: 3, minHeight: '100vh' }}>
+    <Box sx={{ p: 3, minHeight: '100vh', position: 'relative' }}>
+      {loading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            zIndex: 1000,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
+
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -113,7 +234,12 @@ const AttendancePage = () => {
               Attendance Management
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Track and manage student attendance with real-time insights
+              {selectedDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </Typography>
           </Box>
 
@@ -132,7 +258,21 @@ const AttendancePage = () => {
             </Button>
             <Button
               variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefresh}
+              sx={{
+                borderRadius: 3,
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Refresh
+            </Button>
+            <Button
+              variant="outlined"
               startIcon={<Download />}
+              onClick={handleExport}
               sx={{
                 borderRadius: 3,
                 px: 3,
@@ -145,6 +285,7 @@ const AttendancePage = () => {
             <Button
               variant="contained"
               startIcon={<Add />}
+              onClick={handleMarkAttendance}
               sx={{
                 borderRadius: 3,
                 px: 3,
@@ -239,16 +380,27 @@ const AttendancePage = () => {
                     <People color="primary" />
                     Today&apos;s Attendance
                   </Typography>
+                  {error ? (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                      {error}
+                    </Alert>
+                  ) : null}
                   <AttendanceStudentList
                     students={students}
+                    attendanceData={attendanceData}
                     onBulkAction={handleBulkAction}
                     selectedDate={selectedDate}
+                    loading={loading}
                   />
                 </Paper>
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <QuickAttendanceActions onDateSelect={handleDateSelect} />
+                <QuickAttendanceActions
+                  onDateSelect={handleDateSelect}
+                  selectedDate={selectedDate}
+                  onMarkAttendance={handleMarkAttendance}
+                />
               </Grid>
             </Grid>
           </motion.div>
@@ -271,11 +423,11 @@ const AttendancePage = () => {
               <Typography variant="h6" sx={{ mb: 3 }}>
                 Student Attendance History
               </Typography>
-              {/* Enhanced Student List Component */}
               <AttendanceStudentList
                 students={students}
                 showHistory={true}
                 onBulkAction={handleBulkAction}
+                attendanceData={attendanceData}
               />
             </Paper>
           </motion.div>
@@ -302,6 +454,7 @@ const AttendancePage = () => {
               <AttendanceCalendarView
                 onDateSelect={handleDateSelect}
                 selectedDate={selectedDate}
+                attendanceData={attendanceData}
               />
             </Paper>
           </motion.div>
@@ -326,7 +479,10 @@ const AttendancePage = () => {
                   <Typography variant="h6" sx={{ mb: 3 }}>
                     Attendance Trends
                   </Typography>
-                  <AttendanceTrendChart records={attendanceRecords} />
+                  <AttendanceTrendChart
+                    attendanceData={attendanceData}
+                    stats={stats}
+                  />
                 </Paper>
               </Grid>
 
@@ -349,18 +505,18 @@ const AttendancePage = () => {
                   >
                     <Box>
                       <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Best Attendance
+                        Today&apos;s Attendance Rate
                       </Typography>
                       <Typography variant="h6" fontWeight="bold">
-                        Grade 5A - 98%
+                        {stats.attendanceRate.toFixed(1)}%
                       </Typography>
                     </Box>
                     <Box>
                       <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Needs Attention
+                        Present Today
                       </Typography>
                       <Typography variant="h6" fontWeight="bold">
-                        Grade 8B - 82%
+                        {stats.present} students
                       </Typography>
                     </Box>
                     <Box>
@@ -368,7 +524,7 @@ const AttendancePage = () => {
                         Monthly Average
                       </Typography>
                       <Typography variant="h6" fontWeight="bold">
-                        94.2%
+                        {stats.attendanceRate.toFixed(1)}%
                       </Typography>
                     </Box>
                   </Box>
@@ -378,6 +534,37 @@ const AttendancePage = () => {
           </motion.div>
         )}
       </Box>
+
+      {/* Snackbar Notifications */}
+      <Snackbar
+        open={!!success}
+        autoHideDuration={6000}
+        onClose={() => setSuccess(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSuccess(null)}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {success}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

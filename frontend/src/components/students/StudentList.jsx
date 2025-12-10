@@ -25,6 +25,8 @@ const StudentList = ({
   setSelectedStudent,
   onUpdateStudent,
 }) => {
+  console.log('students list: ', students);
+
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error}</Alert>;
 

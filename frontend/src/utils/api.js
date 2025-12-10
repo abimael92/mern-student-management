@@ -493,13 +493,243 @@ export const api = {
 
 
     /** ==========book======= */
-
-
     fetchTextbooks: async () => {
         const response = await fetch(`${BASE}/api/library`);
         const data = await response.json();
         return data;
     }
 
+// === ATTENDANCE CRUD ===
 
+// Get attendance by date
+fetchAttendanceByDate: async (date, classId = null, studentId = null) => {
+        let url = `${BASE}/api/attendance?date=${date}`;
+        if (classId) url += `&classId=${classId}`;
+        if (studentId) url += `&studentId=${studentId}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Mark attendance for multiple students
+    markAttendance: async (attendanceData) => {
+        const res = await fetch(`${BASE}/api/attendance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(attendanceData),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance statistics
+    fetchAttendanceStats: async (startDate, endDate, classId = null, studentId = null) => {
+        let url = `${BASE}/api/attendance/stats?startDate=${startDate}&endDate=${endDate}`;
+        if (classId) url += `&classId=${classId}`;
+        if (studentId) url += `&studentId=${studentId}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance trends
+    fetchAttendanceTrends: async (classId = null, days = 30) => {
+        let url = `${BASE}/api/attendance/trends?days=${days}`;
+        if (classId) url += `&classId=${classId}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get student attendance history
+    fetchStudentAttendanceHistory: async (studentId, limit = 50) => {
+        const res = await fetch(`${BASE}/api/attendance/student-history?studentId=${studentId}&limit=${limit}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Update single attendance record
+    updateAttendanceRecord: async (attendanceId, data) => {
+        const res = await fetch(`${BASE}/api/attendance/${attendanceId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Delete attendance record
+    deleteAttendanceRecord: async (attendanceId) => {
+        const res = await fetch(`${BASE}/api/attendance/${attendanceId}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Bulk update attendance status
+    bulkUpdateAttendance: async (studentIds, date, status, classId, remarks = null) => {
+        const res = await fetch(`${BASE}/api/attendance/bulk`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentIds,
+                date,
+                status,
+                classId,
+                remarks
+            }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance for a specific student in a date range
+    fetchStudentAttendanceRange: async (studentId, startDate, endDate) => {
+        const res = await fetch(`${BASE}/api/attendance/student/${studentId}/range?startDate=${startDate}&endDate=${endDate}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance summary for a class
+    fetchClassAttendanceSummary: async (classId, startDate, endDate) => {
+        const res = await fetch(`${BASE}/api/attendance/class/${classId}/summary?startDate=${startDate}&endDate=${endDate}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Export attendance data
+    exportAttendance: async (params) => {
+        const queryParams = new URLSearchParams(params).toString();
+        const res = await fetch(`${BASE}/api/attendance/export?${queryParams}`, {
+            method: 'GET',
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.blob();
+    },
+
+    // Get attendance calendar data
+    fetchAttendanceCalendar: async (month, year, classId = null) => {
+        let url = `${BASE}/api/attendance/calendar?month=${month}&year=${year}`;
+        if (classId) url += `&classId=${classId}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Mark student attendance (single student)
+    markStudentAttendance: async (studentId, data) => {
+        const res = await fetch(`${BASE}/api/attendance/student/${studentId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get todays attendance for a class
+    fetchTodaysClassAttendance: async (classId) => {
+        const today = new Date().toISOString().split('T')[0];
+        const res = await fetch(`${BASE}/api/attendance/today/${classId}?date=${today}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance overview (dashboard)
+    fetchAttendanceOverview: async () => {
+        const res = await fetch(`${BASE}/api/attendance/overview`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get absent students for today
+    fetchAbsentToday: async (classId = null) => {
+        let url = `${BASE}/api/attendance/absent-today`;
+        if (classId) url += `?classId=${classId}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get late students for today
+    fetchLateToday: async (classId = null) => {
+        let url = `${BASE}/api/attendance/late-today`;
+        if (classId) url += `?classId=${classId}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Excuse student absence
+    excuseStudentAbsence: async (attendanceId, excuseNote) => {
+        const res = await fetch(`${BASE}/api/attendance/${attendanceId}/excuse`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ excuseNote, isExcused: true }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Unexcuse student absence
+    unexcuseStudentAbsence: async (attendanceId) => {
+        const res = await fetch(`${BASE}/api/attendance/${attendanceId}/excuse`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isExcused: false }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Add remarks to attendance
+    addAttendanceRemarks: async (attendanceId, remarks) => {
+        const res = await fetch(`${BASE}/api/attendance/${attendanceId}/remarks`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ remarks }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance by student and month
+    fetchAttendanceByStudentMonth: async (studentId, month, year) => {
+        const res = await fetch(`${BASE}/api/attendance/student/${studentId}/month/${year}/${month}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Get attendance by class and month
+    fetchAttendanceByClassMonth: async (classId, month, year) => {
+        const res = await fetch(`${BASE}/api/attendance/class/${classId}/month/${year}/${month}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Generate attendance report
+    generateAttendanceReport: async (reportData) => {
+        const res = await fetch(`${BASE}/api/attendance/report`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportData),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    // Check attendance status for a student on a specific date
+    checkStudentAttendanceStatus: async (studentId, date) => {
+        const res = await fetch(`${BASE}/api/attendance/check/${studentId}/${date}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    }
 };
