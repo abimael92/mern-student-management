@@ -1,4 +1,4 @@
-import Subject from '../controllers/subject/subject.schema.js';
+import Subject from '../modules/subject/subject.schema.js';
 import Course from '../modules/course/course.schema.js';
 
 
