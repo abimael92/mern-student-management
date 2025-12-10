@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Subject from '../../controllers/subject/subject.schema.js';
+import Subject from '../subject/subject.schema.js';
 import Course from "./course.schema.js";
 import { generateCourseCode } from './course.services.js';
 
