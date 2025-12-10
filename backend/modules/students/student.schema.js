@@ -32,6 +32,16 @@ const studentSchema = new mongoose.Schema({
     gradeLevel: {
         type: String,
         enum: [...GradeEnum],
+        required: false,
+    },
+    // ======================= 🔹 GRADE ALIAS (OPTIONAL) =======================
+    gradeAlias: {
+        type: String,
+        maxlength: 50,
+        default: '',
+        required: false,
+        // No enum - free text for flexibility
+        // Examples: "Sophomore", "Genin", "Year 10", "Form 4"
     },
     homeroom: {
         type: mongoose.Schema.Types.ObjectId,
@@ -105,6 +115,12 @@ studentSchema.virtual('fullName').get(function () {
     return `${this.firstName} ${this.lastName}`.trim();
 });
 
+studentSchema.virtual('gradeDisplay').get(function () {
+    if (this.gradeAlias && this.gradeLevel) {
+        return `${this.gradeLevel} (${this.gradeAlias})`;
+    }
+    return this.gradeAlias || this.gradeLevel || 'Not Set';
+});
 // ======================= 🔹 PRE-SAVE HOOK =======================
 studentSchema.pre('save', async function (next) {
     if (!this.studentNumber) {
