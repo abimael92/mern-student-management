@@ -20,6 +20,8 @@ const TeacherList = ({
   onDelete,
   onStatusChange,
 }) => {
+  console.log('teachers list: ', teachers);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
