@@ -156,15 +156,21 @@ const QuickAttendanceActions = ({ onDateSelect }) => {
                     </ListItemIcon>
                     <ListItemText
                       primary={
-                        <Typography variant="body2" fontWeight="medium">
+                        <Typography
+                          variant="body2"
+                          fontWeight="medium"
+                          component="span"
+                        >
                           {activity.action}
                         </Typography>
                       }
                       secondary={
                         <Box
+                          component="span"
                           sx={{
-                            display: 'flex',
+                            display: 'inline-flex',
                             justifyContent: 'space-between',
+                            width: '100%',
                           }}
                         >
                           <Typography variant="caption" color="text.secondary">
