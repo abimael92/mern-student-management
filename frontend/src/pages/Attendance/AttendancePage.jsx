@@ -51,65 +51,71 @@ const AttendancePage = () => {
   const [success, setSuccess] = useState(null);
 
   // Fetch attendance data
-  const fetchAttendanceData = useCallback(async (date) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchAttendanceData = useCallback(
+    async (date) => {
+      try {
+        setLoading(true);
+        console.log('🔄 STARTING fetchAttendanceData');
 
-      const formattedDate = date.toISOString().split('T')[0];
-      console.log('🔄 Fetching attendance for date:', formattedDate); // ADD THIS
+        const formattedDate = date.toISOString().split('T')[0];
+        console.log('📅 Date:', formattedDate);
 
-      const response = await api.fetchAttendanceByDate(formattedDate);
-      console.log('📊 API Response:', response); // ADD THIS
+        // Get ALL students
+        console.log('📞 Calling api.fetchStudents()');
+        const allStudents = await api.fetchStudents();
+        console.log('📊 Total students:', allStudents?.length || 0);
 
-      // FIX: Add null check
-      if (!response || !Array.isArray(response)) {
-        console.log('⚠️ No data in response'); // ADD THIS
-        setAttendanceData([]);
-        setStudents([]);
-        return;
-      }
+        // Filter for enrolled only
+        const enrolledStudents = allStudents.filter((s) => s.isEnrolled);
+        console.log('📊 Enrolled students:', enrolledStudents.length);
 
-      setAttendanceData(response);
+        if (enrolledStudents.length === 0) {
+          console.warn('⚠️ No enrolled students found!');
+        }
 
-      // FIX: Add proper check for empty array
-      if (response.length === 0) {
-        console.log('📭 Attendance array is empty'); // ADD THIS
-        setStudents([]);
-        // You might want to fetch students from a specific class
-        // This is a placeholder - implement based on your needs
-        // const classResponse = await classApi.getActiveClasses();
-        // setStudents(classResponse.data.students || []);
-      } else {
-        console.log('✅ Found attendance records:', response.length); // ADD THIS
-        // Extract unique students from attendance records
-        // FIX: Add optional chaining for safety
-        const studentList = response
-          .filter((record) => record && record.student) // Filter out invalid records
-          .map((record) => ({
-            ...record.student,
-            attendanceStatus: record.status,
-            attendanceId: record._id,
-          }));
-        console.log('👥 Students extracted:', studentList.length); // ADD THIS
+        // Get attendance
+        console.log('📞 Calling api.fetchAttendanceByDate()');
+        const attendance = await api.fetchAttendanceByDate(formattedDate);
+        console.log('📊 Attendance records:', attendance?.length || 0);
+
+        // Create list
+        const studentList = enrolledStudents.map((student) => {
+          const record = attendance?.find(
+            (a) => a.student?._id === student._id
+          );
+          return {
+            ...student,
+            attendanceStatus: record?.status || 'Not Marked',
+            attendanceId: record?._id,
+          };
+        });
+
+        console.log('✅ Final student list:', studentList.length);
+
+        // ADD THIS DEBUG:
+        if (studentList.length > 0) {
+          console.log('👤 First student:', studentList[0]);
+        }
+
         setStudents(studentList);
+        setAttendanceData(attendance || []);
+      } catch (err) {
+        console.error('❌ Error in fetchAttendanceData:', err);
+        console.error('❌ Error stack:', err.stack);
+        setError('Failed to load attendance: ' + err.message);
+        setStudents([]);
+        setAttendanceData([]);
+      } finally {
+        setLoading(false);
+        console.log('🏁 FINISHED fetchAttendanceData');
       }
-    } catch (err) {
-      console.error('❌ Error fetching attendance:', err); // THIS EXISTS, KEEP IT
-      setError('Failed to fetch attendance data');
-      setAttendanceData([]);
-      setStudents([]);
-    } finally {
-      setLoading(false);
-      console.log('🏁 Finished fetching attendance'); // ADD THIS
-    }
-  }, []);
+    },
+    [selectedDate]
+  );
 
   // Fetch statistics
   const fetchStats = useCallback(async () => {
     try {
-      console.log('📈 Fetching attendance stats...'); // ADD THIS
-
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -119,10 +125,9 @@ const AttendancePage = () => {
 
       const response = await api.fetchAttendanceStats(startDate, endDate);
       console.log('📊 Stats API Response:', response); // ADD THIS
-      console.log('📊 Stats data:', response?.data); // ADD THIS
 
       // FIX: Set default stats if response.data is undefined
-      const statsData = response?.data || {
+      const statsData = response || {
         total: 0,
         present: 0,
         absent: 0,
@@ -130,7 +135,6 @@ const AttendancePage = () => {
         attendanceRate: 0,
       };
 
-      console.log('📊 Final stats to set:', statsData); // ADD THIS
       setStats(statsData);
     } catch (err) {
       console.error('❌ Error fetching stats:', err);
@@ -144,11 +148,6 @@ const AttendancePage = () => {
       });
     }
   }, []);
-
-  console.log('🎬 AttendancePage rendering');
-  console.log('📊 Current stats:', stats); // ADD THIS
-  console.log('👥 Current students:', students.length); // ADD THIS
-  console.log('📅 Current attendance data:', attendanceData.length); // ADD THIS
 
   // Fetch data on component mount and when selectedDate changes
   useEffect(() => {
@@ -175,7 +174,6 @@ const AttendancePage = () => {
         date: selectedDate.toISOString().split('T')[0],
       }));
 
-      // You'll need to add classId here - get it from your context or state
       const classId = 'your-class-id-here'; // Replace with actual class ID
 
       await api.markAttendance({
@@ -219,7 +217,7 @@ const AttendancePage = () => {
       link.click();
       link.remove();
     } catch (err) {
-      setError('Failed to export attendance data');
+      setError(`Failed to export attendance data: ${err.message}`);
     }
   };
 
