@@ -40,6 +40,63 @@ export const getLastStudentNumber = async (req, res) => {
     }
 };
 
+export const getActiveStudents = async (req, res) => {
+    try {
+        const students = await Student.find({ isEnrolled: true })
+            .select('firstName lastName studentNumber gradeLevel gradeAlias')
+            .sort({ lastName: 1 });
+
+        res.status(200).json(students);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET /students/:classId/students 
+export const getStudentsByClass = async (req, res) => {
+    try {
+        const { classId } = req.params;
+
+        // Find class and populate students
+        const classData = await Class.findById(classId)
+            .populate('students.student', 'firstName lastName studentNumber gradeLevel gradeAlias')
+            .lean();
+
+        if (!classData) {
+            return res.status(404).json({ error: 'Class not found' });
+        }
+
+        // Extract student data
+        const students = classData.students
+            .filter(item => item.student)  // Filter out null students
+            .map(item => item.student);
+
+        res.status(200).json(students);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Add this function after getStudentsByClass
+import AttendanceRecord from '../attendance/attendance.schema.js';
+
+export const getStudentAttendance = async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const { limit = 50 } = req.query;
+
+        const attendance = await AttendanceRecord.find({ student: studentId })
+            .populate('class', 'name code')
+            .sort({ date: -1 })
+            .limit(Number(limit))
+            .lean();
+
+        res.status(200).json(attendance);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // ----- CREATE -----
 // POST /students
 export const createStudent = async (req, res) => {
@@ -266,11 +323,11 @@ export const deleteStudent = async (req, res) => {
 
         res.status(200).json({ message: `Successfully deleted student with ID ${id}` });
     } catch (error) {
-        logger.error(`Error deleting student with ID ${id}: ${error.message}`, {
-            method: req.method,
-            route: req.originalUrl,
-            params: req.params
-        });
+        // logger.error(`Error deleting student with ID ${id}: ${error.message}`, {
+        //     method: req.method,
+        //     route: req.originalUrl,
+        //     params: req.params
+        // });
         res.status(500).json({ message: 'Internal server error' });
     }
 };

@@ -70,6 +70,10 @@ const AttendanceStudentList = ({
     }
   };
 
+  console.log('🚨 ATTENDANCE STUDENT LIST - DEBUG');
+  console.log('🚨 Students:', students);
+  console.log('🚨 First student:', students[0]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -186,15 +190,15 @@ const AttendanceStudentList = ({
           <TableBody>
             {students.map((student, index) => (
               <motion.tr
-                key={student.id}
+                key={student._id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selectedStudents.includes(student.id)}
-                    onChange={() => handleSelectStudent(student.id)}
+                    checked={selectedStudents.includes(student._id)}
+                    onChange={() => handleSelectStudent(student._id)}
                   />
                 </TableCell>
                 <TableCell>
@@ -202,16 +206,22 @@ const AttendanceStudentList = ({
                     <Person color="action" />
                     <Box>
                       <Typography variant="body2" fontWeight="medium">
-                        {student.name}
+                        {student.firstName} {student.lastName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {student.id}
+                        {student.studentNumber}
                       </Typography>
                     </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Chip label={student.class} size="small" variant="outlined" />
+                  <Chip
+                    label={
+                      student.gradeAlias || student.gradeLevel || 'No Class'
+                    }
+                    size="small"
+                    variant="outlined"
+                  />
                 </TableCell>
                 <TableCell>
                   <Chip
@@ -224,12 +234,12 @@ const AttendanceStudentList = ({
                   <>
                     <TableCell>
                       <Typography variant="body2">
-                        {student.weeklyAttendance}%
+                        {student.weeklyAttendance || 'N/A'}%
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {student.monthlyAttendance}%
+                        {student.monthlyAttendance || 'N/A'}%
                       </Typography>
                     </TableCell>
                   </>

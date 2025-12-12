@@ -512,6 +512,25 @@ export const api = {
         return res.json();
     },
 
+    // === CLASS STUDENTS & ALL STUDENTS ===
+    getStudentsByClass: async (classId) => {
+        const res = await fetch(`${BASE}/api/students/class/${classId}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    getAllActiveStudents: async () => {
+        const res = await fetch(`${BASE}/api/students/active`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
+    getEnrolledStudents: async () => {
+        const res = await fetch(`${BASE}/api/students?status=enrolled`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+
     // Mark attendance for multiple students
     markAttendance: async (attendanceData) => {
         const res = await fetch(`${BASE}/api/attendance`, {
@@ -546,7 +565,7 @@ export const api = {
 
     // Get student attendance history
     fetchStudentAttendanceHistory: async (studentId, limit = 50) => {
-        const res = await fetch(`${BASE}/api/attendance/student-history?studentId=${studentId}&limit=${limit}`);
+        const res = await fetch(`${BASE}/api/attendance/student/${studentId}?limit=${limit}`);
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
@@ -635,8 +654,7 @@ export const api = {
 
     // Get todays attendance for a class
     fetchTodaysClassAttendance: async (classId) => {
-        const today = new Date().toISOString().split('T')[0];
-        const res = await fetch(`${BASE}/api/attendance/today/${classId}?date=${today}`);
+        const res = await fetch(`${BASE}/api/attendance/today/${classId}`);
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },

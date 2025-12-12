@@ -5,6 +5,7 @@ import Class from '../classes/class.schema.js';
 import mongoose from 'mongoose';
 
 // Get attendance by date
+// In your getAttendanceByDate function:
 export const getAttendanceByDate = async (req, res) => {
     try {
         console.log('📅 Fetching attendance for date:', req.query.date);
@@ -27,12 +28,35 @@ export const getAttendanceByDate = async (req, res) => {
         }
 
         console.log('🔍 MongoDB query:', JSON.stringify(query));
+
+        // FIRST: Check what raw data we get
+        const rawAttendance = await AttendanceRecord.find(query)
+            .lean();
+        console.log('📦 RAW attendance records (no populate):', rawAttendance.length);
+        if (rawAttendance.length > 0) {
+            console.log('📦 First raw record:', JSON.stringify(rawAttendance[0], null, 2));
+        }
+
+        // SECOND: Check with populate
         const attendance = await AttendanceRecord.find(query)
             .populate('student', 'firstName lastName studentNumber profilePicture gradeLevel gradeAlias')
             .populate('class', 'name section code')
-            .sort({ date: -1 });
+            .sort({ date: -1 })
+            .lean();
 
-        console.log('✅ Found', attendance.length, 'attendance records');
+        console.log('✅ POPULATED attendance records:', attendance.length);
+        if (attendance.length > 0) {
+            console.log('📋 First populated record:', JSON.stringify(attendance[0], null, 2));
+
+            // Check what's in the student field
+            console.log('👤 Student field type:', typeof attendance[0].student);
+            console.log('👤 Student field value:', attendance[0].student);
+
+            // Check what's in the class field
+            console.log('🏫 Class field type:', typeof attendance[0].class);
+            console.log('🏫 Class field value:', attendance[0].class);
+        }
+
         res.status(200).json(attendance);
     } catch (error) {
         console.error('❌ Detailed error fetching attendance:');
@@ -278,5 +302,120 @@ export const getAttendanceTrends = async (req, res) => {
     } catch (error) {
         console.error('Error fetching attendance trends:', error);
         res.status(500).json({ error: 'Failed to fetch attendance trends' });
+    }
+};
+
+// Add these to attendance.controller.js if you want them:
+
+export const getStudentAttendanceHistory = async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const { limit = 50 } = req.query;
+
+        const attendance = await AttendanceRecord.find({ student: studentId })
+            .populate('class', 'name code')
+            .populate('student', 'firstName lastName')
+            .sort({ date: -1 })
+            .limit(Number(limit))
+            .lean();
+
+        res.status(200).json(attendance);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getClassAttendanceSummary = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const { startDate, endDate } = req.query;
+
+        let matchStage = { class: new mongoose.Types.ObjectId(classId) };
+
+        if (startDate && endDate) {
+            matchStage.date = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        const summary = await AttendanceRecord.aggregate([
+            { $match: matchStage },
+            {
+                $group: {
+                    _id: '$student',
+                    present: { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } },
+                    absent: { $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] } },
+                    late: { $sum: { $cond: [{ $eq: ['$status', 'late'] }, 1, 0] } },
+                    total: { $sum: 1 }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'student'
+                }
+            },
+            { $unwind: '$student' },
+            {
+                $project: {
+                    student: { firstName: 1, lastName: 1, studentNumber: 1 },
+                    present: 1,
+                    absent: 1,
+                    late: 1,
+                    total: 1,
+                    attendanceRate: { $multiply: [{ $divide: ['$present', '$total'] }, 100] }
+                }
+            }
+        ]);
+
+        res.status(200).json(summary);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const bulkUpdateAttendance = async (req, res) => {
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction();
+        const { studentIds, date, status, classId, remarks } = req.body;
+
+        const attendanceDate = new Date(date);
+        attendanceDate.setHours(0, 0, 0, 0);
+
+        // Create records for all students
+        const records = studentIds.map(studentId => ({
+            student: studentId,
+            class: classId,
+            date: attendanceDate,
+            status: status,
+            remarks: remarks || '',
+            session: 'full_day'
+        }));
+
+        // Remove existing records for these students on this date
+        await AttendanceRecord.deleteMany({
+            student: { $in: studentIds },
+            date: {
+                $gte: new Date(attendanceDate.setHours(0, 0, 0, 0)),
+                $lte: new Date(attendanceDate.setHours(23, 59, 59, 999))
+            },
+            class: classId
+        }, { session });
+
+        // Insert new records
+        await AttendanceRecord.insertMany(records, { session });
+
+        await session.commitTransaction();
+        res.status(200).json({ message: 'Attendance updated successfully' });
+    } catch (error) {
+        await session.abortTransaction();
+        res.status(500).json({ error: error.message });
+    } finally {
+        session.endSession();
     }
 };
