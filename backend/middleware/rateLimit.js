@@ -10,7 +10,7 @@ export const apiLimiter = rateLimit({
 
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: process.env.NODE_ENV === 'development' ? 50 : 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many login attempts, please try again later.' }
