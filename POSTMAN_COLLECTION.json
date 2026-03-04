@@ -1,0 +1,122 @@
+{
+  "info": {
+    "name": "School Management System API",
+    "_postman_id": "00000000-0000-0000-0000-000000000000",
+    "description": "Postman collection for all School Management System endpoints, organized by role.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"admin@school.edu\",\n  \"password\": \"Admin@2024Secure!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"teacher_new\",\n  \"email\": \"teacher.new@school.edu\",\n  \"password\": \"Teacher@2024Secure!\",\n  \"role\": \"teacher\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teacher",
+      "item": [
+        {
+          "name": "My Classes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/classes?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["api", "classes"] }
+          }
+        },
+        {
+          "name": "Mark Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classId\": \"{{classId}}\",\n  \"date\": \"2026-03-01\",\n  \"records\": [\n    { \"studentId\": \"{{studentId1}}\", \"status\": \"present\" },\n    { \"studentId\": \"{{studentId2}}\", \"status\": \"absent\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/attendance/mark", "host": ["{{baseUrl}}"], "path": ["api", "attendance", "mark"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student",
+      "item": [
+        {
+          "name": "My Attendance",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/attendance/student/me", "host": ["{{baseUrl}}"], "path": ["api", "attendance", "student", "me"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    }
+  ]
+}
+

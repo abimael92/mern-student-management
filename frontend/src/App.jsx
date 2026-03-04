@@ -1,67 +1,105 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import AnalyticsPage from './pages/Analytics/AnalyticsPage';
-import FeesPage from './pages/Fees/FeesPage';
-import LibraryPage from './pages/Library/LibraryPage';
-import StudentPage from './pages/Students/StudentPage';
-import StudentForm from './components/students/StudentForm';
-import TeacherPage from './pages/Teachers/TeacherPage';
-import TransportPage from './pages/Transport/TransportPage';
-import AcademicsPage from './pages/Academics/AcademicsPage';
-import GradesAnalytics from './pages/GradesAnalytics/GradesAnalyticsPage';
-import AttendancePage from './pages/Attendance/AttendancePage';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { CircularProgress, Box } from '@mui/material';
+import LoginPage from './pages/auth/LoginPage';
+import AdminLayout from './layouts/AdminLayout';
+import TeacherLayout from './layouts/TeacherLayout';
+import StudentLayout from './layouts/StudentLayout';
+import NurseLayout from './layouts/NurseLayout';
+import SecretaryLayout from './layouts/SecretaryLayout';
+import DirectorLayout from './layouts/DirectorLayout';
+import { useAuth } from './hooks/useAuth';
 
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+const ProtectedRoute = ({ children, roles }) => {
+  const { isAuthenticated, role, isLoading } = useAuth();
 
-import { Container, ThemeProvider, CssBaseline, Box } from '@mui/material';
-import theme from './styles/theme';
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-const App = () => {
-  return (
-    <ThemeProvider theme={theme}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <CssBaseline />
-        <Router>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: '100vh',
-            }}
-          >
-            <Header />
-            <Box component="main" sx={{ flex: 1 }}>
-              <Container maxWidth="lg">
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/analytics" element={<AnalyticsPage />} />
-                  <Route path="/students" element={<StudentPage />} />
-                  <Route path="/teachers" element={<TeacherPage />} />
-                  <Route path="/add-student" element={<StudentForm />} />
-                  <Route path="/edit-student/:id" element={<StudentForm />} />
-                  <Route path="/academics" element={<AcademicsPage />} />
-                  <Route path="/academics-plan" element={<GradesAnalytics />} />
-                  <Route path="/attendance" element={<AttendancePage />} />
-                  <Route path="/fees" element={<FeesPage />} />
-                  <Route path="/transport" element={<TransportPage />} />
-                  <Route path="/library" element={<LibraryPage />} />
-                </Routes>
-              </Container>
-            </Box>
-            <Footer />
-          </Box>
-        </Router>
-      </LocalizationProvider>
-    </ThemeProvider>
-  );
+  // Not authenticated - redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check role-based access
+  if (roles && !roles.includes(role)) {
+    // Redirect to their appropriate dashboard based on role
+    const redirectPath = `/${role}`;
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  // Authorized - render children
+  return children;
 };
+
+const App = () => (
+  <Routes>
+    <Route path="/login" element={<LoginPage />} />
+
+    <Route
+      path="/admin/*"
+      element={
+        <ProtectedRoute roles={['admin']}>
+          <AdminLayout />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/teacher/*"
+      element={
+        <ProtectedRoute roles={['teacher']}>
+          <TeacherLayout />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/student/*"
+      element={
+        <ProtectedRoute roles={['student']}>
+          <StudentLayout />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/nurse/*"
+      element={
+        <ProtectedRoute roles={['nurse']}>
+          <NurseLayout />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/secretary/*"
+      element={
+        <ProtectedRoute roles={['secretary']}>
+          <SecretaryLayout />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/director/*"
+      element={
+        <ProtectedRoute roles={['director']}>
+          <DirectorLayout />
+        </ProtectedRoute>
+      }
+    />
+    <Route path="/" element={<Navigate to="/login" replace />} />
+    <Route path="*" element={<Navigate to="/login" replace />} />
+  </Routes>
+);
 
 export default App;
