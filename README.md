@@ -1,236 +1,216 @@
-# Ultimate School Management System (M.E.R.N) - Academix
+# School Management System
 
-![Ultimate School Management System (M.E.R.N)](https://abimael-common-assets.s3.eu-west-1.amazonaws.com/myproject-resources/academix-preview.png)
+MERN stack school management platform with **6 roles**:
 
-![MERN Stack](https://img.shields.io/badge/MERN-Stack-blueviolet)
-![License](https://img.shields.io/badge/License-MIT-green)
+- **Admin**
+- **Director**
+- **Teacher**
+- **Student**
+- **Nurse**
+- **Secretary**
 
-## Next-Generation Academic Management Platform
+The system provides secure, role‑based access to core school operations: user management, classes, attendance, grades, fees, medical records, documents, and analytics.
 
-A comprehensive, modular MERN stack solution revolutionizing school administration with cutting-edge features for academic scheduling, attendance tracking, payroll management, and student lifecycle management.
+---
 
-## Table of Contents
-- Key Features
-- System Architecture
-- Data Models
-- Installation Guide
-- Deployment
-- Development Workflow
-- Testing Strategy
-- Security
-- Performance Optimization
-- Contributing
-- License
-- Contact
+## Quick Start
 
-## Key Features
+### 1. Clone repository
 
-### Core Functionalities
-- **Multi-Calendar System**: Support for Semesters, Trimesters, Quarters, and Custom Academic Periods
-- **Hierarchical Structure**: Subject → Course → Class with Intelligent Room/Teacher Assignment
-- **Advanced Role System**: Granular permissions for Teachers, Nurses, Admin, and Custom Roles
-- **Comprehensive Tracking**: Attendance, Behavioral Notes, Medical Records, and Academic Progress
-- **Automated Payroll**: Complex salary calculations with bonuses and deductions
-
-### Premium Features
-- **AI-Powered Scheduling**: Conflict-free automatic timetable generation
-- **Real-time Analytics Dashboard**: Visualize key metrics and trends
-- **Mobile Responsive**: Fully functional on all devices
-- **API-First Design**: RESTful endpoints with Swagger documentation
-- **WebSocket Integration**: Real-time notifications and updates
-
-## System Architecture
-
-### High-Level Architecture
-
-```mermaid
-graph TD
-    A[Frontend: React] -->|API Calls| B[Backend: Node/Express]
-    B -->|Data Persistence| C[(MongoDB Atlas)]
-    B -->|Authentication| D[Auth0/JWT]
-    A -->|Real-time| E[Socket.IO]
-    B -->|External APIs| F[Payment Gateways]
-    B -->|External APIs| G[SMTP Service]
+```bash
+git clone https://github.com/your-org/school-management.git
+cd school-management
 ```
 
+### 2. Install dependencies
 
-### Component Diagram
+At the project root:
 
-![ER Diagram](frontend/public/assets/ER-Diagram.svg)
-
-## Data Models
-
-![Component Diagram](frontend/public/assets/componentDiagram.svg)
-
-### School Structure
-
-**Key Relationships:**
-- 1:M SchoolYear → Periods
-- 1:M Subject → Courses
-- 1:M Course → Classes
-- M:N Students ↔ Classes (through Enrollment)
-- 1:1 Teacher ↔ Payroll
-
-## Installation Guide
-
-### System Requirements
-- Node.js 16+
-- MongoDB 5.0+
-- Redis 6.0+ (for caching)
-- 4GB RAM minimum
-- 10GB Disk Space
-
-### Installation Steps
 ```bash
-git clone https://github.com/your-repo/school-management-enterprise.git
-cd school-management-enterprise
-cp .env.example .env
-npm run setup
-npm run db:seed
+npm run install-all
+```
+
+> Configure `install-all` in `package.json` to run `npm install` in both `backend` and `frontend`.
+
+### 3. Configure environment variables
+
+Copy `.env.example` into backend and frontend as needed and update values:
+
+```bash
+cp .env.example backend/.env
+cp .env.example frontend/.env   # or create a separate frontend .env
+```
+
+Set:
+
+- `MONGO_URI`
+- `JWT_SECRET`, `JWT_REFRESH_SECRET`
+- AWS credentials and bucket
+- `VITE_API_URL`
+
+See **`.env.example`** for details.
+
+### 4. Seed database
+
+```bash
+cd backend
+npm run seed
+```
+
+This will:
+
+- Reset the target database.
+- Create all collections with indexes.
+- Seed users for all 6 roles.
+- Seed students, classes, attendance, fees, and medical data.
+
+### 5. Start development servers
+
+Backend:
+
+```bash
+cd backend
 npm run dev
 ```
 
-## Deployment
-
-### Docker Deployment
-```bash
-docker-compose up -d --build
-```
-
-### Cloud Deployment Options
-
-**AWS Elastic Beanstalk**
+Frontend:
 
 ```bash
-eb init
-eb create --sample
-eb deploy
+cd frontend
+npm run dev
 ```
 
-** Heroku**
+Visit `http://localhost:5173` (or your Vite dev port).
 
-```bash
-heroku create
-git push heroku main
+---
+
+## Default Logins
+
+Use these accounts in **local development** after running the seed script.
+
+- **Admin**
+  - Email: `admin@school.edu`
+  - Password: `Admin@2024Secure!`
+- **Admin (secondary)**
+  - Email: `admin2@school.edu`
+  - Password: `Admin@2024Secure!`
+- **Director**
+  - Email: `director@school.edu`
+  - Password: `Director@2024Secure!`
+- **Teacher**
+  - Email: `wilson@school.edu`
+  - Password: `Teacher@2024Secure!`
+- **Student**
+  - Email: `emma.j@student.edu`
+  - Password: `Student@2024Secure!`
+- **Nurse**
+  - Email: `nurse@school.edu`
+  - Password: `Nurse@2024Secure!`
+- **Secretary**
+  - Email: `secretary@school.edu`
+  - Password: `Secretary@2024Secure!`
+
+> Additional seeded teachers and students follow the naming patterns described in `SEED_DATA_COMPLETE.json`.
+
+---
+
+## High‑Level Features
+
+- **Authentication & Security**
+  - JWT‑based auth with short‑lived access tokens and rotated refresh tokens.
+  - Role‑based access control (RBAC) for 6 roles.
+  - httpOnly cookies, Helmet, rate limiting, input sanitization, Mongo injection + XSS protection.
+
+- **Admin**
+  - User management (CRUD).
+  - Role assignment.
+  - System settings.
+  - Audit logs viewer.
+
+- **Director**
+  - Read‑only analytics: attendance trends, grade distributions, fee statistics.
+  - School performance and reports.
+
+- **Teacher**
+  - Own classes and rosters.
+  - Attendance marking for own classes.
+  - Grade management and student notes.
+
+- **Student**
+  - Self‑service dashboard.
+  - Profile (read‑only).
+  - Attendance history and grades.
+  - Fee status and documents.
+
+- **Nurse**
+  - Health records per student.
+  - Immunization and incident logging.
+  - Medical document uploads.
+
+- **Secretary**
+  - Student enrollment and documentation.
+  - Timetable and schedule management.
+  - Communication logs.
+
+- **Infrastructure**
+  - MongoDB with indexes and seeding.
+  - AWS S3 for file storage (profile pictures, documents, medical files).
+  - Optional Redis caching for frequent queries.
+
+---
+
+## Project Structure
+
+```text
+backend/      # Express API, models, controllers, middleware
+frontend/     # React + Vite SPA with role-based dashboards
+scripts/      # Seed, backup, and maintenance scripts
+docs/         # API docs, user manual, deployment, testing, monitoring
 ```
 
-**Azure App Service**
+See:
 
-```bash
-az webapp up --sku F1 --name <app-name>
-```
+- `API_DOCS.md` – All endpoints and roles.
+- `USER_MANUAL.md` – Role‑specific usage.
+- `DEPLOYMENT_GUIDE.md` – Local & production deployment.
+- `TESTING.md` – How to run and interpret tests.
+- `MONITORING.md` – Logging, alerting, performance.
+- `TROUBLESHOOTING.md` – Common issues and fixes.
 
-## Development Workflow
+---
 
-### Scripts Overview
-| Command | Description |
-| ------- | ----------- |
-| npm run dev | Start development servers |
-| npm run build | Production build |
-| npm run test | Run all tests |
-| npm run lint | Run ESLint |
-| npm run format | Format with Prettier |
-| npm run storybook | Launch UI component library |
+## Scripts
 
-## CI/CD Pipeline
+From the **root**:
 
-```mermaid
-graph LR
-    A[Code Commit] --> B[ESLint Check]
-    B --> C[Unit Tests]
-    C --> D[Integration Tests]
-    D --> E[Build Artifacts]
-    E --> F[Deploy to Staging]
-    F --> G[Manual Approval]
-    G --> H[Production Deployment]
-```
+- `npm run install-all` – Install dependencies for backend and frontend.
+- `npm run seed` – Run backend seeding.
+- `npm run dev` – Start both backend and frontend in dev (if configured via a root script).
 
+From **backend**:
 
+- `npm run dev` – Start API in development.
+- `npm run seed` – Reset and seed MongoDB with sample data.
+- `npm test` – Run backend tests (models, API, RBAC).
 
-## Testing Strategy
+From **frontend**:
 
-### Test Distribution
-- Unit Tests: 60%
-- Integration Tests: 30%
-- E2E Tests: 10%
+- `npm run dev` – Start Vite dev server.
+- `npm run build` – Build production bundle.
 
-### Test Coverage
-- Frontend: Jest + React Testing Library (95%+ coverage)
-- Backend: Mocha + Chai (90%+ coverage)
-- E2E: Cypress (Critical paths only)
+---
 
+## Contributing
 
-** Test Pyramid** 
+See `CONTRIBUTING.md` for:
 
-```mermaid
-pie
-    title Test Distribution
-    "Unit Tests" : 60
-    "Integration Tests" : 30
-    "E2E Tests" : 10
-```
+- How to set up your dev environment.
+- Coding standards and linting.
+- Pull request process.
+- Testing and review requirements.
 
+---
 
-###  Test Coverage
-- Frontend: Jest + React Testing Library (95%+ coverage)
-- Backend: Mocha + Chai (90%+ coverage)
-- E2E: Cypress (Critical paths only)
+## License
 
-Run all tests:
-```bash
-npm test
-```
-
-## 🔒 Security
-
-### 🛡️ Security Features
-- JWT authentication with refresh tokens
-- RBAC with ABAC extensions
-- Field-level encryption
-- Audit logging
-- Rate limiting
-- CORS strict policy
-- Helmet for secure HTTP headers
-
-### 🔐 Security Checklist
-- OWASP Top 10 mitigated
-- Regular dependency audits
-- Secret rotation every 90 days
-- Quarterly penetration tests
-
-## 📈 Performance Optimization
-- Redis caching
-- Lazy loading and code splitting
-- Pagination
-- Gzip compression
-- CDN asset delivery
-- Database indexing
-
-**📊 Benchmarks:**
-| Operation | Avg Response Time |
-| --------- | ----------------- |
-| GET /classes | 120ms |
-| POST /attendance | 250ms |
-| GET /reports | 800ms (cached: 150ms) |
-
-## 🤝 Contributing
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-**Code Standards:**
-- Airbnb JavaScript Style Guide (ESLint)
-- Prettier formatting
-- Conventional commits
-- JSDoc documentation
-
-## 📜 License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
-## 📞 Contact
-- **Maintainer:** [Your Name]
-- **Email:** your.email@example.com
-- **Slack:** Join our workspace
-- **Issues:** GitHub Issues
+This project is released under the MIT License. See `LICENSE` for details.
