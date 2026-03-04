@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import { apiLimiter } from './middleware/rateLimit.js';
@@ -21,10 +22,34 @@ import classRoutes from './modules/classes/class.routes.js';
 import roomRoutes from './modules/rooms/room.routes.js';
 import uploadRoutes from './routes/upload.js';
 
-dotenv.config();
+// Get current directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Explicitly load .env from backend directory
+const envPath = path.join(__dirname, '.env');
+console.log('Loading .env from:', envPath);
+console.log('File exists:', fs.existsSync(envPath));
+
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.error('❌ Failed to load .env:', result.error);
+  process.exit(1);
+} else {
+  console.log('✅ .env loaded successfully');
+}
+
+// Verify JWT_SECRET is loaded
+console.log('JWT_SECRET loaded:', process.env.JWT_SECRET ? '✅ Yes' : '❌ No');
+if (!process.env.JWT_SECRET) {
+  console.error('❌ JWT_SECRET is still missing after loading .env!');
+  process.exit(1);
+}
 
 const app = express();
 
+// Security middleware
 app.use(helmet());
 app.use(
   cors({
@@ -32,13 +57,20 @@ app.use(
     credentials: true
   })
 );
+
+// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Security sanitization
 app.use(mongoSanitize());
 app.use(xss());
+
+// Rate limiting
 app.use('/api', apiLimiter);
 
+// ========== API ROUTES (These come FIRST) ==========
 app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/students', studentRoutes);
@@ -50,18 +82,22 @@ app.use('/api/classes', classRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/upload', uploadRoutes);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// ========== STATIC FILES (These come AFTER API routes) ==========
 const frontendPath = path.join(__dirname, '../frontend/dist');
 
+// Serve static files
 app.use(express.static(frontendPath));
-app.get('*', (req, res) => {
+
+// This catch-all should ONLY serve the frontend for non-API routes
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
+// ========== ERROR HANDLERS (These come LAST) ==========
 app.use(notFound);
 app.use(errorHandler);
 
+// Database connection and server start
 connectDB().then(() => {
   app.listen(process.env.PORT || 5000, () => {
     console.log(`Server running on port ${process.env.PORT || 5000}`);
