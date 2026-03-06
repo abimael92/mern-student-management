@@ -9,7 +9,11 @@ import TeacherList from './TeacherList';
 
 const TeacherContainer = () => {
   const dispatch = useDispatch();
-  const { teachers, loading, error } = useSelector((state) => state.teachers);
+  const {
+    teachers = [],
+    loading = false,
+    error = null,
+  } = useSelector((state) => state.teachers || {});
   const [filter, setFilter] = useState({
     search: '',
     status: 'all',
@@ -20,6 +24,17 @@ const TeacherContainer = () => {
     dispatch(fetchTeachers());
   }, [dispatch]);
 
+  useEffect(() => {
+    console.log('Teachers:', teachers);
+    console.log('Filter:', filter);
+  }, [teachers, filter]);
+
+  // Add this near the top
+  const reduxState = useSelector((state) => state);
+  console.log('📦 Redux store has keys:', Object.keys(reduxState));
+  console.log('📦 Teachers key exists:', reduxState.hasOwnProperty('teachers'));
+  console.log('📦 Teachers value:', reduxState.teachers);
+
   const filteredTeachers = teachers.filter((teacher) => {
     const matchesSearch =
       filter.search === '' ||
@@ -29,8 +44,9 @@ const TeacherContainer = () => {
 
     const matchesStatus =
       filter.status === 'all' ||
-      (filter.status === 'active' && teacher.isActive) ||
-      (filter.status === 'inactive' && !teacher.isActive);
+      (filter.status === 'active' && teacher.status === 'active') ||
+      (filter.status === 'inactive' &&
+        (teacher.status === 'inactive' || teacher.status === 'on leave'));
 
     const matchesSubject =
       filter.subject === '' || teacher.subjects.includes(filter.subject);
