@@ -3,6 +3,7 @@ import { Box, Typography, Select, MenuItem, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import api from '../../services/api';
 import DataTable from '../../components/common/DataTable';
+import PageWrapper from '../../components/common/PageWrapper';
 
 const UserManagement = () => {
   const [rows, setRows] = useState([]);
@@ -11,7 +12,9 @@ const UserManagement = () => {
   const [total, setTotal] = useState(0);
 
   const load = async (pageIndex, limit) => {
-    const { data } = await api.get('/users', { params: { page: pageIndex + 1, limit } });
+    const { data } = await api.get('/users', {
+      params: { page: pageIndex + 1, limit },
+    });
     if (Array.isArray(data)) {
       setRows(data);
       setTotal(data.length);
@@ -33,60 +36,65 @@ const UserManagement = () => {
   const columns = [
     { field: 'username', headerName: 'Username' },
     { field: 'email', headerName: 'Email' },
-    { field: 'role', headerName: 'Role' }
+    { field: 'role', headerName: 'Role' },
   ];
 
   return (
-    <Box>
-      <Typography variant="h6" mb={2}>
-        User Management
-      </Typography>
-      <DataTable
-        columns={[
-          ...columns,
-          {
-            field: 'actions',
-            headerName: 'Actions'
-          }
-        ]}
-        rows={rows.map((u) => ({
-          ...u,
-          actions: (
-            <IconButton size="small">
-              <EditIcon fontSize="small" />
-            </IconButton>
-          )
-        }))}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        total={total}
-        onPageChange={setPage}
-        onRowsPerPageChange={setRowsPerPage}
-      />
-      <Box mt={2}>
-        <Typography variant="body2">Change Role:</Typography>
-        {rows.map((u) => (
-          <Box key={u._id} display="flex" alignItems="center" gap={1} mt={1}>
-            <Typography variant="body2" sx={{ width: 160 }}>
-              {u.username}
-            </Typography>
-            <Select
-              size="small"
-              value={u.role}
-              onChange={(e) => handleRoleChange(u._id, e.target.value)}
-            >
-              {['admin', 'director', 'teacher', 'student', 'nurse', 'secretary'].map((r) => (
-                <MenuItem key={r} value={r}>
-                  {r}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-        ))}
+    <PageWrapper title="User Management">
+      <Box>
+        <DataTable
+          columns={[
+            ...columns,
+            {
+              field: 'actions',
+              headerName: 'Actions',
+            },
+          ]}
+          rows={rows.map((u) => ({
+            ...u,
+            actions: (
+              <IconButton size="small">
+                <EditIcon fontSize="small" />
+              </IconButton>
+            ),
+          }))}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          total={total}
+          onPageChange={setPage}
+          onRowsPerPageChange={setRowsPerPage}
+        />
+        <Box mt={2}>
+          <Typography variant="body2">Change Role:</Typography>
+          {rows.map((u) => (
+            <Box key={u._id} display="flex" alignItems="center" gap={1} mt={1}>
+              <Typography variant="body2" sx={{ width: 160 }}>
+                {u.username}
+              </Typography>
+              <Select
+                size="small"
+                value={u.role}
+                onChange={(e) => handleRoleChange(u._id, e.target.value)}
+              >
+                {[
+                  'admin',
+                  'director',
+                  'teacher',
+                  'student',
+                  'nurse',
+                  'secretary',
+                ].map((r) => (
+                  <MenuItem key={r} value={r}>
+                    {r}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+          ))}
+        </Box>
       </Box>
-    </Box>
+    </PageWrapper>
   );
 };
 
 export default UserManagement;
-

@@ -1,17 +1,21 @@
 import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
+import PageWrapper from '../../components/common/PageWrapper';
 
 const Settings = () => (
-  <Box>
-    <Typography variant="h6" mb={2}>
-      System Settings
-    </Typography>
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="body2">
+  <PageWrapper title="System Settings">
+    <Paper
+      sx={{
+        p: 4,
+        borderRadius: 4,
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+      }}
+    >
+      <Typography variant="body2" color="text.secondary">
         Configure global system options here (feature toggles, academic year, etc.).
       </Typography>
     </Paper>
-  </Box>
+  </PageWrapper>
 );
 
 export default Settings;

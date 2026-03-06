@@ -1,10 +1,10 @@
 import React from 'react';
 import { Paper, Typography } from '@mui/material';
-import LocalHospital from '@mui/icons-material/LocalHospital';
+import People from '@mui/icons-material/People';
 import PageWrapper from '../../components/common/PageWrapper';
 
-const HealthRecords = () => (
-  <PageWrapper title="Health Records">
+const DirectorTeachers = () => (
+  <PageWrapper title="Teachers Overview">
     <Paper
       sx={{
         p: 4,
@@ -13,16 +13,15 @@ const HealthRecords = () => (
         textAlign: 'center',
       }}
     >
-      <LocalHospital sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
+      <People sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
       <Typography variant="h6" gutterBottom>
-        Student health records
+        Teaching staff overview
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Search for a student to view or add health notes, immunizations, and incident reports.
+        Read-only view of teachers and assignments.
       </Typography>
     </Paper>
   </PageWrapper>
 );
 
-export default HealthRecords;
-
+export default DirectorTeachers;

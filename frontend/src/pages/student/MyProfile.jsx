@@ -1,21 +1,29 @@
 import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Paper, Typography, Box } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
+import PageWrapper from '../../components/common/PageWrapper';
 
 const MyProfile = () => {
   const { user } = useAuth();
   const profile = user?.profile || {};
+  const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || user?.username;
+
   return (
-    <Box>
-      <Typography variant="h6" mb={2}>
-        My Profile
-      </Typography>
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="body2">Name: {profile.firstName} {profile.lastName}</Typography>
-        <Typography variant="body2">Email: {user?.email}</Typography>
-        <Typography variant="body2">Phone: {profile.phone}</Typography>
+    <PageWrapper title="My Profile">
+      <Paper
+        sx={{
+          p: 4,
+          borderRadius: 4,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body1"><strong>Name:</strong> {fullName}</Typography>
+          <Typography variant="body1"><strong>Email:</strong> {user?.email}</Typography>
+          <Typography variant="body1"><strong>Phone:</strong> {profile.phone || '—'}</Typography>
+        </Box>
       </Paper>
-    </Box>
+    </PageWrapper>
   );
 };
 
