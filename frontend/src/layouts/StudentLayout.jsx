@@ -6,7 +6,7 @@ import MyProfile from '../pages/student/MyProfile';
 import MyAttendance from '../pages/student/MyAttendance';
 
 const StudentLayout = () => (
-  <MainLayout title="Student Portal">
+  <MainLayout>
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/profile" element={<MyProfile />} />

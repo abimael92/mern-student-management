@@ -1,19 +1,22 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Box } from '@mui/material';
-import Header from '../components/common/Header';
-import Sidebar from '../components/common/Sidebar';
+import { Routes, Route } from 'react-router-dom';
+import MainLayout from './MainLayout';
+import DirectorDashboard from '../pages/director/Dashboard';
+import DirectorAnalytics from '../pages/director/Analytics';
+import DirectorReports from '../pages/director/Reports';
+import DirectorStudents from '../pages/director/Students';
+import DirectorTeachers from '../pages/director/Teachers';
 
-const DirectorLayout = () => {
-  return (
-    <Box sx={{ display: 'flex' }}>
-      <Header />
-      <Sidebar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
-        <Outlet />
-      </Box>
-    </Box>
-  );
-};
+const DirectorLayout = () => (
+  <MainLayout>
+    <Routes>
+      <Route path="/" element={<DirectorDashboard />} />
+      <Route path="/analytics" element={<DirectorAnalytics />} />
+      <Route path="/reports" element={<DirectorReports />} />
+      <Route path="/students" element={<DirectorStudents />} />
+      <Route path="/teachers" element={<DirectorTeachers />} />
+    </Routes>
+  </MainLayout>
+);
 
 export default DirectorLayout;
