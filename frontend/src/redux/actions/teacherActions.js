@@ -20,6 +20,7 @@ export const fetchTeachers = () => async (dispatch) => {
     dispatch({ type: FETCH_TEACHERS_REQUEST });
     try {
         const data = await api.fetchTeachers();
+        console.log('API fetchTeachers response:', data); 
         dispatch({ type: FETCH_TEACHERS_SUCCESS, payload: data });
     } catch (error) {
         dispatch({ type: FETCH_TEACHERS_FAILURE, payload: error.message });
