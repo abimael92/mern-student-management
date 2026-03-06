@@ -10,7 +10,11 @@ import StudentList from './StudentList';
 
 const StudentContainer = () => {
   const dispatch = useDispatch();
-  const { students, isLoading, error } = useSelector((state) => state.students);
+  const {
+    students = [],
+    isLoading = false,
+    error = null,
+  } = useSelector((state) => state.students || {});
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);

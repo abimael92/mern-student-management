@@ -9,7 +9,7 @@ import {
   useMediaQuery,
   Menu,
   MenuItem,
-  Divider,
+  // Divider,
   Tooltip,
   Chip,
   Badge,
@@ -19,8 +19,12 @@ import {
   useScrollTrigger,
   Container,
 } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme, alpha } from '@mui/material/styles';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
+import getNavConfig from '../../config/navConfig';
+import { useAuth } from '../../hooks/useAuth';
 import {
   School,
   Home,
@@ -44,14 +48,20 @@ import {
   Lightbulb,
 } from '@mui/icons-material';
 
-const Header = () => {
+const Header = ({ navConfig: navConfigProp }) => {
   const theme = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { role } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+
+  const navConfig = navConfigProp || getNavConfig(role);
+  const { categories = [], userMenuItems = [], homePath = '/' } = navConfig;
 
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -80,139 +90,11 @@ const Header = () => {
     setMobileMenuAnchor(null);
   };
 
-  // Menu data with enhanced features
-  const insightsReportsItems = [
-    {
-      name: 'Dashboard',
-      path: '/dashboard',
-      icon: <Dashboard />,
-      badge: '3',
-      color: 'primary',
-    },
-    {
-      name: 'Analytics',
-      path: '/analytics',
-      icon: <TrendingUp />,
-      badge: 'New',
-      color: 'secondary',
-    },
-  ];
-
-  const peopleManagementItems = [
-    {
-      name: 'Students',
-      path: '/students',
-      icon: <People />,
-      count: '245',
-    },
-    {
-      name: 'Teachers',
-      path: '/teachers',
-      icon: <People />,
-      count: '32',
-    },
-    {
-      name: 'Staff',
-      path: '/staff',
-      icon: <People />,
-      comingSoon: true,
-    },
-  ];
-
-  const academicsAttendanceItems = [
-    {
-      name: 'Academics',
-      path: '/academics',
-      icon: <MenuBookOutlined />,
-      featured: true,
-    },
-    {
-      name: 'School Manager',
-      path: '/academics-plan',
-      icon: <ClassOutlined />,
-    },
-    {
-      name: 'Attendance',
-      path: '/attendance',
-      icon: <EventAvailableOutlined />,
-      badge: 'Live',
-    },
-  ];
-
-  const financialLogisticsItems = [
-    {
-      name: 'Fees',
-      path: '/fees',
-      icon: <Receipt />,
-      badge: 'Due',
-      color: 'error',
-    },
-    {
-      name: 'Transport',
-      path: '/transport',
-      icon: <LocalShipping />,
-    },
-    {
-      name: 'Inventory',
-      path: '/inventory',
-      icon: <LocalShipping />,
-      comingSoon: true,
-    },
-  ];
-
-  const resourcesFacilitiesItems = [
-    {
-      name: 'Library',
-      path: '/library',
-      icon: <LibraryBooks />,
-      count: '1.2k',
-    },
-    {
-      name: 'Labs',
-      path: '/labs',
-      icon: <SchoolOutlined />,
-      comingSoon: true,
-    },
-  ];
-
-  const userMenuItems = [
-    { name: 'Profile', path: '/profile', icon: <AccountCircle /> },
-    { name: 'Settings', path: '/settings', icon: <Lightbulb /> },
-    { name: 'Logout', path: '/logout', icon: <RocketLaunch /> },
-  ];
-
-  const categories = [
-    {
-      name: 'Insights & Reports',
-      icon: <Assessment />,
-      items: insightsReportsItems,
-      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    },
-    {
-      name: 'People Management',
-      icon: <People />,
-      items: peopleManagementItems,
-      color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    },
-    {
-      name: 'Academics & Attendance',
-      icon: <SchoolOutlined />,
-      items: academicsAttendanceItems,
-      color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    },
-    {
-      name: 'Financial & Logistics',
-      icon: <Receipt />,
-      items: financialLogisticsItems,
-      color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    },
-    {
-      name: 'Resources & Facilities',
-      icon: <LibraryBooks />,
-      items: resourcesFacilitiesItems,
-      color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    },
-  ];
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+    handleMenuClose();
+  };
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
@@ -252,7 +134,7 @@ const Header = () => {
               <Slide direction="right" in={true} timeout={800}>
                 <Box
                   component={Link}
-                  to="/"
+                  to={homePath}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
@@ -307,7 +189,7 @@ const Header = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
                   component={Link}
-                  to="/"
+                  to={homePath}
                   startIcon={<Home />}
                   sx={{
                     color: scrolled ? 'text.primary' : 'white',
@@ -317,7 +199,7 @@ const Header = () => {
                     borderRadius: 3,
                     px: 3,
                     py: 1,
-                    background: isActiveRoute('/')
+                    background: isActiveRoute(homePath)
                       ? alpha(theme.palette.primary.main, 0.1)
                       : 'transparent',
                     '&:hover': {
@@ -485,29 +367,51 @@ const Header = () => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {selectedCategory === 'User'
-          ? userMenuItems.map((item) => (
-              <MenuItem
-                key={item.name}
-                component={Link}
-                to={item.path}
-                onClick={handleMenuClose}
-                sx={{
-                  py: 2,
-                  px: 3,
-                  gap: 2,
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                    transform: 'translateX(4px)',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {item.icon}
-                <Typography variant="body1" fontWeight={500}>
-                  {item.name}
-                </Typography>
-              </MenuItem>
-            ))
+          ? userMenuItems.map((item) =>
+              item.isLogout ? (
+                <MenuItem
+                  key={item.name}
+                  onClick={handleLogout}
+                  sx={{
+                    py: 2,
+                    px: 3,
+                    gap: 2,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      transform: 'translateX(4px)',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {item.icon}
+                  <Typography variant="body1" fontWeight={500}>
+                    {item.name}
+                  </Typography>
+                </MenuItem>
+              ) : (
+                <MenuItem
+                  key={item.name}
+                  component={Link}
+                  to={item.path}
+                  onClick={handleMenuClose}
+                  sx={{
+                    py: 2,
+                    px: 3,
+                    gap: 2,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      transform: 'translateX(4px)',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {item.icon}
+                  <Typography variant="body1" fontWeight={500}>
+                    {item.name}
+                  </Typography>
+                </MenuItem>
+              )
+            )
           : categories
               .filter((category) => category.name === selectedCategory)
               .map((category) => (
@@ -643,7 +547,7 @@ const Header = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Button
               component={Link}
-              to="/"
+              to={homePath}
               startIcon={<Home />}
               onClick={handleMobileMenuClose}
               fullWidth

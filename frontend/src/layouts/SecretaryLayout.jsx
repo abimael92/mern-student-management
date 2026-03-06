@@ -5,7 +5,7 @@ import Dashboard from '../pages/secretary/Dashboard';
 import Enrollment from '../pages/secretary/Enrollment';
 
 const SecretaryLayout = () => (
-  <MainLayout title="Secretary Portal">
+  <MainLayout>
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/enrollment" element={<Enrollment />} />

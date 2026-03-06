@@ -5,7 +5,7 @@ import Dashboard from '../pages/nurse/Dashboard';
 import HealthRecords from '../pages/nurse/HealthRecords';
 
 const NurseLayout = () => (
-  <MainLayout title="Nurse Portal">
+  <MainLayout>
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/health-records" element={<HealthRecords />} />

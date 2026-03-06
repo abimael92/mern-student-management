@@ -6,7 +6,7 @@ import MyClasses from '../pages/teacher/MyClasses';
 import MarkAttendance from '../pages/teacher/MarkAttendance';
 
 const TeacherLayout = () => (
-  <MainLayout title="Teacher Portal">
+  <MainLayout>
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/classes" element={<MyClasses />} />

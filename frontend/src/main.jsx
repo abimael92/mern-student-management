@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import App from './App';
-import { store } from './store/store';
+import store from './redux/store';
 import theme from './styles/theme';
 import AuthLoader from './components/common/AuthLoader'; // Import the loader
 
