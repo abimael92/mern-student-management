@@ -26,7 +26,30 @@ export const JoiSchemas = {
     }),
     password: Joi.string().required().messages({
       'string.empty': 'Password is required'
-    })
+    }),
+    rememberMe: Joi.boolean().optional()
+  }),
+
+  registerPublic: Joi.object({
+    username: Joi.string().alphanum().min(3).max(30).required().messages({
+      'string.alphanum': 'Username must contain only letters and numbers',
+      'string.min': 'Username must be at least 3 characters',
+      'string.max': 'Username cannot exceed 30 characters',
+      'string.empty': 'Username is required'
+    }),
+    email: Joi.string().email().required().messages({
+      'string.email': 'Please provide a valid email',
+      'string.empty': 'Email is required'
+    }),
+    password: Joi.string().min(8).required().messages({
+      'string.min': 'Password must be at least 8 characters',
+      'string.empty': 'Password is required'
+    }),
+    profile: Joi.object({
+      firstName: Joi.string().optional(),
+      lastName: Joi.string().optional(),
+      phone: Joi.string().optional()
+    }).optional()
   }),
 
   registerUser: Joi.object({
