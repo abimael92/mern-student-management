@@ -14,14 +14,12 @@ const signToken = (user) =>
     { expiresIn: process.env.JWT_ACCESS_EXPIRE || '15m' }
   );
 
-// Helper function to generate refresh token (long-lived)
-const generateRefreshToken = async (user, ipAddress, userAgent) => {
-  // Create random token
+// Helper function to generate refresh token (long-lived; optional extended for "remember me")
+const generateRefreshToken = async (user, ipAddress, userAgent, rememberMe = false) => {
   const token = crypto.randomBytes(40).toString('hex');
-
-  // Set expiration (7 days from now)
+  const days = rememberMe ? 30 : 7;
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7);
+  expiresAt.setDate(expiresAt.getDate() + days);
 
   // Store in database
   const refreshToken = await RefreshToken.create({
@@ -36,7 +34,7 @@ const generateRefreshToken = async (user, ipAddress, userAgent) => {
 };
 
 // Helper function to set cookie options
-const getCookieOptions = (isRefreshToken = false) => {
+const getCookieOptions = (isRefreshToken = false, rememberMe = false) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -44,10 +42,11 @@ const getCookieOptions = (isRefreshToken = false) => {
   };
 
   if (isRefreshToken) {
+    const maxDays = rememberMe ? 30 : 7;
     return {
       ...options,
-      path: '/api/v1/auth/refresh',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      path: '/api/auth/refresh',
+      maxAge: maxDays * 24 * 60 * 60 * 1000
     };
   }
 
@@ -57,39 +56,33 @@ const getCookieOptions = (isRefreshToken = false) => {
   };
 };
 
-// Login with refresh token support
+// Login with refresh token support and optional "remember me"
 export const login = async (req, res) => {
   try {
-    const { usernameOrEmail, password } = req.body;
+    const { usernameOrEmail, password, rememberMe } = req.body;
     const ipAddress = req.ip || req.connection.remoteAddress;
     const userAgent = req.get('User-Agent') || 'unknown';
 
-    // Find user
     const user = await User.findOne({
       $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
     }).select('+password');
 
-    // Check credentials
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check if user is active
     if (user.isActive === false) {
       return res.status(401).json({ message: 'Account is deactivated' });
     }
 
-    // Generate tokens
     const accessToken = signToken(user);
-    const refreshToken = await generateRefreshToken(user, ipAddress, userAgent);
+    const refreshToken = await generateRefreshToken(user, ipAddress, userAgent, !!rememberMe);
 
-    // Update last login
     user.lastLogin = Date.now();
     await user.save({ validateBeforeSave: false });
 
-    // Set HTTP-only cookies
     res.cookie('accessToken', accessToken, getCookieOptions(false));
-    res.cookie('refreshToken', refreshToken, getCookieOptions(true));
+    res.cookie('refreshToken', refreshToken, getCookieOptions(true, !!rememberMe));
 
     // Return user info (no tokens in body)
     res.json({
@@ -167,18 +160,16 @@ export const refresh = async (req, res) => {
   }
 };
 
-// Register
+// Register (admin-only, any role)
 export const register = async (req, res) => {
   try {
     const { username, email, password, role, profile } = req.body;
 
-    // Check if user exists
     const exists = await User.findOne({ $or: [{ username }, { email }] });
     if (exists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user
     const user = await User.create({
       username,
       email,
@@ -201,6 +192,38 @@ export const register = async (req, res) => {
   }
 };
 
+// Public registration (student self-signup only)
+export const registerPublic = async (req, res) => {
+  try {
+    const { username, email, password, profile } = req.body;
+
+    const exists = await User.findOne({ $or: [{ username }, { email }] });
+    if (exists) {
+      return res.status(400).json({ message: 'Username or email already registered' });
+    }
+
+    const user = await User.create({
+      username,
+      email,
+      password,
+      role: 'student',
+      profile: profile || {},
+      isActive: true
+    });
+
+    res.status(201).json({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      message: 'Registration successful. You can now log in.'
+    });
+  } catch (error) {
+    console.error('Register public error:', error);
+    res.status(500).json({ message: 'Registration failed' });
+  }
+};
+
 // Logout
 export const logout = async (req, res) => {
   try {
@@ -216,7 +239,7 @@ export const logout = async (req, res) => {
 
     // Clear cookies
     res.clearCookie('accessToken');
-    res.clearCookie('refreshToken', { path: '/api/v1/auth/refresh' });
+    res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
 
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
@@ -305,5 +328,49 @@ export const revokeSession = async (req, res) => {
   } catch (error) {
     console.error('Revoke session error:', error);
     res.status(500).json({ message: 'Failed to revoke session' });
+  }
+};
+
+// Forgot password: send reset token (in production, send via email)
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
+    if (!user) {
+      return res.status(200).json({ message: 'If an account exists with that email, a reset link has been sent.' });
+    }
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+    // In production: send email with reset link containing resetToken
+    res.status(200).json({
+      message: 'If an account exists with that email, a reset link has been sent.',
+      resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Password reset request failed' });
+  }
+};
+
+// Reset password using token from email/link
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() }
+    }).select('+password +passwordResetToken +passwordResetExpires');
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    res.status(200).json({ message: 'Password has been reset. You can now log in.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Password reset failed' });
   }
 };

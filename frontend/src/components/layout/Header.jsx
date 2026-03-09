@@ -92,7 +92,7 @@ const Header = ({ navConfig: navConfigProp }) => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate('/');
     handleMenuClose();
   };
 

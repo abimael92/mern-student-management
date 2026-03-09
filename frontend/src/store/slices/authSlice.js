@@ -9,13 +9,12 @@ const initialState = {
   error: null
 };
 
-// Login thunk
+// Login thunk (cookies + optional rememberMe are set by backend)
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ usernameOrEmail, password }, { rejectWithValue }) => {
+  async ({ usernameOrEmail, password, rememberMe }, { rejectWithValue }) => {
     try {
-      // loginApi should now return only user data (no token)
-      const user = await loginApi(usernameOrEmail, password);
+      const user = await loginApi(usernameOrEmail, password, rememberMe);
       return user;
     } catch (err) {
       const message = err.response?.data?.message || 'Login failed';
@@ -90,11 +89,15 @@ const authSlice = createSlice({
         state.user = null; // Clear user if can't get current user
       })
 
-      // Logout cases
+      // Logout cases (clear user even if request fails so UI reflects logged-out state)
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.status = 'idle';
-        // No localStorage cleanup needed
+        state.error = null;
+      })
+      .addCase(logout.rejected, (state) => {
+        state.user = null;
+        state.status = 'idle';
       });
   }
 });

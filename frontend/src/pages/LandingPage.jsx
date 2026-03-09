@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Typography,
@@ -7,6 +8,8 @@ import {
   Grid,
   Card,
   CardContent,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
@@ -18,7 +21,7 @@ import {
 } from '@mui/icons-material';
 
 const LandingPage = () => {
-  // Features data for the features section
+  const navigate = useNavigate();
   const features = [
     {
       icon: <Dashboard sx={{ fontSize: 40 }} />,
@@ -65,20 +68,74 @@ const LandingPage = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Background Elements - Uncomment for decorative background */}
-      {/* <Box
+      <AppBar
+        position="fixed"
+        elevation={0}
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%)',
-          zIndex: 0,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         }}
-      /> */}
-
+      >
+        <Toolbar
+          sx={{
+            minHeight: { xs: 64, sm: 72 },
+            justifyContent: 'space-between',
+            px: { xs: 2, sm: 3 },
+          }}
+        >
+          <Typography
+            component="button"
+            variant="h6"
+            onClick={() => navigate('/')}
+            sx={{
+              fontWeight: 800,
+              color: '#fff',
+              cursor: 'pointer',
+              border: 'none',
+              background: 'none',
+              fontSize: { xs: '1.25rem', sm: '1.5rem' },
+              '&:hover': { opacity: 0.95 },
+            }}
+          >
+            AcademiX
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/login')}
+              sx={{
+                color: '#fff',
+                borderColor: 'rgba(255,255,255,0.9)',
+                fontWeight: 700,
+                px: { xs: 2, sm: 3 },
+                '&:hover': {
+                  borderColor: '#fff',
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                },
+              }}
+            >
+              Log in
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/register')}
+              sx={{
+                backgroundColor: '#fff',
+                color: 'primary.main',
+                fontWeight: 700,
+                px: { xs: 2, sm: 3 },
+                boxShadow: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                },
+              }}
+            >
+              Sign up
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
+      <Toolbar sx={{ minHeight: { xs: 64, sm: 72 } }} />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         {/* ===== HERO SECTION ===== */}
         {/* Centered Header Section */}
@@ -238,6 +295,7 @@ const LandingPage = () => {
                       size="large"
                       fullWidth
                       startIcon={<RocketLaunch />}
+                      onClick={() => navigate('/login')}
                       sx={{
                         background:
                           'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

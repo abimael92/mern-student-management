@@ -1,32 +1,21 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CircularProgress, Box } from '@mui/material';
+import { getCurrentUser } from '../../store/slices/authSlice';
 
+/**
+ * Runs getCurrentUser on mount so auth state is available.
+ * Always renders children so the app (and landing page) show immediately—
+ * no full-screen spinner that blocks the landing page.
+ */
 const AuthLoader = ({ children }) => {
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Ensure we try to load the user if not already loaded
     if (status === 'idle') {
-      dispatch({ type: 'auth/getCurrentUser' });
+      dispatch(getCurrentUser());
     }
   }, [dispatch, status]);
-
-  if (status === 'loading') {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return children;
 };

@@ -2,12 +2,15 @@ import express from 'express';
 import {
     login,
     register,
+    registerPublic,
     logout,
     me,
     refresh,
     revokeAllTokens,
     getMySessions,
-    revokeSession
+    revokeSession,
+    forgotPassword,
+    resetPassword
 } from '../controllers/authController.js';
 import { authRequired } from '../middleware/auth.js';
 import { restrictTo } from '../middleware/rbac.js';
@@ -19,6 +22,9 @@ const router = express.Router();
 // ==================== PUBLIC ROUTES ====================
 router.post('/login', loginLimiter, validate(JoiSchemas.login), login);
 router.post('/refresh', refresh);
+router.post('/register-public', validate(JoiSchemas.registerPublic), registerPublic);
+router.post('/forgot-password', validate(JoiSchemas.forgotPassword), forgotPassword);
+router.post('/reset-password', validate(JoiSchemas.resetPassword), resetPassword);
 
 // ==================== PROTECTED ROUTES (Any authenticated user) ====================
 router.post('/logout', authRequired, logout);

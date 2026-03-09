@@ -32,19 +32,23 @@ api.interceptors.response.use(
         // Retry original request
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - clear any remaining localStorage and redirect to login
-        localStorage.removeItem('auth'); // Clean up old localStorage data
-        if (window.location.pathname !== '/login') {
+        localStorage.removeItem('auth');
+        const path = window.location.pathname;
+        const publicPaths = ['/', '/login', '/register', '/forgot-password'];
+        const isPublic = publicPaths.includes(path) || path.startsWith('/reset-password/');
+        if (!isPublic) {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
       }
     }
 
-    // For other errors or if refresh also fails
     if (error.response?.status === 401) {
       localStorage.removeItem('auth');
-      if (window.location.pathname !== '/login') {
+      const path = window.location.pathname;
+      const publicPaths = ['/', '/login', '/register', '/forgot-password'];
+      const isPublic = publicPaths.includes(path) || path.startsWith('/reset-password/');
+      if (!isPublic) {
         window.location.href = '/login';
       }
     }
