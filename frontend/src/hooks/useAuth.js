@@ -14,7 +14,7 @@ export const useAuth = () => {
 
   const handleLogout = async () => {
     await dispatch(logout());
-    navigate('/login');
+    navigate('/');
   };
 
   const hasRole = (allowedRoles) => {
