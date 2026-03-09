@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Paper,
@@ -9,34 +9,31 @@ import {
   Button,
   Alert,
   CircularProgress,
+  FormControlLabel,
+  Checkbox,
+  Link,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
 import { login } from '../../store/slices/authSlice';
 
 const LoginPage = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { status, error } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!usernameOrEmail.trim() || !password.trim()) return;
 
-    // Validate inputs
-    if (!usernameOrEmail.trim() || !password.trim()) {
-      return;
-    }
-
-    const action = await dispatch(login({ usernameOrEmail, password }));
+    const action = await dispatch(login({ usernameOrEmail, password, rememberMe }));
 
     if (login.fulfilled.match(action)) {
-      // action.payload is the user object directly from authService
       const user = action.payload;
-      console.log('Login successful:', user); // For debugging
-
-      // Navigate based on user role
-      const role = user.role;
-      navigate(`/${role}`);
+      navigate(`/${user.role}`);
     }
   };
 
@@ -45,12 +42,42 @@ const LoginPage = () => {
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'column',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        p: 2,
       }}
     >
+      <AppBar position="fixed" elevation={0} sx={{ background: 'transparent', boxShadow: 'none' }}>
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 } }}>
+          <Typography
+            component="button"
+            variant="h6"
+            onClick={() => navigate('/')}
+            sx={{
+              color: '#fff',
+              fontWeight: 700,
+              cursor: 'pointer',
+              border: 'none',
+              background: 'none',
+              fontSize: '1.25rem',
+            }}
+          >
+            AcademiX
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/register')}
+            sx={{
+              color: '#fff',
+              borderColor: 'rgba(255,255,255,0.9)',
+              fontWeight: 600,
+              '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
+            }}
+          >
+            Sign up
+          </Button>
+        </Toolbar>
+      </AppBar>
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, pt: 10 }}>
       <Paper
         sx={{
           p: 4,
@@ -96,6 +123,22 @@ const LoginPage = () => {
             disabled={status === 'loading'}
             required
           />
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Remember me"
+            />
+            <Link component={RouterLink} to="/forgot-password" variant="body2" sx={{ color: 'primary.main' }}>
+              Forgot password?
+            </Link>
+          </Box>
 
           {error && (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -153,8 +196,16 @@ const LoginPage = () => {
               </Typography>
             </Box>
           )}
+
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+            Don&apos;t have an account?{' '}
+            <Link component={RouterLink} to="/register" sx={{ fontWeight: 600 }}>
+              Sign up
+            </Link>
+          </Typography>
         </form>
       </Paper>
+      </Box>
     </Box>
   );
 };
